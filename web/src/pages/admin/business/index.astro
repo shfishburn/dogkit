@@ -1,22 +1,82 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
-const docs = [
-  {
-    title: "Business Model",
-    href: "/admin/business/model",
-    version: "V1.0",
-    summary:
-      "Comprehensive overview of Dogology HealthSpan Kits — the full business model covering concept and vision, target customer segments, product structure (Full Kits vs DIY Premix), the science and nutrition model (MER engine, AAFCO alignment, bioavailability), regulatory and compliance strategy, go-to-market channels and brand positioning, unit economics (47% gross margin, 24x LTV:CAC), a 3-year financial projection (to ~$30M revenue, $9.7M EBITDA by Year 3), operations and supply chain, data moat and defensibility, execution roadmap, and investor narrative.",
-  },
-  {
-    title: "Business Plan (Evidence-Annotated)",
-    href: "/admin/business/plan",
-    version: "V1.2",
-    summary:
-      "The evidence-backed companion to the business model. Grounds every major claim in published research — the 94% deficiency rate in homemade diets, micronutrient under-feeding from calorie restriction, MER formula derivations, AAFCO nutrient profile requirements, human-grade labeling standards, and validation study design. Narrows scope from earlier drafts: finite template recipes (not bespoke formulas), explicit uncertainty bands on MER, phased human-grade claims, and an honest assessment of what is and isn't proprietary. Designed to be stress-tested on specifics.",
-  },
-];
+function stripMarkdown(s: string): string {
+  return s
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractTitle(md: string, fallback: string): string {
+  const lines = md.split(/\r?\n/);
+  const titleLine = lines.find((l) => l.trim().startsWith("# "));
+  if (!titleLine) return fallback;
+  return stripMarkdown(titleLine.replace(/^#\s+/, ""));
+}
+
+function extractSummary(md: string, maxLen = 280): string {
+  const lines = md.split(/\r?\n/);
+  let started = false;
+  const parts: string[] = [];
+
+  for (const line of lines) {
+    const t = line.trim();
+    if (!started) {
+      if (t.startsWith("# ")) {
+        started = true;
+      }
+      continue;
+    }
+    if (!t) {
+      if (parts.length > 0) break;
+      continue;
+    }
+    if (t.startsWith("*") || t.startsWith("---") || t.startsWith("***")) continue;
+    if (t.startsWith("## ")) break;
+    parts.push(t);
+    if (parts.join(" ").length >= maxLen) break;
+  }
+
+  const summary = stripMarkdown(parts.join(" "));
+  if (summary.length <= maxLen) return summary;
+  return summary.slice(0, maxLen - 1).trimEnd() + "…";
+}
+
+const entries = await getCollection("specs");
+const businessEntries = entries
+  .filter((e) => e.id.startsWith("business/"))
+  .sort((a, b) => a.id.localeCompare(b.id));
+
+const preferredOrder = ["business/model.md", "business/plan.md"]; // adjust anytime
+businessEntries.sort((a, b) => {
+  const ai = preferredOrder.indexOf(a.id);
+  const bi = preferredOrder.indexOf(b.id);
+  if (ai !== -1 || bi !== -1) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  return a.id.localeCompare(b.id);
+});
+
+const docs = await Promise.all(
+  businessEntries.map(async (entry) => {
+    const srcPath = path.resolve(process.cwd(), "..", "specs", entry.id);
+    const md = await readFile(srcPath, "utf-8");
+    const slug = entry.id.replace(/^business\//, "").replace(/\.md$/i, "");
+    const title = extractTitle(md, slug);
+    const summary = extractSummary(md);
+    return {
+      title,
+      href: `/admin/business/${slug}`,
+      source: `specs/${entry.id}`,
+      summary,
+    };
+  })
+);
 ---
 
 <BaseLayout title="Admin — Business">
@@ -25,24 +85,15 @@ const docs = [
     <p>Reading order and summary for each document in the Dogology business package.</p>
 
     <ol class="doc-list">
-      {docs.map((doc, i) => (
+      {docs.map((doc) => (
         <li class="doc-item">
           <h2>
             <a href={doc.href}>{doc.title}</a>
-            <span class="small" style="font-weight: 400; margin-left: 0.5rem;">{doc.version}</span>
           </h2>
+          <div class="small">{doc.source}</div>
           <p>{doc.summary}</p>
         </li>
       ))}
     </ol>
   </div>
 </BaseLayout>
-
-<style>
-  .doc-list {
-    padding-left: 1.25rem;
-  }
-  .doc-item + .doc-item {
-    margin-top: var(--space-8);
-  }
-</style>

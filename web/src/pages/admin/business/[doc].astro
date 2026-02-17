@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("specs");
+  const business = entries.filter((e) => e.id.startsWith("business/"));
+
+  return business.map((entry) => {
+    const doc = entry.id.replace(/^business\//, "").replace(/\.md$/i, "");
+    return { params: { doc }, props: { entry } };
+  });
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const pageTitle = entry.data.title ?? entry.id.replace(/^business\//, "").replace(/\.md$/i, "");
+---
+
+<BaseLayout title={`Admin — ${pageTitle}`}>
+  <article class="prose">
+    <div class="small" style="margin-bottom: var(--space-4);">
+      <a href="/admin/business">&larr; Business documents</a>
+      &middot; Source: specs/{entry.id}
+    </div>
+    <Content />
+  </article>
+</BaseLayout>
