@@ -27,6 +27,7 @@ const carb = recipe.tags?.primary_carb ?? "";
 const veggie = recipe.tags?.primary_veggie ?? "";
 const tier = recipe.tags?.tier ?? "";
 const prep = recipe.tags?.prep_time_min ?? 0;
+const nutrients = recipe.per_1000kcal_estimate ?? {};
 
 // Find which days this recipe appears in the meal plan
 const appearances: { day: number; label: string; meal: string }[] = [];
@@ -47,39 +48,37 @@ export async function getStaticPaths() {
   title={recipe.name}
   description={recipe.overview}
 >
-  <article class="recipe-detail">
-    <!-- Header -->
-    <header class="recipe-detail__header">
-      <div class="recipe-detail__header-top">
-        <div>
-          <div class="recipe-detail__badges">
-            <span class:list={["badge", tier === "T2" ? "badge--t2" : "badge--t1"]}>{tier}</span>
-            <span class="badge badge--time">⏱ {prep} min</span>
-          </div>
-          <h1 class="recipe-detail__title">{recipe.name}</h1>
-          <p class="recipe-detail__tags">
-            <span class="tag tag--protein">{labelify(protein)}</span>
-            <span class="tag tag--carb">{labelify(carb)}</span>
-            <span class="tag tag--veggie">{labelify(veggie)}</span>
-          </p>
-        </div>
-        <div class="action-bar no-print">
-          <button type="button" class="action-btn" id="share-btn" title="Share recipe">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            <span>Share</span>
-          </button>
-          <button type="button" class="action-btn" id="print-btn" title="Print recipe">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            <span>Print</span>
-          </button>
-        </div>
+  <article class="rd">
+    <!-- Title -->
+    <section class="rd__block">
+      <div class="rd__badges">
+        <span class:list={["badge", tier === "T2" ? "badge--t2" : "badge--t1"]}>{tier}</span>
+        <span class="badge badge--time">{prep} min</span>
       </div>
-      <p class="recipe-detail__overview">{recipe.overview}</p>
-    </header>
+      <h1 class="rd__title">{recipe.name}</h1>
+      <div class="rd__tags">
+        <span class="tag tag--protein">{labelify(protein)}</span>
+        <span class="tag tag--carb">{labelify(carb)}</span>
+        <span class="tag tag--veggie">{labelify(veggie)}</span>
+      </div>
+      <p class="rd__overview">{recipe.overview}</p>
+    </section>
+
+    <!-- Actions -->
+    <div class="rd__actions no-print">
+      <button type="button" class="action-btn" id="share-btn" title="Share recipe">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        <span>Share</span>
+      </button>
+      <button type="button" class="action-btn" id="print-btn" title="Print recipe">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <span>Print</span>
+      </button>
+    </div>
 
     <!-- Size selector -->
-    <div class="recipe-detail__size-bar">
-      <span class="filter-label">Dog size</span>
+    <section class="rd__block rd__size-bar no-print">
+      <span class="rd__label">Dog size</span>
       <div class="pill-row" id="size-picker">
         {Object.entries(sizing).map(([key, val]: [string, any]) => (
           <button
@@ -92,13 +91,12 @@ export async function getStaticPaths() {
           </button>
         ))}
       </div>
-    </div>
+    </section>
 
-    <!-- Two-column body -->
-    <div class="recipe-detail__body">
-      <!-- Ingredients -->
-      <section class="recipe-detail__section">
-        <h2 class="recipe-detail__section-title">Ingredients</h2>
+    <!-- Ingredients -->
+    <section class="rd__block">
+      <h2 class="rd__heading">Ingredients</h2>
+      <div class="rd__table-wrap">
         <table class="ingredient-table">
           <thead>
             <tr>
@@ -125,62 +123,62 @@ export async function getStaticPaths() {
             ))}
           </tbody>
         </table>
-      </section>
+      </div>
+    </section>
 
-      <!-- Instructions -->
-      <section class="recipe-detail__section">
-        <h2 class="recipe-detail__section-title">Instructions</h2>
-        <ol class="instruction-list instruction-list--detail">
-          {recipe.instructions.map((step: string) => (
-            <li>{step}</li>
-          ))}
-        </ol>
-      </section>
-    </div>
+    <!-- Instructions -->
+    <section class="rd__block">
+      <h2 class="rd__heading">Instructions</h2>
+      <ol class="rd__steps">
+        {recipe.instructions.map((step: string) => (
+          <li>{step}</li>
+        ))}
+      </ol>
+    </section>
 
     <!-- Nutrition -->
-    <section class="recipe-detail__section recipe-detail__nutrition">
-      <h2 class="recipe-detail__section-title">Nutrition per 1,000 kcal</h2>
-      <div class="nutrient-row nutrient-row--detail">
-        <div class="nutrient-stat">
-          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.protein_g}g</span>
-          <span class="nutrient-lbl">Protein</span>
+    <section class="rd__block rd__nutrition">
+      <h2 class="rd__heading">Nutrition per 1,000 kcal</h2>
+      <div class="rd__nutrient-grid">
+        <div class="rd__nutrient">
+          <span class="rd__nutrient-val">{nutrients.protein_g}g</span>
+          <span class="rd__nutrient-lbl">Protein</span>
         </div>
-        <div class="nutrient-stat">
-          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.fat_g}g</span>
-          <span class="nutrient-lbl">Fat</span>
+        <div class="rd__nutrient">
+          <span class="rd__nutrient-val">{nutrients.fat_g}g</span>
+          <span class="rd__nutrient-lbl">Fat</span>
         </div>
-        <div class="nutrient-stat">
-          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.fiber_g}g</span>
-          <span class="nutrient-lbl">Fiber</span>
+        <div class="rd__nutrient">
+          <span class="rd__nutrient-val">{nutrients.fiber_g}g</span>
+          <span class="rd__nutrient-lbl">Fiber</span>
         </div>
-        <div class="nutrient-stat">
-          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.ca_p_ratio}</span>
-          <span class="nutrient-lbl">Ca:P</span>
+        <div class="rd__nutrient">
+          <span class="rd__nutrient-val">{nutrients.ca_p_ratio}</span>
+          <span class="rd__nutrient-lbl">Ca:P</span>
         </div>
-        <div class="nutrient-stat">
-          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.calcium_mg}mg</span>
-          <span class="nutrient-lbl">Calcium</span>
+        <div class="rd__nutrient">
+          <span class="rd__nutrient-val">{nutrients.calcium_mg}mg</span>
+          <span class="rd__nutrient-lbl">Calcium</span>
         </div>
       </div>
 
       {recipe.tags?.dimensions_covered?.length > 0 && (
-        <div style="margin-top: var(--space-4);">
-          <span class="recipe-detail__section-title" style="margin-bottom: var(--space-2); display: block;">Nutrient dimensions covered</span>
-          <p class="dim-chips">
+        <div class="rd__dimensions">
+          <h3 class="rd__heading">Nutrient dimensions covered</h3>
+          <div class="dim-chips">
             {recipe.tags.dimensions_covered.map((d: string) => (
               <span class="dim-chip">{d}</span>
             ))}
-          </p>
+          </div>
         </div>
       )}
     </section>
 
     <!-- Meal plan appearances -->
     {appearances.length > 0 && (
-      <section class="recipe-detail__section">
-        <h2 class="recipe-detail__section-title">In the meal plan</h2>
-        <div class="recipe-detail__plan-chips">
+      <section class="rd__block">
+        <h2 class="rd__heading">In the meal plan</h2>
+        <div class="rd__plan-chips">
           {appearances.map((a) => (
             <span class:list={["plan-chip", a.meal === "AM" ? "plan-chip--am" : "plan-chip--pm"]}>
               {a.label} · {a.meal}
@@ -219,10 +217,10 @@ export async function getStaticPaths() {
 
   applySize("medium");
 
-  // ── Share ──
+  // Share
   const shareBtn = document.getElementById("share-btn");
   shareBtn.addEventListener("click", async () => {
-    const title = document.querySelector(".recipe-detail__title")?.textContent ?? "Recipe";
+    const title = document.querySelector(".rd__title")?.textContent ?? "Recipe";
     const url = window.location.href;
     if (navigator.share) {
       try {
@@ -237,7 +235,7 @@ export async function getStaticPaths() {
     }
   });
 
-  // ── Print ──
+  // Print
   document.getElementById("print-btn").addEventListener("click", () => {
     window.print();
   });

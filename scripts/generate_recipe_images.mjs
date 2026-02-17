@@ -71,71 +71,68 @@ async function generateImage(systemPrompt, userPrompt) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("OPENROUTER_API_KEY not set");
 
-  // OpenRouter serves image generation through chat/completions, not /images/generations
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://dogkit.vercel.app",
-      "X-Title": "Dogology Recipe Images",
-    },
-    body: JSON.stringify({
-      model: "openai/gpt-5-image",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-    }),
-  });
+  // 5 minute timeout — image generation can take 60-90s, plus large base64 transfer
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5 * 60 * 1000);
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`OpenRouter ${res.status}: ${body}`);
-  }
+  try {
+    // OpenRouter serves image generation through chat/completions
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://dogkit.vercel.app",
+        "X-Title": "Dogology Recipe Images",
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-5-image",
+        stream: false,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+    });
 
-  const json = await res.json();
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`OpenRouter ${res.status}: ${body}`);
+    }
+
+    // Read full body as text first so the connection isn't dropped mid-stream
+    const rawBody = await res.text();
+    console.log(`  Response body: ${(rawBody.length / 1024).toFixed(0)} KB`);
+    const json = JSON.parse(rawBody);
   const choice = json.choices?.[0];
-  const content = choice?.message?.content;
+  const message = choice?.message;
 
-  if (!content) {
-    throw new Error("No content in response: " + JSON.stringify(json).slice(0, 500));
-  }
-
-  // Response may contain a mix of text and image parts, or inline base64 data URI
-  // Case 1: content is an array of parts (OpenAI multimodal style)
-  if (Array.isArray(content)) {
-    const imagePart = content.find((p) => p.type === "image_url" || p.type === "image");
-    if (imagePart) {
-      const url = imagePart.image_url?.url ?? imagePart.url ?? imagePart.b64;
-      if (url?.startsWith("data:")) {
-        const b64 = url.split(",")[1];
-        return Buffer.from(b64, "base64");
-      }
-      if (url) {
-        const imgRes = await fetch(url);
-        if (!imgRes.ok) throw new Error(`Failed to download image: ${imgRes.status}`);
-        return Buffer.from(await imgRes.arrayBuffer());
-      }
+  // Primary path: gpt-5-image returns images in message.images[]
+  if (message?.images?.length > 0) {
+    const imgObj = message.images[0];
+    const url = imgObj.image_url?.url ?? imgObj.url;
+    if (url?.startsWith("data:")) {
+      const b64 = url.split(",")[1];
+      return Buffer.from(b64, "base64");
     }
-  }
-
-  // Case 2: content is a string containing a data URI
-  if (typeof content === "string") {
-    const dataUriMatch = content.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
-    if (dataUriMatch) {
-      return Buffer.from(dataUriMatch[1], "base64");
-    }
-    // Case 3: content is a string URL to an image
-    const urlMatch = content.match(/https?:\/\/\S+\.(?:png|jpg|jpeg|webp)\S*/i);
-    if (urlMatch) {
-      const imgRes = await fetch(urlMatch[0]);
+    if (url) {
+      const imgRes = await fetch(url);
       if (!imgRes.ok) throw new Error(`Failed to download image: ${imgRes.status}`);
       return Buffer.from(await imgRes.arrayBuffer());
     }
   }
 
-  throw new Error("Could not extract image from response: " + JSON.stringify(json).slice(0, 500));
+  // Fallback: content may contain image data
+  const content = message?.content;
+  if (typeof content === "string" && content.length > 0) {
+    const dataUriMatch = content.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
+    if (dataUriMatch) {
+      return Buffer.from(dataUriMatch[1], "base64");
+    }
+  }
+
+  throw new Error("No image in response: " + JSON.stringify(json).slice(0, 500));
 }
 
 // ── Supabase upload ──────────────────────────────────────────
@@ -148,7 +145,9 @@ function getSupabaseClient() {
 
 async function uploadToSupabase(supabase, recipeId, imageBuffer) {
   const bucket = process.env.SUPABASE_BUCKET || "recipe-images";
-  const filePath = `${recipeId}.webp`;
+  const filePath = `${recipeId}.png`;
+
+  console.log(`  Uploading ${(imageBuffer.length / 1024).toFixed(0)} KB to bucket "${bucket}" as "${filePath}"...`);
 
   const { data, error } = await supabase.storage
     .from(bucket)
@@ -158,6 +157,7 @@ async function uploadToSupabase(supabase, recipeId, imageBuffer) {
     });
 
   if (error) throw new Error(`Supabase upload failed: ${error.message}`);
+  console.log(`  Upload OK: ${JSON.stringify(data)}`);
 
   const { data: urlData } = supabase.storage
     .from(bucket)
