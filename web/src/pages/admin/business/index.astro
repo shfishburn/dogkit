@@ -1,0 +1,48 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+const docs = [
+  {
+    title: "Business Model",
+    href: "/admin/business/model",
+    version: "V1.0",
+    summary:
+      "Comprehensive overview of Dogology HealthSpan Kits — the full business model covering concept and vision, target customer segments, product structure (Full Kits vs DIY Premix), the science and nutrition model (MER engine, AAFCO alignment, bioavailability), regulatory and compliance strategy, go-to-market channels and brand positioning, unit economics (47% gross margin, 24x LTV:CAC), a 3-year financial projection (to ~$30M revenue, $9.7M EBITDA by Year 3), operations and supply chain, data moat and defensibility, execution roadmap, and investor narrative.",
+  },
+  {
+    title: "Business Plan (Evidence-Annotated)",
+    href: "/admin/business/plan",
+    version: "V1.2",
+    summary:
+      "The evidence-backed companion to the business model. Grounds every major claim in published research — the 94% deficiency rate in homemade diets, micronutrient under-feeding from calorie restriction, MER formula derivations, AAFCO nutrient profile requirements, human-grade labeling standards, and validation study design. Narrows scope from earlier drafts: finite template recipes (not bespoke formulas), explicit uncertainty bands on MER, phased human-grade claims, and an honest assessment of what is and isn't proprietary. Designed to be stress-tested on specifics.",
+  },
+];
+---
+
+<BaseLayout title="Admin — Business">
+  <div class="prose" style="max-width: 100%;">
+    <h1>Business documents</h1>
+    <p>Reading order and summary for each document in the Dogology business package.</p>
+
+    <ol class="doc-list">
+      {docs.map((doc, i) => (
+        <li class="doc-item">
+          <h2>
+            <a href={doc.href}>{doc.title}</a>
+            <span class="small" style="font-weight: 400; margin-left: 0.5rem;">{doc.version}</span>
+          </h2>
+          <p>{doc.summary}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</BaseLayout>
+
+<style>
+  .doc-list {
+    padding-left: 1.25rem;
+  }
+  .doc-item + .doc-item {
+    margin-top: var(--space-8);
+  }
+</style>

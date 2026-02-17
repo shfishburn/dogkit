@@ -1,0 +1,21 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const entries = await getCollection("specs");
+const entry = entries.find((e) => e.id.replace(/\.md$/i, "").endsWith("business/model"));
+
+if (!entry) throw new Error("business/model not found in specs collection");
+
+const { Content } = await entry.render();
+---
+
+<BaseLayout title="Admin — Business Model">
+  <article class="prose">
+    <div class="small" style="margin-bottom: var(--space-4);">
+      <a href="/admin/business">&larr; Business documents</a>
+      &middot; Source: specs/business/model.md
+    </div>
+    <Content />
+  </article>
+</BaseLayout>
