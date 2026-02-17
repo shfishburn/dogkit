@@ -1,0 +1,39 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+function slugifySegment(segment: string): string {
+	return segment
+		.trim()
+		.replace(/\.md$/i, "")
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/(^-|-$)/g, "");
+}
+
+function entryToPath(entryId: string): string {
+	const parts = entryId.split("/").map(slugifySegment).filter(Boolean);
+	return parts.join("/");
+}
+
+const entries = await getCollection("specs");
+const items = entries
+	.map((entry) => {
+		const slugPath = entryToPath(entry.id);
+		const name = entry.data.title ?? entry.id.replace(/\.md$/i, "");
+		return { href: `/specs/${slugPath}`, name, slugPath };
+	})
+	.sort((a, b) => a.slugPath.localeCompare(b.slugPath));
+---
+
+<BaseLayout title="Hello Dogology">
+	<div class="prose">
+		<h1>Hello Dogology</h1>
+		<p><a href="/ingredients">Browse ingredients by category</a></p>
+		<ul>
+			{items.map((i) => (
+				<li><a href={i.href}>{i.name}</a></li>
+			))}
+		</ul>
+	</div>
+</BaseLayout>

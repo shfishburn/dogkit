@@ -1,0 +1,41 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  function slugifySegment(segment: string): string {
+    return segment
+      .trim()
+      .replace(/\.md$/i, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
+
+  function entryToPath(entryId: string): string {
+    const parts = entryId.split("/").map(slugifySegment).filter(Boolean);
+    return parts.join("/");
+  }
+
+  const entries = await getCollection("specs");
+  return entries.map((entry) => {
+    const slug = entryToPath(entry.id);
+    return {
+      params: { slug },
+      props: { entry },
+    };
+  });
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const pageTitle = entry.data.title ?? entry.id.replace(/\.md$/i, "");
+---
+
+<BaseLayout title={pageTitle}>
+  <article class="prose">
+    <h1>{pageTitle}</h1>
+    <div class="small">Source: {entry.id}</div>
+    <Content />
+  </article>
+</BaseLayout>

@@ -1,0 +1,40 @@
+---
+import "../styles/global.css";
+
+type Props = {
+  title?: string;
+};
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title ? `${title} | Dogology` : "Dogology"}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <p class="site-title"><a href="/" style="text-decoration:none;color:inherit;">Dogology</a></p>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/specs">Specs</a>
+          <a href="/ingredients">Ingredients</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <slot />
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">Dogology</div>
+    </footer>
+  </body>
+</html>

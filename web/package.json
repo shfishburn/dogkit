@@ -1,0 +1,19 @@
+{
+  "name": "web",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "sync:specs": "node scripts/sync-specs.mjs",
+    "gen:ingredients": "../.venv/bin/python ../scripts/extract_median_nutrients.py --input ../specs/kyokon-synthetic-ingredients.json --format json --output src/data/ingredients_medians.json",
+    "predev": "npm run sync:specs && npm run gen:ingredients",
+    "dev": "astro dev",
+    "prebuild": "npm run sync:specs && npm run gen:ingredients",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.17.1",
+    "remark-gfm": "^4.0.1"
+  }
+}

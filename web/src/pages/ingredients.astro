@@ -1,0 +1,111 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+type Ingredient = {
+  id: string;
+  name: string;
+  category: string;
+  tier: string;
+  usda_fdc_id?: number;
+  default_unit?: string;
+  notes?: string;
+  dimensions?: Record<string, string>;
+};
+
+type IngredientDb = {
+  metadata?: {
+    dimensions?: Record<string, string>;
+    availability_tiers?: Record<string, string>;
+  };
+  ingredients: Ingredient[];
+};
+
+function titleCaseCategory(category: string): string {
+  return category
+    .split("_")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function stableSort<T>(items: T[], toKey: (x: T) => string): T[] {
+  return [...items].sort((a, b) => toKey(a).localeCompare(toKey(b)));
+}
+
+const jsonPath = path.resolve(process.cwd(), "..", "specs", "ingredients", "ingredients.json");
+const raw = await readFile(jsonPath, "utf-8");
+const db = JSON.parse(raw) as IngredientDb;
+
+const dimensionLabels = db.metadata?.dimensions ?? {};
+const tierLabels = db.metadata?.availability_tiers ?? {};
+
+const byCategory = new Map<string, Ingredient[]>();
+for (const ing of db.ingredients ?? []) {
+  const category = ing.category ?? "uncategorized";
+  const arr = byCategory.get(category) ?? [];
+  arr.push(ing);
+  byCategory.set(category, arr);
+}
+
+const categories = stableSort(Array.from(byCategory.keys()), (c) => c);
+const categorySections = categories.map((c) => ({
+  key: c,
+  label: titleCaseCategory(c),
+  items: stableSort(byCategory.get(c) ?? [], (i) => i.name ?? i.id),
+}));
+---
+
+<BaseLayout title="Ingredients">
+  <div class="prose" style="max-width: 100%;">
+    <h1>Ingredients</h1>
+
+    <p class="small">Source: specs/ingredients/ingredients.json</p>
+
+    <h2>Categories</h2>
+    <ul>
+      {categorySections.map((c) => (
+        <li><a href={`#${c.key}`}>{c.label}</a> <span class="small">({c.items.length})</span></li>
+      ))}
+    </ul>
+
+    {categorySections.map((c) => (
+      <section id={c.key}>
+        <h2>{c.label}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Tier</th>
+              <th>Notes</th>
+              <th>Dimensions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {c.items.map((ing) => {
+              const dims = ing.dimensions ?? {};
+              const dimsText = Object.entries(dims)
+                .map(([k, v]) => `${dimensionLabels[k] ?? k}: ${v}`)
+                .join(", ");
+              const tierText = tierLabels[ing.tier] ? `${ing.tier} (${tierLabels[ing.tier]})` : ing.tier;
+              return (
+                <tr>
+                  <td>
+                    <div>
+                      <strong>{ing.name}</strong>
+                      <div class="small">{ing.id}{ing.usda_fdc_id ? ` • USDA FDC ${ing.usda_fdc_id}` : ""}{ing.default_unit ? ` • ${ing.default_unit}` : ""}</div>
+                    </div>
+                  </td>
+                  <td>{tierText}</td>
+                  <td>{ing.notes ?? ""}</td>
+                  <td>{dimsText}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
+    ))}
+  </div>
+</BaseLayout>

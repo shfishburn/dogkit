@@ -1,0 +1,10 @@
+{
+  "name": "dog",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "preview": "npm --prefix web run preview",
+    "gen:ingredients": "npm --prefix web run gen:ingredients"
+  }
+}
