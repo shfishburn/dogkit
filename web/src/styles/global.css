@@ -16,6 +16,10 @@ body {
   line-height: 1.55;
   background: var(--color-surface);
   color: var(--color-text);
+  font-feature-settings: "cv11", "ss01";
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -593,18 +597,19 @@ main.full-bleed {
 .pill-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 .pill {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
-  padding: var(--space-1) var(--space-3);
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
   border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-1);
   background: transparent;
   font-size: var(--text-sm);
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   line-height: 1.3;
@@ -624,8 +629,9 @@ main.full-bleed {
   color: var(--color-accent-fg);
 }
 .pill-sub {
-  font-size: var(--text-2xs);
-  opacity: 0.8;
+  font-size: var(--text-tiny);
+  font-weight: 400;
+  opacity: 0.7;
   white-space: nowrap;
 }
 
@@ -1036,6 +1042,20 @@ main.full-bleed {
   background: var(--color-surface);
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
+.recipe-list-card__media {
+  border-radius: var(--radius-2);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  aspect-ratio: 1 / 1;
+  margin-bottom: var(--space-3);
+}
+.recipe-list-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .recipe-list-card:hover {
   border-color: var(--color-accent);
   box-shadow: 0 4px 24px color-mix(in srgb, var(--color-accent) 12%, transparent);
@@ -1339,7 +1359,8 @@ main.full-bleed {
   .lib-card {
     break-inside: avoid;
   }
-  .rd__nutrition {
+  .rd__stat-grid,
+  .rd__ing-card {
     break-inside: avoid;
   }
   img {
@@ -1350,37 +1371,34 @@ main.full-bleed {
 
 /* ─── Recipe detail page ───────────────────────────────────── */
 .rd {
-  max-width: 42rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  max-width: 40rem;
 }
 
-/* Every section is a stacked block with consistent bottom border */
-.rd__block {
-  padding-block: var(--space-6);
+/* Hero image */
+.rd__hero {
+  margin: 0 0 var(--space-6);
+  border-radius: var(--radius-2);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+}
+.rd__hero-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+}
+
+/* Header */
+.rd__header {
+  padding-bottom: var(--space-6);
   border-bottom: 1px solid var(--color-border);
 }
-.rd__block:first-child {
-  padding-top: 0;
-}
-.rd__block:last-child {
-  border-bottom: none;
-}
-
-/* Shared section heading */
-.rd__heading {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--color-muted);
-  margin: 0 0 var(--space-3);
-}
-
-/* Title block */
-.rd__badges {
+.rd__meta {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
 }
@@ -1391,95 +1409,155 @@ main.full-bleed {
   line-height: 1.15;
   margin: 0 0 var(--space-3);
 }
-.rd__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-bottom: var(--space-3);
-}
 .rd__overview {
   font-size: var(--text-base);
   color: var(--color-muted);
   line-height: 1.65;
   max-width: 65ch;
-  margin: 0;
+  margin: 0 0 var(--space-4);
 }
-
-/* Actions row */
 .rd__actions {
   display: flex;
   gap: var(--space-2);
-  padding-block: var(--space-3);
+}
+
+/* Sections */
+.rd__section {
+  padding-block: var(--space-6);
   border-bottom: 1px solid var(--color-border);
 }
-
-/* Size bar */
-.rd__size-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-4);
+.rd__section:last-child {
+  border-bottom: none;
 }
-.rd__label {
+.rd__section-title {
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: var(--color-muted);
+  margin: 0 0 var(--space-4);
 }
 
-/* Table wrapper for overflow */
-.rd__table-wrap {
-  overflow-x: auto;
+/* Ingredient card */
+.rd__ing-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-1);
+  overflow: hidden;
+}
+.rd__ing {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+}
+.rd__ing:last-child {
+  border-bottom: none;
+}
+.rd__ing:hover {
+  background: var(--color-surface-alt);
+}
+.rd__ing-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.rd__ing-name {
+  font-weight: 600;
+  line-height: 1.3;
+}
+.rd__ing-prep {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: 1.3;
+}
+.rd__ing-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--color-accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: var(--text-sm);
 }
 
 /* Steps */
 .rd__steps {
-  padding-left: var(--space-6);
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  margin: 0;
+  gap: var(--space-4);
+  counter-reset: step;
 }
-.rd__steps li {
+.rd__step {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+.rd__step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.rd__step-text {
   font-size: var(--text-sm);
   line-height: 1.65;
+  padding-top: var(--space-1);
 }
 
-/* Nutrition */
-.rd__nutrition {
-  background: var(--color-surface-alt);
-  border-radius: var(--radius-2);
-  border: 1px solid var(--color-border);
-  padding: var(--space-6);
-  border-bottom: none;
+/* Nutrition stats */
+.rd__stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-3);
 }
-.rd__nutrient-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-6);
+@media (max-width: 30rem) {
+  .rd__stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
-.rd__nutrient {
+.rd__stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 3.5rem;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-1);
 }
-.rd__nutrient-val {
-  font-size: var(--text-base);
-  font-weight: 700;
+.rd__stat-val {
+  font-size: var(--text-lg);
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
-.rd__nutrient-lbl {
+.rd__stat-val small {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  opacity: 0.6;
+}
+.rd__stat-lbl {
   font-size: var(--text-2xs);
   color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  font-weight: 600;
 }
 .rd__dimensions {
-  margin-top: var(--space-6);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-4);
 }
 
 /* Plan chips */
@@ -1668,4 +1746,30 @@ main.full-bleed {
   color: var(--color-hero-sub);
   margin: 0;
   line-height: 1.6;
+}
+
+/* ─── Scroll reveal ──────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children: add delay-1 through delay-4 */
+.reveal.delay-1 { transition-delay: 0.08s; }
+.reveal.delay-2 { transition-delay: 0.16s; }
+.reveal.delay-3 { transition-delay: 0.24s; }
+.reveal.delay-4 { transition-delay: 0.32s; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

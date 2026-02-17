@@ -67,6 +67,76 @@ function labelify(s) {
 }
 
 // ── OpenRouter image generation ──────────────────────────────
+async function readOpenRouterJsonResponse(res) {
+  const contentType = res.headers.get("content-type") ?? "";
+
+  // Some OpenRouter responses are streamed as SSE even when stream=false.
+  if (contentType.includes("text/event-stream")) {
+    if (!res.body) throw new Error("OpenRouter SSE response missing body");
+
+    const decoder = new TextDecoder();
+    const reader = res.body.getReader();
+    let buffer = "";
+    let lastJson = null;
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      // Normalize newlines so we can split on "\n\n" reliably.
+      buffer = buffer.replace(/\r\n/g, "\n");
+
+      // SSE events are separated by blank lines.
+      while (true) {
+        const idx = buffer.indexOf("\n\n");
+        if (idx < 0) break;
+        const eventBlock = buffer.slice(0, idx);
+        buffer = buffer.slice(idx + 2);
+
+        const dataLines = eventBlock
+          .split("\n")
+          .filter((l) => l.startsWith("data:"))
+          .map((l) => l.slice(5).trim());
+
+        if (dataLines.length === 0) continue;
+        const data = dataLines.join("\n");
+        if (data === "[DONE]") return lastJson;
+
+        try {
+          const parsed = JSON.parse(data);
+          lastJson = parsed;
+        } catch {
+          // Ignore malformed partial chunks; final chunks should be valid JSON.
+        }
+      }
+    }
+
+    // Parse any trailing chunk that didn't end with a blank line.
+    if (buffer.trim().length > 0) {
+      const dataLines = buffer
+        .split("\n")
+        .filter((l) => l.startsWith("data:"))
+        .map((l) => l.slice(5).trim());
+      const data = dataLines.join("\n");
+      if (data && data !== "[DONE]") {
+        try {
+          lastJson = JSON.parse(data);
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    return lastJson;
+  }
+
+  const rawBody = await res.text();
+  if (process.env.DEBUG_OPENROUTER === "1") {
+    console.log(`  OpenRouter body: ${(rawBody.length / 1024).toFixed(0)} KB`);
+  }
+  return JSON.parse(rawBody);
+}
+
 async function generateImage(systemPrompt, userPrompt) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("OPENROUTER_API_KEY not set");
@@ -83,6 +153,7 @@ async function generateImage(systemPrompt, userPrompt) {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        Accept: "application/json",
         "HTTP-Referer": "https://dogkit.vercel.app",
         "X-Title": "Dogology Recipe Images",
       },
@@ -101,38 +172,44 @@ async function generateImage(systemPrompt, userPrompt) {
       throw new Error(`OpenRouter ${res.status}: ${body}`);
     }
 
-    // Read full body as text first so the connection isn't dropped mid-stream
-    const rawBody = await res.text();
-    console.log(`  Response body: ${(rawBody.length / 1024).toFixed(0)} KB`);
-    const json = JSON.parse(rawBody);
-  const choice = json.choices?.[0];
-  const message = choice?.message;
+    const json = await readOpenRouterJsonResponse(res);
+    if (json?.error) {
+      throw new Error(`OpenRouter error: ${JSON.stringify(json.error)}`);
+    }
 
-  // Primary path: gpt-5-image returns images in message.images[]
-  if (message?.images?.length > 0) {
-    const imgObj = message.images[0];
-    const url = imgObj.image_url?.url ?? imgObj.url;
-    if (url?.startsWith("data:")) {
-      const b64 = url.split(",")[1];
-      return Buffer.from(b64, "base64");
+    const choice = json.choices?.[0];
+    const message = choice?.message;
+
+    // Primary path: gpt-5-image returns images in message.images[]
+    if (message?.images?.length > 0) {
+      const imgObj = message.images[0];
+      const url = imgObj.image_url?.url ?? imgObj.url;
+      if (url?.startsWith("data:")) {
+        const comma = url.indexOf(",");
+        if (comma < 0) throw new Error("Invalid data URI in image_url.url");
+        const b64 = url.slice(comma + 1);
+        return Buffer.from(b64, "base64");
+      }
+      if (url) {
+        const imgRes = await fetch(url);
+        if (!imgRes.ok) throw new Error(`Failed to download image: ${imgRes.status}`);
+        return Buffer.from(await imgRes.arrayBuffer());
+      }
     }
-    if (url) {
-      const imgRes = await fetch(url);
-      if (!imgRes.ok) throw new Error(`Failed to download image: ${imgRes.status}`);
-      return Buffer.from(await imgRes.arrayBuffer());
+
+    // Fallback: content may contain image data
+    const content = message?.content;
+    if (typeof content === "string" && content.length > 0) {
+      const dataUriMatch = content.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
+      if (dataUriMatch) {
+        return Buffer.from(dataUriMatch[1], "base64");
+      }
     }
+
+    throw new Error("No image in response: " + JSON.stringify(json).slice(0, 500));
+  } finally {
+    clearTimeout(timeout);
   }
-
-  // Fallback: content may contain image data
-  const content = message?.content;
-  if (typeof content === "string" && content.length > 0) {
-    const dataUriMatch = content.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
-    if (dataUriMatch) {
-      return Buffer.from(dataUriMatch[1], "base64");
-    }
-  }
-
-  throw new Error("No image in response: " + JSON.stringify(json).slice(0, 500));
 }
 
 // ── Supabase upload ──────────────────────────────────────────
@@ -159,9 +236,11 @@ async function uploadToSupabase(supabase, recipeId, imageBuffer) {
   if (error) throw new Error(`Supabase upload failed: ${error.message}`);
   console.log(`  Upload OK: ${JSON.stringify(data)}`);
 
-  const { data: urlData } = supabase.storage
+  const { data: urlData, error: urlErr } = supabase.storage
     .from(bucket)
     .getPublicUrl(filePath);
+
+  if (urlErr) throw new Error(`Supabase getPublicUrl failed: ${urlErr.message}`);
 
   return urlData.publicUrl;
 }
@@ -169,13 +248,40 @@ async function uploadToSupabase(supabase, recipeId, imageBuffer) {
 // ── CLI args ─────────────────────────────────────────────────
 function parseArgs() {
   const args = process.argv.slice(2);
-  const opts = { force: false, dryRun: false, recipeId: null };
+  const opts = { force: false, dryRun: false, recipeId: null, concurrency: 1, delayMs: 2000 };
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--force") opts.force = true;
     else if (args[i] === "--dry-run") opts.dryRun = true;
     else if (args[i] === "--recipe" && args[i + 1]) opts.recipeId = args[++i];
+    else if (args[i] === "--concurrency" && args[i + 1]) {
+      const n = Number.parseInt(args[++i], 10);
+      if (!Number.isFinite(n) || n < 1 || n > 5) {
+        console.error("--concurrency must be an integer between 1 and 5");
+        process.exit(1);
+      }
+      opts.concurrency = n;
+    } else if (args[i] === "--delay-ms" && args[i + 1]) {
+      const n = Number.parseInt(args[++i], 10);
+      if (!Number.isFinite(n) || n < 0 || n > 60000) {
+        console.error("--delay-ms must be an integer between 0 and 60000");
+        process.exit(1);
+      }
+      opts.delayMs = n;
+    }
   }
   return opts;
+}
+
+async function runPool(items, concurrency, worker) {
+  const queue = items.slice();
+  const runners = Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
+    while (queue.length) {
+      const item = queue.shift();
+      if (!item) return;
+      await worker(item);
+    }
+  });
+  await Promise.all(runners);
 }
 
 // ── Main ─────────────────────────────────────────────────────
@@ -203,7 +309,9 @@ async function main() {
     targets = recipes.filter((r) => !r.image_url);
   }
 
-  console.log(`Generating images for ${targets.length} recipe(s)...\n`);
+  console.log(
+    `Generating images for ${targets.length} recipe(s) (concurrency=${opts.concurrency}, delayMs=${opts.delayMs})...\n`,
+  );
 
   if (targets.length === 0) {
     console.log("All recipes already have images. Use --force to regenerate.");
@@ -219,30 +327,31 @@ async function main() {
   let success = 0;
   let failed = 0;
 
-  for (const recipe of targets) {
+  const startedAt = Date.now();
+  let processed = 0;
+
+  await runPool(targets, opts.concurrency, async (recipe) => {
     const userPrompt = buildUserPrompt(userTemplate, recipe);
 
-    console.log(`[${recipe.id}] ${recipe.name}`);
+    const n = ++processed;
+    console.log(`[${n}/${targets.length}] [${recipe.id}] ${recipe.name}`);
 
     if (opts.dryRun) {
       console.log("  System prompt:", systemPrompt.slice(0, 80) + "...");
       console.log("  User prompt:", userPrompt.slice(0, 120) + "...");
       console.log("");
-      continue;
+      return;
     }
 
     try {
-      // Generate image
       console.log("  Generating image...");
       const imageBuffer = await generateImage(systemPrompt, userPrompt);
       console.log(`  Got ${(imageBuffer.length / 1024).toFixed(0)} KB image`);
 
-      // Upload to Supabase
       console.log("  Uploading to Supabase...");
       const publicUrl = await uploadToSupabase(supabase, recipe.id, imageBuffer);
       console.log(`  Uploaded: ${publicUrl}`);
 
-      // Update recipe in memory + Supabase table
       recipe.image_url = publicUrl;
       console.log("  Updating recipes table...");
       const { error: dbErr } = await supabase
@@ -250,20 +359,21 @@ async function main() {
         .update({ image_url: publicUrl, image_generated_at: new Date().toISOString() })
         .eq("id", recipe.id);
       if (dbErr) console.warn(`  DB update warning: ${dbErr.message}`);
-      success++;
 
-      // Rate limit: pause between requests
-      if (targets.indexOf(recipe) < targets.length - 1) {
-        console.log("  Waiting 2s...");
-        await new Promise((r) => setTimeout(r, 2000));
-      }
+      success++;
     } catch (err) {
       console.error(`  ERROR: ${err.message}`);
       failed++;
     }
 
+    if (opts.delayMs > 0) {
+      await new Promise((r) => setTimeout(r, opts.delayMs));
+    }
+
+    const elapsedMin = ((Date.now() - startedAt) / 60000).toFixed(1);
+    console.log(`  Progress: ${success} ok, ${failed} failed, ${n}/${targets.length} done (${elapsedMin}m)`);
     console.log("");
-  }
+  });
 
   // Write updated JSON back
   if (!opts.dryRun && success > 0) {

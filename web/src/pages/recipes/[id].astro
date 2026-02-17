@@ -29,7 +29,6 @@ const tier = recipe.tags?.tier ?? "";
 const prep = recipe.tags?.prep_time_min ?? 0;
 const nutrients = recipe.per_1000kcal_estimate ?? {};
 
-// Find which days this recipe appears in the meal plan
 const appearances: { day: number; label: string; meal: string }[] = [];
 for (const day of weeklyPlan.days ?? []) {
   if (day.am?.recipe_id === id) appearances.push({ day: day.day, label: day.label, meal: "AM" });
@@ -44,41 +43,48 @@ export async function getStaticPaths() {
 }
 ---
 
-<BaseLayout
-  title={recipe.name}
-  description={recipe.overview}
->
+<BaseLayout title={recipe.name} description={recipe.overview}>
   <article class="rd">
-    <!-- Title -->
-    <section class="rd__block">
-      <div class="rd__badges">
+
+    {/* Hero image */}
+    {recipe.image_url && (
+      <figure class="rd__hero">
+        <img
+          class="rd__hero-img"
+          src={recipe.image_url}
+          alt={recipe.name}
+          loading="eager"
+          decoding="async"
+        />
+      </figure>
+    )}
+
+    {/* Header */}
+    <header class="rd__header reveal">
+      <div class="rd__meta">
         <span class:list={["badge", tier === "T2" ? "badge--t2" : "badge--t1"]}>{tier}</span>
         <span class="badge badge--time">{prep} min</span>
-      </div>
-      <h1 class="rd__title">{recipe.name}</h1>
-      <div class="rd__tags">
         <span class="tag tag--protein">{labelify(protein)}</span>
         <span class="tag tag--carb">{labelify(carb)}</span>
         <span class="tag tag--veggie">{labelify(veggie)}</span>
       </div>
+      <h1 class="rd__title">{recipe.name}</h1>
       <p class="rd__overview">{recipe.overview}</p>
-    </section>
+      <div class="rd__actions no-print">
+        <button type="button" class="action-btn" id="share-btn" title="Share recipe">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span>Share</span>
+        </button>
+        <button type="button" class="action-btn" id="print-btn" title="Print recipe">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span>Print</span>
+        </button>
+      </div>
+    </header>
 
-    <!-- Actions -->
-    <div class="rd__actions no-print">
-      <button type="button" class="action-btn" id="share-btn" title="Share recipe">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        <span>Share</span>
-      </button>
-      <button type="button" class="action-btn" id="print-btn" title="Print recipe">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        <span>Print</span>
-      </button>
-    </div>
-
-    <!-- Size selector -->
-    <section class="rd__block rd__size-bar no-print">
-      <span class="rd__label">Dog size</span>
+    {/* Size selector */}
+    <section class="rd__section no-print reveal">
+      <h2 class="rd__section-title">Dog size</h2>
       <div class="pill-row" id="size-picker">
         {Object.entries(sizing).map(([key, val]: [string, any]) => (
           <button
@@ -86,85 +92,78 @@ export async function getStaticPaths() {
             class:list={["pill", { "pill--active": key === "medium" }]}
             data-size={key}
           >
-            {val.label}
-            <span class="pill-sub">{val.weight_kg} kg · {val.approx_mer_kcal} kcal/day</span>
+            {key.charAt(0).toUpperCase() + key.slice(1)}
+            <span class="pill-sub">{val.weight_kg} kg · {val.approx_mer_kcal} kcal</span>
           </button>
         ))}
       </div>
     </section>
 
-    <!-- Ingredients -->
-    <section class="rd__block">
-      <h2 class="rd__heading">Ingredients</h2>
-      <div class="rd__table-wrap">
-        <table class="ingredient-table">
-          <thead>
-            <tr>
-              <th>Ingredient</th>
-              <th class="amount-col">Amount</th>
-              <th>Prep</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recipe.ingredients.map((ing: any) => (
-              <tr>
-                <td>{ing.name}</td>
-                <td
-                  class="amount-col"
-                  data-base-g={ing.base_g ?? null}
-                  data-unit={ing.unit}
-                >
-                  {ing.base_g != null
-                    ? `${Math.round(ing.base_g * 0.95)} ${ing.unit}`
-                    : ing.prep}
-                </td>
-                <td class="prep-col">{ing.base_g != null ? ing.prep : ""}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    {/* Ingredients */}
+    <section class="rd__section reveal">
+      <h2 class="rd__section-title">Ingredients</h2>
+      <div class="rd__ing-card">
+        {recipe.ingredients.map((ing: any) => (
+          <div class="rd__ing">
+            <div class="rd__ing-left">
+              <span class="rd__ing-name">{ing.name}</span>
+              {ing.prep && <span class="rd__ing-prep">{ing.prep}</span>}
+            </div>
+            {ing.base_g != null && (
+              <span
+                class="rd__ing-amount"
+                data-base-g={ing.base_g}
+                data-unit={ing.unit}
+              >
+                {Math.round(ing.base_g * 0.95)} {ing.unit}
+              </span>
+            )}
+          </div>
+        ))}
       </div>
     </section>
 
-    <!-- Instructions -->
-    <section class="rd__block">
-      <h2 class="rd__heading">Instructions</h2>
+    {/* Instructions */}
+    <section class="rd__section reveal">
+      <h2 class="rd__section-title">Instructions</h2>
       <ol class="rd__steps">
-        {recipe.instructions.map((step: string) => (
-          <li>{step}</li>
+        {recipe.instructions.map((step: string, i: number) => (
+          <li class="rd__step">
+            <span class="rd__step-num">{i + 1}</span>
+            <span class="rd__step-text">{step}</span>
+          </li>
         ))}
       </ol>
     </section>
 
-    <!-- Nutrition -->
-    <section class="rd__block rd__nutrition">
-      <h2 class="rd__heading">Nutrition per 1,000 kcal</h2>
-      <div class="rd__nutrient-grid">
-        <div class="rd__nutrient">
-          <span class="rd__nutrient-val">{nutrients.protein_g}g</span>
-          <span class="rd__nutrient-lbl">Protein</span>
+    {/* Nutrition */}
+    <section class="rd__section reveal">
+      <h2 class="rd__section-title">Nutrition per 1,000 kcal</h2>
+      <div class="rd__stat-grid">
+        <div class="rd__stat">
+          <span class="rd__stat-val">{nutrients.protein_g}<small>g</small></span>
+          <span class="rd__stat-lbl">Protein</span>
         </div>
-        <div class="rd__nutrient">
-          <span class="rd__nutrient-val">{nutrients.fat_g}g</span>
-          <span class="rd__nutrient-lbl">Fat</span>
+        <div class="rd__stat">
+          <span class="rd__stat-val">{nutrients.fat_g}<small>g</small></span>
+          <span class="rd__stat-lbl">Fat</span>
         </div>
-        <div class="rd__nutrient">
-          <span class="rd__nutrient-val">{nutrients.fiber_g}g</span>
-          <span class="rd__nutrient-lbl">Fiber</span>
+        <div class="rd__stat">
+          <span class="rd__stat-val">{nutrients.fiber_g}<small>g</small></span>
+          <span class="rd__stat-lbl">Fiber</span>
         </div>
-        <div class="rd__nutrient">
-          <span class="rd__nutrient-val">{nutrients.ca_p_ratio}</span>
-          <span class="rd__nutrient-lbl">Ca:P</span>
+        <div class="rd__stat">
+          <span class="rd__stat-val">{nutrients.ca_p_ratio}</span>
+          <span class="rd__stat-lbl">Ca:P</span>
         </div>
-        <div class="rd__nutrient">
-          <span class="rd__nutrient-val">{nutrients.calcium_mg}mg</span>
-          <span class="rd__nutrient-lbl">Calcium</span>
+        <div class="rd__stat">
+          <span class="rd__stat-val">{nutrients.calcium_mg}<small>mg</small></span>
+          <span class="rd__stat-lbl">Calcium</span>
         </div>
       </div>
-
       {recipe.tags?.dimensions_covered?.length > 0 && (
         <div class="rd__dimensions">
-          <h3 class="rd__heading">Nutrient dimensions covered</h3>
+          <h3 class="rd__section-title">Dimensions covered</h3>
           <div class="dim-chips">
             {recipe.tags.dimensions_covered.map((d: string) => (
               <span class="dim-chip">{d}</span>
@@ -174,10 +173,10 @@ export async function getStaticPaths() {
       )}
     </section>
 
-    <!-- Meal plan appearances -->
+    {/* Meal plan appearances */}
     {appearances.length > 0 && (
-      <section class="rd__block">
-        <h2 class="rd__heading">In the meal plan</h2>
+      <section class="rd__section reveal">
+        <h2 class="rd__section-title">In the meal plan</h2>
         <div class="rd__plan-chips">
           {appearances.map((a) => (
             <span class:list={["plan-chip", a.meal === "AM" ? "plan-chip--am" : "plan-chip--pm"]}>
@@ -192,16 +191,15 @@ export async function getStaticPaths() {
 
 <script define:vars={{ sizing }}>
   let activeSize = "medium";
-
   const sizePicker = document.getElementById("size-picker");
 
   function applySize(sizeKey) {
     const factor = sizing[sizeKey]?.factor ?? 0.95;
-    for (const cell of document.querySelectorAll("td[data-base-g]")) {
-      const base = parseFloat(cell.dataset.baseG);
+    for (const el of document.querySelectorAll("[data-base-g]")) {
+      const base = parseFloat(el.dataset.baseG);
       if (!isNaN(base)) {
-        const unit = cell.dataset.unit ?? "g";
-        cell.textContent = `${Math.round(base * factor)} ${unit}`;
+        const unit = el.dataset.unit ?? "g";
+        el.textContent = `${Math.round(base * factor)} ${unit}`;
       }
     }
   }
@@ -217,15 +215,12 @@ export async function getStaticPaths() {
 
   applySize("medium");
 
-  // Share
   const shareBtn = document.getElementById("share-btn");
   shareBtn.addEventListener("click", async () => {
     const title = document.querySelector(".rd__title")?.textContent ?? "Recipe";
     const url = window.location.href;
     if (navigator.share) {
-      try {
-        await navigator.share({ title, url });
-      } catch (_) { /* user cancelled */ }
+      try { await navigator.share({ title, url }); } catch (_) {}
     } else {
       await navigator.clipboard.writeText(url);
       const label = shareBtn.querySelector("span");
@@ -235,8 +230,5 @@ export async function getStaticPaths() {
     }
   });
 
-  // Print
-  document.getElementById("print-btn").addEventListener("click", () => {
-    window.print();
-  });
+  document.getElementById("print-btn").addEventListener("click", () => window.print());
 </script>
