@@ -3,8 +3,7 @@ dist/
 # generated types
 .astro/
 
-# generated data
-src/data/ingredients_medians.json
+# generated data (ingredients_medians.json is committed for Vercel builds)
 
 # generated docs (synced from repo root specs/)
 src/content/specs/
