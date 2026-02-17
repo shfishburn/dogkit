@@ -31,994 +31,1088 @@
       "K": "potassium",
       "Mg": "magnesium",
       "Na": "sodium"
-    },
-    "generatedFrom": "specs/ingredients/Canine Ingredient Database.md"
+    }
   },
   "ingredients": [
     {
-      "id": "calcium_sources_bone_meal",
-      "name": "Bone meal (food-grade)",
-      "category": "calcium_sources",
-      "tier": "T3",
-      "notes": "~280mg Ca + ~140mg Ph per 1g. Ca:P ≈ 2:1.",
-      "dimensions": {
-        "Ca": "primary",
-        "Ph": "primary",
-        "CaPh": "primary"
-      }
-    },
-    {
-      "id": "calcium_sources_calcium_carbonate",
-      "name": "Calcium carbonate (supplement)",
-      "category": "calcium_sources",
-      "tier": "T1",
-      "notes": "~400mg Ca per 1g (40% elemental Ca). No phosphorus.",
-      "dimensions": {
-        "Ca": "primary",
-        "CaPh": "primary"
-      }
-    },
-    {
-      "id": "calcium_sources_canned_salmon_with_bones",
-      "name": "Canned salmon with bones",
-      "category": "calcium_sources",
-      "tier": "T1",
-      "notes": "~277mg Ca per 100g. Also delivers O3 and VD.",
-      "dimensions": {
-        "Ca": "primary",
-        "O3": "primary",
-        "VD": "primary"
-      }
-    },
-    {
-      "id": "calcium_sources_dicalcium_phosphate",
-      "name": "Dicalcium phosphate",
-      "category": "calcium_sources",
-      "tier": "T3",
-      "notes": "~230mg Ca + ~180mg Ph per 1g. Ca:P ≈ 1.3:1.",
-      "dimensions": {
-        "Ca": "primary",
-        "Ph": "primary",
-        "CaPh": "primary"
-      }
-    },
-    {
-      "id": "calcium_sources_eggshell_powder",
-      "name": "Eggshell powder (homemade)",
-      "category": "calcium_sources",
-      "tier": "T1",
-      "notes": "~2000mg Ca per 5.5g (1 level tsp). Pure CaCO₃. No phosphorus.",
-      "dimensions": {
-        "Ca": "primary",
-        "CaPh": "primary"
-      }
-    },
-    {
-      "id": "calcium_sources_sardines_with_bones",
-      "name": "Sardines with bones",
-      "category": "calcium_sources",
-      "tier": "T1",
-      "notes": "~382mg Ca per 100g. Also delivers O3, VD, Se.",
-      "dimensions": {
-        "Ca": "primary",
-        "O3": "primary",
-        "VD": "primary",
-        "Se": "primary"
-      }
-    },
-    {
-      "id": "eggs_dairy_cheddar_cheese",
-      "name": "Cheddar cheese",
-      "category": "eggs_dairy",
-      "tier": "T1",
-      "notes": "25g protein, 33g fat, 721mg Ca, 512mg Ph",
-      "dimensions": {
-        "Ca": "primary",
-        "P": "primary",
-        "F": "primary"
-      }
-    },
-    {
-      "id": "eggs_dairy_cottage_cheese",
-      "name": "Cottage cheese (2%)",
-      "category": "eggs_dairy",
-      "tier": "T1",
-      "notes": "11g protein, 2.3g fat, 83mg Ca, 160mg Ph",
-      "dimensions": {
-        "P": "primary",
-        "Ca": "primary",
-        "B": "primary"
-      }
-    },
-    {
-      "id": "eggs_dairy_eggshell_powder",
-      "name": "Eggshell powder (ground)",
-      "category": "eggs_dairy",
-      "tier": "T1",
-      "notes": "~2000mg Ca per 5.5g (1 tsp). Pure CaCO₃. No phosphorus.",
-      "dimensions": {
-        "Ca": "primary",
-        "CaPh": "primary"
-      }
-    },
-    {
-      "id": "eggs_dairy_kefir",
-      "name": "Kefir (plain, whole)",
-      "category": "eggs_dairy",
-      "tier": "T1",
-      "notes": "3.3g protein, 3.5g fat, 130mg Ca, 100mg Ph",
-      "dimensions": {
-        "Ca": "primary",
-        "P": "primary",
-        "F": "primary",
-        "B": "primary"
-      }
-    },
-    {
-      "id": "eggs_dairy_plain_yogurt",
-      "name": "Plain yogurt (whole milk)",
-      "category": "eggs_dairy",
-      "tier": "T1",
-      "notes": "3.5g protein, 3.3g fat, 121mg Ca, 95mg Ph",
-      "dimensions": {
-        "Ca": "primary",
-        "P": "primary",
-        "F": "primary",
-        "B": "primary"
-      }
-    },
-    {
-      "id": "eggs_dairy_whole_egg",
-      "name": "Whole egg (large, ~50g)",
-      "category": "eggs_dairy",
-      "tier": "T1",
-      "notes": "6g protein, 5g fat, 147mg Ch, 1.1mcg vit D, 15.4mcg Se",
-      "dimensions": {
-        "P": "primary",
-        "F": "primary",
-        "Ch": "primary",
-        "VD": "primary",
-        "Se": "primary",
-        "B": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_canola_oil",
-      "name": "Canola oil",
-      "category": "fats_oils",
-      "tier": "T1",
-      "default_unit": "tbsp",
-      "notes": "14g fat, 2.8g linoleic acid, 1.3g ALA",
-      "dimensions": {
-        "O6": "primary",
-        "F": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_coconut_oil",
-      "name": "Coconut oil",
-      "category": "fats_oils",
-      "tier": "T1",
-      "default_unit": "tbsp",
-      "notes": "14g fat (MCT-rich), 0.2g linoleic acid",
-      "dimensions": {
-        "F": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_cod_liver_oil",
-      "name": "Cod liver oil",
-      "category": "fats_oils",
-      "tier": "T2",
-      "default_unit": "tbsp",
-      "notes": "~1g EPA+DHA per tsp, 4500 IU vit A, 450 IU vit D",
-      "dimensions": {
-        "O3": "primary",
-        "VA": "primary",
-        "VD": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_fish_oil",
-      "name": "Fish oil (generic, liquid)",
-      "category": "fats_oils",
-      "tier": "T1",
-      "default_unit": "tbsp",
-      "notes": "~1.5g EPA+DHA per tsp (5ml)",
-      "dimensions": {
-        "O3": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_ground_flaxseed",
-      "name": "Ground flaxseed",
-      "category": "fats_oils",
-      "tier": "T1",
-      "default_unit": "tbsp",
-      "notes": "3g protein, 6g fat, 3.3g ALA, 3.8g fiber per 15g",
-      "dimensions": {
-        "Fib": "primary",
-        "F": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_hemp_hearts",
-      "name": "Hemp hearts (hulled seeds)",
-      "category": "fats_oils",
-      "tier": "T1",
-      "default_unit": "tbsp",
-      "notes": "10g protein, 14g fat, 8g O6 per 30g",
-      "dimensions": {
-        "O6": "primary",
-        "F": "primary",
-        "P": "primary",
-        "Mg": "primary",
-        "Mn": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_hempseed_oil",
-      "name": "Hempseed oil",
-      "category": "fats_oils",
-      "tier": "T2",
-      "default_unit": "tbsp",
-      "notes": "14g fat, 8g linoleic acid, 2.7g ALA, 1g GLA",
-      "dimensions": {
-        "O6": "primary",
-        "F": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_olive_oil",
-      "name": "Olive oil",
-      "category": "fats_oils",
-      "tier": "T1",
-      "default_unit": "tbsp",
-      "notes": "14g fat, 1.3g linoleic acid, 1.4mg VE",
-      "dimensions": {
-        "F": "primary",
-        "VE": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_safflower_oil",
-      "name": "Safflower oil (high-linoleic)",
-      "category": "fats_oils",
-      "tier": "T1",
-      "default_unit": "tbsp",
-      "notes": "14g fat, 10g linoleic acid (O6)",
-      "dimensions": {
-        "O6": "primary",
-        "F": "primary"
-      }
-    },
-    {
-      "id": "fats_oils_sunflower_oil",
-      "name": "Sunflower oil",
-      "category": "fats_oils",
-      "tier": "T1",
-      "default_unit": "tbsp",
-      "notes": "14g fat, 9g linoleic acid (O6), 5.6mg VE",
-      "dimensions": {
-        "O6": "primary",
-        "F": "primary",
-        "VE": "primary"
-      }
-    },
-    {
-      "id": "fish_seafood_cod_fresh",
-      "name": "Cod, fresh (cooked)",
-      "category": "fish_seafood",
-      "tier": "T1",
-      "default_unit": "g",
-      "notes": "23g protein, 0.2g EPA+DHA, 1mcg vit D, 35mcg Se",
-      "dimensions": {
-        "Se": "primary",
-        "P": "primary",
-        "VD": "primary"
-      }
-    },
-    {
-      "id": "fish_seafood_mackerel_canned",
-      "name": "Mackerel, canned (jack)",
-      "category": "fish_seafood",
-      "tier": "T1",
-      "default_unit": "g",
-      "notes": "24g protein, 1.8g EPA+DHA, 7.8mcg vit D, 40mcg Se",
-      "dimensions": {
-        "O3": "primary",
-        "VD": "primary",
-        "Se": "primary",
-        "P": "primary"
-      }
-    },
-    {
-      "id": "fish_seafood_salmon_canned",
-      "name": "Salmon, canned (pink, with bones)",
-      "category": "fish_seafood",
-      "tier": "T1",
-      "default_unit": "g",
-      "notes": "20g protein, 277mg Ca, 1.0g EPA+DHA, 12.5mcg vit D, 32mcg Se",
-      "dimensions": {
-        "O3": "primary",
-        "Ca": "primary",
-        "VD": "primary",
-        "Se": "primary",
-        "P": "primary"
-      }
-    },
-    {
-      "id": "fish_seafood_salmon_fresh",
-      "name": "Salmon, fresh (cooked)",
-      "category": "fish_seafood",
-      "tier": "T1",
-      "default_unit": "g",
-      "notes": "25g protein, 1.5g EPA+DHA, 9mcg vit D, 38mcg Se",
-      "dimensions": {
-        "O3": "primary",
-        "VD": "primary",
-        "Se": "primary",
-        "P": "primary"
-      }
-    },
-    {
-      "id": "fish_seafood_sardines_canned_in_water",
-      "name": "Sardines, canned in water (with bones)",
-      "category": "fish_seafood",
-      "tier": "T1",
-      "default_unit": "g",
-      "notes": "25g protein, 382mg Ca, 1.5g EPA+DHA, 4.8mcg vit D, 52mcg Se",
-      "dimensions": {
-        "O3": "primary",
-        "Ca": "primary",
-        "VD": "primary",
-        "Se": "primary",
-        "P": "primary",
-        "CaPh": "primary"
-      }
-    },
-    {
-      "id": "fish_seafood_tilapia_fresh",
-      "name": "Tilapia, fresh (cooked)",
-      "category": "fish_seafood",
-      "tier": "T1",
-      "default_unit": "g",
-      "notes": "26g protein, 0.1g EPA+DHA, 3.1mcg vit D",
-      "dimensions": {
-        "P": "primary",
-        "VD": "primary"
-      }
-    },
-    {
-      "id": "muscle_meat_beef_chuck_roast",
-      "name": "Beef chuck roast",
+      "id": "muscle_ground_beef_90",
+      "name": "Ground beef 90% lean",
       "category": "muscle_meat",
       "tier": "T1",
+      "usda_fdc_id": 174036,
       "default_unit": "g_cooked",
-      "notes": "26g protein, 14g fat, 6.4mg Zn, 2.9mg Fe",
+      "notes": "Primary red meat protein; high zinc and iron.",
       "dimensions": {
         "P": "primary",
         "F": "primary",
         "Zn": "primary",
         "Fe": "primary",
-        "B": "primary"
+        "B": "secondary",
+        "Ch": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "muscle_meat_beef_heart",
-      "name": "Beef heart",
+      "id": "muscle_ground_beef_85",
+      "name": "Ground beef 85% lean",
       "category": "muscle_meat",
-      "tier": "T2",
+      "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "28g protein, 4g fat, 2.1mg Zn, 4.3mg Fe, 0.4mg Cu",
-      "dimensions": {
-        "P": "primary",
-        "Fe": "primary",
-        "Cu": "primary",
-        "B": "primary",
-        "Ch": "primary"
-      }
-    },
-    {
-      "id": "muscle_meat_bison_ground",
-      "name": "Bison, ground",
-      "category": "muscle_meat",
-      "tier": "T2",
-      "default_unit": "g_cooked",
-      "notes": "25g protein, 7g fat, 4.5mg Zn, 2.8mg Fe",
+      "notes": "Higher fat than 90% lean; very high zinc.",
       "dimensions": {
         "P": "primary",
         "F": "primary",
         "Zn": "primary",
-        "Fe": "primary",
-        "B": "primary"
+        "Fe": "secondary",
+        "B": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "muscle_meat_chicken_breast_boneless",
-      "name": "Chicken breast, boneless",
+      "id": "muscle_ground_turkey_93",
+      "name": "Ground turkey 93% lean",
       "category": "muscle_meat",
       "tier": "T1",
+      "usda_fdc_id": 171498,
       "default_unit": "g_cooked",
-      "notes": "31g protein, 3.6g fat, 1.0mg Zn, 0.5mg Fe",
+      "notes": "Lean white meat; lower zinc than beef.",
       "dimensions": {
         "P": "primary",
-        "B": "primary"
+        "F": "secondary",
+        "Zn": "secondary",
+        "Se": "secondary",
+        "B": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "muscle_meat_chicken_thigh_boneless",
-      "name": "Chicken thigh, boneless",
-      "category": "muscle_meat",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "26g protein, 11g fat, 2.0mg Zn, 1.1mg Fe",
-      "dimensions": {
-        "P": "primary",
-        "F": "primary",
-        "Zn": "primary",
-        "B": "primary"
-      }
-    },
-    {
-      "id": "muscle_meat_ground_beef_85_lean",
-      "name": "Ground beef, 85% lean",
-      "category": "muscle_meat",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "25g protein, 15g fat, 5.4mg Zn, 2.4mg Fe",
-      "dimensions": {
-        "P": "primary",
-        "F": "primary",
-        "Zn": "primary",
-        "Fe": "primary",
-        "B": "primary"
-      }
-    },
-    {
-      "id": "muscle_meat_ground_beef_90_lean",
-      "name": "Ground beef, 90% lean",
-      "category": "muscle_meat",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "26g protein, 10g fat, 2.8mg Zn, 2.7mg Fe, 79mg Ch",
-      "dimensions": {
-        "P": "primary",
-        "F": "primary",
-        "Zn": "primary",
-        "Fe": "primary",
-        "B": "primary",
-        "Ch": "primary"
-      }
-    },
-    {
-      "id": "muscle_meat_ground_chicken",
+      "id": "muscle_ground_chicken",
       "name": "Ground chicken",
       "category": "muscle_meat",
       "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "24g protein, 10g fat, 1.8mg Zn, 1.1mg Fe",
       "dimensions": {
         "P": "primary",
-        "F": "primary",
-        "Zn": "primary",
-        "B": "primary"
+        "F": "secondary",
+        "Zn": "secondary",
+        "B": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "muscle_meat_ground_turkey_93_lean",
-      "name": "Ground turkey, 93% lean",
+      "id": "muscle_chicken_thigh_boneless",
+      "name": "Chicken thigh, boneless",
+      "category": "muscle_meat",
+      "tier": "T1",
+      "usda_fdc_id": 171477,
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "P": "primary",
+        "F": "secondary",
+        "Zn": "secondary",
+        "B": "secondary",
+        "Ph": "implicit"
+      }
+    },
+    {
+      "id": "muscle_chicken_breast_boneless",
+      "name": "Chicken breast, boneless",
       "category": "muscle_meat",
       "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "27g protein, 8g fat, 2.4mg Zn, 1.5mg Fe, 0.03mg Se",
       "dimensions": {
         "P": "primary",
-        "F": "primary",
-        "Zn": "primary",
-        "Se": "primary",
-        "B": "primary"
+        "B": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "muscle_meat_lamb_ground",
-      "name": "Lamb, ground",
-      "category": "muscle_meat",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "25g protein, 17g fat, 3.6mg Zn, 1.6mg Fe",
-      "dimensions": {
-        "P": "primary",
-        "F": "primary",
-        "Zn": "primary",
-        "Fe": "primary",
-        "B": "primary"
-      }
-    },
-    {
-      "id": "muscle_meat_pork_loin",
+      "id": "muscle_pork_loin",
       "name": "Pork loin",
       "category": "muscle_meat",
       "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "27g protein, 8g fat, 2.0mg Zn, 0.9mg Fe",
       "dimensions": {
         "P": "primary",
-        "F": "primary",
-        "Zn": "primary",
-        "B": "primary"
+        "F": "secondary",
+        "Zn": "secondary",
+        "B": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "muscle_meat_pork_shoulder_butt",
+      "id": "muscle_pork_shoulder",
       "name": "Pork shoulder/butt",
       "category": "muscle_meat",
       "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "24g protein, 16g fat, 3.5mg Zn, 1.2mg Fe",
+      "dimensions": {
+        "P": "primary",
+        "F": "primary",
+        "Zn": "secondary",
+        "Fe": "secondary",
+        "B": "secondary",
+        "Ph": "implicit"
+      }
+    },
+    {
+      "id": "muscle_beef_chuck",
+      "name": "Beef chuck roast",
+      "category": "muscle_meat",
+      "tier": "T1",
+      "default_unit": "g_cooked",
       "dimensions": {
         "P": "primary",
         "F": "primary",
         "Zn": "primary",
         "Fe": "primary",
-        "B": "primary"
+        "B": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "muscle_meat_rabbit",
-      "name": "Rabbit",
+      "id": "muscle_beef_heart",
+      "name": "Beef heart",
       "category": "muscle_meat",
       "tier": "T2",
-      "default_unit": "g_cooked",
-      "notes": "29g protein, 3.5g fat, 2.0mg Zn, 1.6mg Fe",
+      "default_unit": "g_raw",
+      "notes": "Technically organ; used as lean muscle; taurine-rich.",
       "dimensions": {
         "P": "primary",
-        "B": "primary"
+        "Fe": "primary",
+        "Cu": "secondary",
+        "B": "secondary",
+        "Ch": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "muscle_meat_venison_ground",
+      "id": "muscle_lamb_ground",
+      "name": "Lamb, ground",
+      "category": "muscle_meat",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "P": "primary",
+        "F": "primary",
+        "Zn": "secondary",
+        "Fe": "secondary",
+        "B": "secondary",
+        "Ph": "implicit"
+      }
+    },
+    {
+      "id": "muscle_venison_ground",
       "name": "Venison, ground",
       "category": "muscle_meat",
       "tier": "T2",
       "default_unit": "g_cooked",
-      "notes": "26g protein, 3g fat, 3.0mg Zn, 3.4mg Fe",
       "dimensions": {
         "P": "primary",
-        "Zn": "primary",
+        "Zn": "secondary",
         "Fe": "primary",
-        "B": "primary"
+        "B": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "non_starchy_vegetables_bok_choy",
-      "name": "Bok choy (cooked)",
-      "category": "non_starchy_vegetables",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "1.6g protein, 1g fiber, 46mcg VK, 105mg Ca, 252mg K",
-      "dimensions": {
-        "VK": "primary",
-        "Ca": "primary",
-        "K": "primary"
-      }
-    },
-    {
-      "id": "non_starchy_vegetables_broccoli",
-      "name": "Broccoli (steamed)",
-      "category": "non_starchy_vegetables",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "2.4g protein, 3.3g fiber, 102mcg VK, 0.8mg VE, 293mg K",
-      "dimensions": {
-        "Fib": "primary",
-        "VK": "primary",
-        "VE": "primary",
-        "K": "primary",
-        "Mn": "primary"
-      }
-    },
-    {
-      "id": "non_starchy_vegetables_brussels_sprouts",
-      "name": "Brussels sprouts (cooked)",
-      "category": "non_starchy_vegetables",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "3.4g protein, 3.8g fiber, 177mcg VK, 389mg K",
-      "dimensions": {
-        "Fib": "primary",
-        "VK": "primary",
-        "K": "primary"
-      }
-    },
-    {
-      "id": "non_starchy_vegetables_carrots",
-      "name": "Carrots (cooked)",
-      "category": "non_starchy_vegetables",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "0.8g protein, 3g fiber, 17000 IU VA",
-      "dimensions": {
-        "Fib": "primary",
-        "VA": "primary",
-        "VK": "primary"
-      }
-    },
-    {
-      "id": "non_starchy_vegetables_green_beans",
-      "name": "Green beans (steamed)",
-      "category": "non_starchy_vegetables",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "1.8g protein, 3.2g fiber, 43mcg VK, 209mg K",
-      "dimensions": {
-        "Fib": "primary",
-        "VK": "primary",
-        "K": "primary"
-      }
-    },
-    {
-      "id": "non_starchy_vegetables_kale",
-      "name": "Kale (cooked)",
-      "category": "non_starchy_vegetables",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "2.9g protein, 2g fiber, 817mcg VK, 1mg VE, 135mg Ca",
-      "dimensions": {
-        "VK": "primary",
-        "VE": "primary",
-        "Ca": "primary",
-        "K": "primary",
-        "Mn": "primary"
-      }
-    },
-    {
-      "id": "non_starchy_vegetables_peas",
-      "name": "Peas (cooked)",
-      "category": "non_starchy_vegetables",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "5.4g protein, 4.4g fiber, 24mcg VK, 1.5mg Mn, 271mg K",
-      "dimensions": {
-        "Fib": "primary",
-        "P": "primary",
-        "VK": "primary",
-        "Mn": "primary",
-        "K": "primary"
-      }
-    },
-    {
-      "id": "non_starchy_vegetables_spinach",
-      "name": "Spinach (cooked)",
-      "category": "non_starchy_vegetables",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "3g protein, 2.4g fiber, 483mcg VK, 2mg VE, 3.6mg Fe, 87mg Mg",
-      "dimensions": {
-        "VK": "primary",
-        "VE": "primary",
-        "Fe": "primary",
-        "Mg": "primary",
-        "K": "primary",
-        "Mn": "primary"
-      }
-    },
-    {
-      "id": "non_starchy_vegetables_zucchini",
-      "name": "Zucchini (cooked)",
-      "category": "non_starchy_vegetables",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "1g protein, 1g fiber, 264mg K",
-      "dimensions": {
-        "Fib": "primary",
-        "K": "primary"
-      }
-    },
-    {
-      "id": "organ_meat_beef_kidney",
-      "name": "Beef kidney",
-      "category": "organ_meat",
+      "id": "muscle_bison_ground",
+      "name": "Bison, ground",
+      "category": "muscle_meat",
       "tier": "T2",
-      "default_unit": "g_raw",
-      "notes": "17g protein, 5mg Fe, 0.4mg Cu, 2.1mg Zn, 141mcg Se",
+      "default_unit": "g_cooked",
       "dimensions": {
-        "Se": "primary",
-        "Fe": "primary",
-        "B": "primary",
-        "Cu": "primary"
+        "P": "primary",
+        "F": "secondary",
+        "Zn": "primary",
+        "Fe": "secondary",
+        "B": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "organ_meat_beef_liver",
+      "id": "muscle_rabbit",
+      "name": "Rabbit",
+      "category": "muscle_meat",
+      "tier": "T2",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "P": "primary",
+        "B": "secondary",
+        "Ph": "implicit"
+      }
+    },
+
+    {
+      "id": "organ_beef_liver",
       "name": "Beef liver",
       "category": "organ_meat",
       "tier": "T1",
+      "usda_fdc_id": 169451,
       "default_unit": "g_raw",
-      "notes": "20g protein, 4.9mg Fe, 14mg Cu, 5.3mg Zn, 40mcg Se, 16814 IU vit A, 1.3mcg vit D, 310mg Ch, all B vitamins",
+      "notes": "Cap at ~5% of recipe weight due to vitamin A and copper.",
       "dimensions": {
         "VA": "primary",
         "Cu": "primary",
         "Fe": "primary",
-        "Zn": "primary",
-        "Se": "primary",
+        "Zn": "secondary",
+        "Se": "secondary",
         "B": "primary",
         "Ch": "primary",
-        "VD": "primary",
-        "Mn": "primary"
+        "VD": "secondary",
+        "Mn": "secondary",
+        "P": "implicit"
       }
     },
     {
-      "id": "organ_meat_chicken_gizzard",
+      "id": "organ_chicken_liver",
+      "name": "Chicken liver",
+      "category": "organ_meat",
+      "tier": "T1",
+      "usda_fdc_id": 171060,
+      "default_unit": "g_raw",
+      "dimensions": {
+        "VA": "primary",
+        "Fe": "primary",
+        "B": "primary",
+        "Ch": "secondary",
+        "Zn": "secondary",
+        "P": "implicit"
+      }
+    },
+    {
+      "id": "organ_chicken_gizzard",
       "name": "Chicken gizzard",
       "category": "organ_meat",
       "tier": "T1",
       "default_unit": "g_raw",
-      "notes": "18g protein, 3.2mg Fe, 2.7mg Zn, high B12",
       "dimensions": {
         "P": "primary",
-        "Fe": "primary",
-        "Zn": "primary",
-        "B": "primary"
+        "Fe": "secondary",
+        "Zn": "secondary",
+        "B": "secondary",
+        "Ph": "implicit"
       }
     },
     {
-      "id": "organ_meat_chicken_liver",
-      "name": "Chicken liver",
-      "category": "organ_meat",
-      "tier": "T1",
-      "default_unit": "g_raw",
-      "notes": "17g protein, 9mg Fe, 0.5mg Cu, 2.7mg Zn, 11078 IU vit A, 264mg Ch",
-      "dimensions": {
-        "VA": "primary",
-        "Fe": "primary",
-        "B": "primary",
-        "Ch": "primary"
-      }
-    },
-    {
-      "id": "organ_meat_lamb_liver",
-      "name": "Lamb liver",
+      "id": "organ_beef_kidney",
+      "name": "Beef kidney",
       "category": "organ_meat",
       "tier": "T2",
       "default_unit": "g_raw",
-      "notes": "20g protein, 7.4mg Fe, 6.4mg Cu, 4.0mg Zn",
       "dimensions": {
-        "VA": "primary",
-        "Fe": "primary",
-        "Cu": "primary",
-        "Zn": "primary",
-        "B": "primary"
+        "Se": "primary",
+        "Fe": "secondary",
+        "Cu": "secondary",
+        "B": "secondary",
+        "P": "implicit"
       }
     },
     {
-      "id": "organ_meat_pork_liver",
+      "id": "organ_pork_liver",
       "name": "Pork liver",
       "category": "organ_meat",
       "tier": "T2",
       "default_unit": "g_raw",
-      "notes": "22g protein, 18mg Fe, 0.7mg Cu, 5.8mg Zn, 17997 IU vit A",
       "dimensions": {
         "VA": "primary",
         "Fe": "primary",
-        "Zn": "primary",
+        "Zn": "secondary",
+        "Cu": "secondary",
+        "B": "secondary",
+        "Ch": "secondary",
+        "P": "implicit"
+      }
+    },
+    {
+      "id": "organ_lamb_liver",
+      "name": "Lamb liver",
+      "category": "organ_meat",
+      "tier": "T2",
+      "default_unit": "g_raw",
+      "dimensions": {
+        "VA": "primary",
+        "Fe": "secondary",
         "Cu": "primary",
-        "B": "primary",
-        "Ch": "primary"
+        "Zn": "secondary",
+        "B": "secondary",
+        "P": "implicit"
       }
     },
+
     {
-      "id": "starchy_carbohydrates_barley",
-      "name": "Barley (cooked)",
-      "category": "starchy_carbohydrates",
+      "id": "fish_sardines_bones",
+      "name": "Sardines, canned in water (with bones)",
+      "category": "fish_seafood",
       "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "2.3g protein, 3.8g fiber",
+      "default_unit": "g_canned_drained",
+      "notes": "Best whole-food calcium + EPA/DHA + vitamin D combo.",
       "dimensions": {
-        "Fib": "primary"
+        "P": "secondary",
+        "Ca": "primary",
+        "O3": "primary",
+        "VD": "primary",
+        "Se": "primary",
+        "Ph": "secondary",
+        "CaPh": "primary"
       }
     },
     {
-      "id": "starchy_carbohydrates_brown_rice",
-      "name": "Brown rice (cooked)",
-      "category": "starchy_carbohydrates",
+      "id": "fish_mackerel_canned",
+      "name": "Mackerel, canned (jack)",
+      "category": "fish_seafood",
+      "tier": "T1",
+      "default_unit": "g_canned_drained",
+      "dimensions": {
+        "P": "secondary",
+        "O3": "primary",
+        "VD": "primary",
+        "Se": "secondary",
+        "Ph": "secondary"
+      }
+    },
+    {
+      "id": "fish_salmon_canned_bones",
+      "name": "Salmon, canned (with bones)",
+      "category": "fish_seafood",
+      "tier": "T1",
+      "default_unit": "g_canned_drained",
+      "dimensions": {
+        "P": "secondary",
+        "Ca": "secondary",
+        "O3": "primary",
+        "VD": "primary",
+        "Se": "secondary",
+        "Ph": "secondary",
+        "CaPh": "secondary"
+      }
+    },
+    {
+      "id": "fish_salmon_fresh",
+      "name": "Salmon, fresh cooked",
+      "category": "fish_seafood",
       "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "2.3g protein, 1.6g fiber, 0.9mg Mn, 1.0mg Fe",
+      "dimensions": {
+        "P": "secondary",
+        "O3": "primary",
+        "VD": "primary",
+        "Se": "secondary",
+        "Ph": "secondary"
+      }
+    },
+    {
+      "id": "fish_cod_fresh",
+      "name": "Cod, fresh cooked",
+      "category": "fish_seafood",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "P": "secondary",
+        "Se": "secondary",
+        "VD": "secondary",
+        "Ph": "secondary"
+      }
+    },
+    {
+      "id": "fish_tilapia_fresh",
+      "name": "Tilapia, fresh cooked",
+      "category": "fish_seafood",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "P": "secondary",
+        "VD": "secondary",
+        "Ph": "secondary"
+      }
+    },
+
+    {
+      "id": "egg_whole",
+      "name": "Whole egg (large)",
+      "category": "egg_dairy",
+      "tier": "T1",
+      "usda_fdc_id": 171287,
+      "default_unit": "unit",
+      "dimensions": {
+        "P": "secondary",
+        "F": "secondary",
+        "Ch": "primary",
+        "VD": "secondary",
+        "Se": "secondary",
+        "B": "secondary",
+        "Ph": "secondary"
+      }
+    },
+    {
+      "id": "eggshell_powder",
+      "name": "Eggshell powder",
+      "category": "calcium_source",
+      "tier": "T1",
+      "default_unit": "g_powder",
+      "notes": "Pure CaCO3; no phosphorus.",
+      "dimensions": {
+        "Ca": "primary",
+        "CaPh": "primary"
+      }
+    },
+    {
+      "id": "dairy_yogurt_plain_whole",
+      "name": "Yogurt, plain whole",
+      "category": "egg_dairy",
+      "tier": "T1",
+      "default_unit": "g",
+      "dimensions": {
+        "Ca": "secondary",
+        "P": "secondary",
+        "F": "secondary",
+        "B": "secondary"
+      }
+    },
+    {
+      "id": "dairy_cottage_cheese_2",
+      "name": "Cottage cheese 2%",
+      "category": "egg_dairy",
+      "tier": "T1",
+      "default_unit": "g",
+      "dimensions": {
+        "P": "secondary",
+        "Ca": "secondary",
+        "B": "secondary",
+        "Ph": "secondary"
+      }
+    },
+    {
+      "id": "dairy_kefir_plain_whole",
+      "name": "Kefir, plain whole",
+      "category": "egg_dairy",
+      "tier": "T1",
+      "default_unit": "g",
+      "dimensions": {
+        "Ca": "secondary",
+        "P": "secondary",
+        "F": "secondary",
+        "B": "secondary"
+      }
+    },
+    {
+      "id": "dairy_cheddar",
+      "name": "Cheddar cheese",
+      "category": "egg_dairy",
+      "tier": "T1",
+      "default_unit": "g",
+      "dimensions": {
+        "Ca": "secondary",
+        "P": "secondary",
+        "F": "primary"
+      }
+    },
+
+    {
+      "id": "starch_sweet_potato",
+      "name": "Sweet potato, cooked",
+      "category": "starch",
+      "tier": "T1",
+      "default_unit": "g_cooked",
       "dimensions": {
         "Fib": "primary",
-        "Mn": "primary",
-        "Fe": "primary"
-      }
-    },
-    {
-      "id": "starchy_carbohydrates_lentils",
-      "name": "Lentils (cooked)",
-      "category": "starchy_carbohydrates",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "9g protein, 7.9g fiber, 0.5mg Mn, 3.3mg Fe, 369mg K",
-      "dimensions": {
-        "Fib": "primary",
-        "Fe": "primary",
         "K": "primary",
-        "Mn": "primary"
+        "VA": "secondary",
+        "Mn": "secondary"
       }
     },
     {
-      "id": "starchy_carbohydrates_oatmeal",
-      "name": "Oatmeal (cooked)",
-      "category": "starchy_carbohydrates",
+      "id": "starch_white_potato",
+      "name": "White potato, cooked",
+      "category": "starch",
       "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "2.4g protein, 1.7g fiber, 1.0mg Mn, 27mg Mg",
       "dimensions": {
-        "Fib": "primary",
-        "Mn": "primary",
-        "Mg": "primary"
+        "Fib": "secondary",
+        "K": "secondary"
       }
     },
     {
-      "id": "starchy_carbohydrates_pumpkin_puree",
+      "id": "starch_brown_rice",
+      "name": "Brown rice, cooked",
+      "category": "starch",
+      "tier": "T1",
+      "usda_fdc_id": 169704,
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "secondary",
+        "Mn": "primary",
+        "Fe": "secondary"
+      }
+    },
+    {
+      "id": "starch_white_rice",
+      "name": "White rice, cooked",
+      "category": "starch",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "tertiary"
+      }
+    },
+    {
+      "id": "starch_oatmeal",
+      "name": "Oatmeal, cooked",
+      "category": "starch",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "secondary",
+        "Mn": "primary",
+        "Mg": "secondary"
+      }
+    },
+    {
+      "id": "starch_quinoa",
+      "name": "Quinoa, cooked",
+      "category": "starch",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "secondary",
+        "Mn": "primary",
+        "Mg": "secondary",
+        "Ph": "secondary"
+      }
+    },
+    {
+      "id": "starch_barley",
+      "name": "Barley, cooked",
+      "category": "starch",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "secondary"
+      }
+    },
+    {
+      "id": "starch_lentils",
+      "name": "Lentils, cooked",
+      "category": "starch_legume",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "primary",
+        "Fe": "secondary",
+        "K": "secondary",
+        "Mn": "secondary"
+      }
+    },
+    {
+      "id": "starch_pumpkin_puree",
       "name": "Pumpkin puree (canned)",
-      "category": "starchy_carbohydrates",
+      "category": "starch_veg",
       "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "1g protein, 2.9g fiber, 230mg K, 17000 IU vit A",
+      "default_unit": "g",
       "dimensions": {
         "Fib": "primary",
-        "VA": "primary",
-        "K": "primary"
+        "VA": "secondary",
+        "K": "secondary"
+      }
+    },
+
+    {
+      "id": "veg_broccoli",
+      "name": "Broccoli, steamed",
+      "category": "vegetable",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "primary",
+        "VK": "secondary",
+        "VE": "secondary",
+        "K": "secondary",
+        "Mn": "secondary"
       }
     },
     {
-      "id": "starchy_carbohydrates_quinoa",
-      "name": "Quinoa (cooked)",
-      "category": "starchy_carbohydrates",
+      "id": "veg_spinach",
+      "name": "Spinach, cooked",
+      "category": "vegetable",
       "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "4.4g protein, 2.8g fiber, 1.1mg Mn, 64mg Mg",
+      "notes": "Oxalate content; not a calcium source in constraints.",
       "dimensions": {
-        "Fib": "primary",
-        "Mn": "primary",
+        "VK": "primary",
+        "VE": "primary",
+        "Fe": "secondary",
         "Mg": "primary",
-        "P": "primary"
-      }
-    },
-    {
-      "id": "starchy_carbohydrates_sweet_potato",
-      "name": "Sweet potato (baked)",
-      "category": "starchy_carbohydrates",
-      "tier": "T1",
-      "default_unit": "g_cooked",
-      "notes": "2g protein, 3.3g fiber, 475mg K, 0.6mg Mn, 14187 IU vit A (beta-carotene)",
-      "dimensions": {
-        "Fib": "primary",
         "K": "primary",
-        "VA": "primary",
-        "Mn": "primary"
+        "Mn": "secondary"
       }
     },
     {
-      "id": "starchy_carbohydrates_white_potato",
-      "name": "White potato (boiled)",
-      "category": "starchy_carbohydrates",
+      "id": "veg_kale",
+      "name": "Kale, cooked",
+      "category": "vegetable",
       "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "1.7g protein, 1.8g fiber, 379mg K",
+      "dimensions": {
+        "VK": "primary",
+        "VE": "secondary",
+        "Ca": "secondary",
+        "K": "secondary",
+        "Mn": "secondary"
+      }
+    },
+    {
+      "id": "veg_green_beans",
+      "name": "Green beans, steamed",
+      "category": "vegetable",
+      "tier": "T1",
+      "default_unit": "g_cooked",
       "dimensions": {
         "Fib": "primary",
-        "K": "primary"
+        "VK": "secondary",
+        "K": "secondary"
       }
     },
     {
-      "id": "starchy_carbohydrates_white_rice",
-      "name": "White rice (cooked)",
-      "category": "starchy_carbohydrates",
+      "id": "veg_zucchini",
+      "name": "Zucchini, cooked",
+      "category": "vegetable",
       "tier": "T1",
       "default_unit": "g_cooked",
-      "notes": "2.4g protein, 0.3g fiber",
-      "dimensions": {}
+      "dimensions": {
+        "Fib": "secondary",
+        "K": "secondary"
+      }
     },
     {
-      "id": "supplements_fish_oil_13",
-      "name": "Fish oil (Nordic Naturals Omega-3 Pet) [^13]",
-      "category": "supplements",
+      "id": "veg_carrots",
+      "name": "Carrots, cooked",
+      "category": "vegetable",
       "tier": "T1",
-      "notes": "~1.5g EPA+DHA per tsp. Dose: 75–100mg EPA+DHA per kg BW/day",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "primary",
+        "VA": "secondary",
+        "VK": "secondary"
+      }
+    },
+    {
+      "id": "veg_brussels_sprouts",
+      "name": "Brussels sprouts, cooked",
+      "category": "vegetable",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "primary",
+        "VK": "secondary",
+        "K": "secondary"
+      }
+    },
+    {
+      "id": "veg_peas",
+      "name": "Peas, cooked",
+      "category": "vegetable_legume",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "Fib": "primary",
+        "P": "secondary",
+        "VK": "secondary",
+        "Mn": "primary",
+        "K": "secondary"
+      }
+    },
+    {
+      "id": "veg_bok_choy",
+      "name": "Bok choy, cooked",
+      "category": "vegetable",
+      "tier": "T1",
+      "default_unit": "g_cooked",
+      "dimensions": {
+        "VK": "secondary",
+        "Ca": "secondary",
+        "K": "secondary"
+      }
+    },
+
+    {
+      "id": "fat_sunflower_oil",
+      "name": "Sunflower oil",
+      "category": "fat_oil",
+      "tier": "T1",
+      "default_unit": "ml",
+      "dimensions": {
+        "O6": "primary",
+        "F": "primary",
+        "VE": "primary"
+      }
+    },
+    {
+      "id": "fat_safflower_oil",
+      "name": "Safflower oil (high-linoleic)",
+      "category": "fat_oil",
+      "tier": "T1",
+      "default_unit": "ml",
+      "dimensions": {
+        "O6": "primary",
+        "F": "primary"
+      }
+    },
+    {
+      "id": "fat_canola_oil",
+      "name": "Canola oil",
+      "category": "fat_oil",
+      "tier": "T1",
+      "usda_fdc_id": 172336,
+      "default_unit": "ml",
+      "dimensions": {
+        "O6": "secondary",
+        "F": "primary"
+      }
+    },
+    {
+      "id": "fat_olive_oil",
+      "name": "Olive oil",
+      "category": "fat_oil",
+      "tier": "T1",
+      "default_unit": "ml",
+      "dimensions": {
+        "F": "primary",
+        "VE": "secondary"
+      }
+    },
+    {
+      "id": "fat_coconut_oil",
+      "name": "Coconut oil",
+      "category": "fat_oil",
+      "tier": "T1",
+      "default_unit": "ml",
+      "dimensions": {
+        "F": "primary"
+      }
+    },
+    {
+      "id": "fat_hemp_hearts",
+      "name": "Hemp hearts (hulled seeds)",
+      "category": "fat_seed",
+      "tier": "T1",
+      "default_unit": "g",
+      "dimensions": {
+        "O6": "secondary",
+        "F": "secondary",
+        "P": "secondary",
+        "Mg": "secondary",
+        "Mn": "secondary"
+      }
+    },
+    {
+      "id": "fat_flaxseed_ground",
+      "name": "Ground flaxseed",
+      "category": "fat_seed",
+      "tier": "T1",
+      "default_unit": "g",
+      "dimensions": {
+        "Fib": "secondary",
+        "F": "secondary"
+      }
+    },
+
+    {
+      "id": "ca_calcium_carbonate",
+      "name": "Calcium carbonate powder",
+      "category": "calcium_source",
+      "tier": "T1",
+      "default_unit": "g",
+      "dimensions": {
+        "Ca": "primary",
+        "CaPh": "primary"
+      }
+    },
+    {
+      "id": "ca_bone_meal",
+      "name": "Bone meal (food-grade)",
+      "category": "calcium_source",
+      "tier": "T3",
+      "default_unit": "g",
+      "notes": "Provides Ca and Ph; better for puppies.",
+      "dimensions": {
+        "Ca": "primary",
+        "Ph": "primary",
+        "CaPh": "primary"
+      }
+    },
+    {
+      "id": "ca_dicalcium_phosphate",
+      "name": "Dicalcium phosphate",
+      "category": "calcium_source",
+      "tier": "T3",
+      "default_unit": "g",
+      "dimensions": {
+        "Ca": "primary",
+        "Ph": "primary",
+        "CaPh": "primary"
+      }
+    },
+    {
+      "id": "ca_sardines_bones",
+      "name": "Sardines with bones",
+      "category": "calcium_source",
+      "tier": "T1",
+      "alias_of": "fish_sardines_bones",
+      "dimensions": {
+        "Ca": "primary",
+        "O3": "primary",
+        "VD": "primary",
+        "Se": "primary",
+        "CaPh": "secondary"
+      }
+    },
+    {
+      "id": "ca_salmon_canned_bones",
+      "name": "Canned salmon with bones",
+      "category": "calcium_source",
+      "tier": "T1",
+      "alias_of": "fish_salmon_canned_bones",
+      "dimensions": {
+        "Ca": "secondary",
+        "O3": "primary",
+        "VD": "primary"
+      }
+    }
+  ],
+  "supplements": [
+    {
+      "id": "supp_premix_balanceit_canine",
+      "name": "BalanceIT Canine",
+      "brand": "BalanceIT",
+      "category": "premix",
+      "tier": "T3",
+      "default_unit": "g",
+      "notes": "Recipe-based veterinary premix; no omega-3.",
+      "dimensions": {
+        "Ca": "primary",
+        "Ph": "primary",
+        "K": "primary",
+        "Mg": "primary",
+        "Zn": "primary",
+        "Fe": "primary",
+        "Cu": "primary",
+        "Mn": "primary",
+        "Se": "primary",
+        "I": "primary",
+        "VA": "primary",
+        "VD": "primary",
+        "VE": "primary",
+        "VK": "secondary",
+        "B": "primary",
+        "Ch": "primary",
+        "Na": "primary"
+      }
+    },
+    {
+      "id": "supp_premix_chefs_canine_complete",
+      "name": "Chef’s Canine Complete",
+      "brand": "Chef’s Canine",
+      "category": "premix",
+      "tier": "T3",
+      "default_unit": "g",
+      "notes": "Dose: 5 g per 15 lb body weight.",
+      "dimensions": {
+        "Ca": "primary",
+        "Ph": "primary",
+        "Zn": "primary",
+        "Fe": "primary",
+        "Cu": "primary",
+        "Mn": "primary",
+        "Se": "primary",
+        "I": "primary",
+        "VA": "primary",
+        "VD": "primary",
+        "VE": "primary",
+        "B": "primary",
+        "Ch": "primary",
+        "Na": "primary"
+      }
+    },
+    {
+      "id": "supp_premix_azestfor",
+      "name": "Azestfor Homemade Dog Vitamins",
+      "brand": "Azestfor",
+      "category": "premix",
+      "tier": "T3",
+      "default_unit": "g",
+      "dimensions": {
+        "Ca": "primary",
+        "Ph": "primary",
+        "Zn": "primary",
+        "Fe": "primary",
+        "Cu": "primary",
+        "Mn": "primary",
+        "Se": "primary",
+        "I": "primary",
+        "VA": "primary",
+        "VD": "primary",
+        "VE": "primary",
+        "B": "primary",
+        "Ch": "primary",
+        "Na": "primary"
+      }
+    },
+    {
+      "id": "supp_premix_holistic_vet_blend",
+      "name": "Holistic Vet Blend Canine Regular",
+      "brand": "Holistic Vet Blend",
+      "category": "premix",
+      "tier": "T3",
+      "default_unit": "g",
+      "dimensions": {
+        "Ca": "primary",
+        "Ph": "primary",
+        "Zn": "primary",
+        "Se": "primary",
+        "I": "primary",
+        "VD": "primary",
+        "VE": "primary",
+        "B": "primary",
+        "Na": "primary"
+      }
+    },
+    {
+      "id": "supp_premix_wynwood_vitamineral",
+      "name": "Wynwood Vitamineral Mix",
+      "brand": "Wynwood Dog Food Co.",
+      "category": "premix",
+      "tier": "T3",
+      "default_unit": "g",
+      "dimensions": {
+        "Ca": "primary",
+        "Ph": "primary",
+        "Zn": "primary",
+        "Fe": "primary",
+        "Cu": "primary",
+        "Mn": "primary",
+        "Se": "primary",
+        "I": "primary",
+        "VA": "primary",
+        "VD": "primary",
+        "VE": "primary",
+        "B": "primary",
+        "Ch": "primary",
+        "Na": "primary"
+      }
+    },
+
+    {
+      "id": "supp_fish_oil_generic",
+      "name": "Fish oil (generic liquid)",
+      "brand": "generic",
+      "category": "single_nutrient",
+      "tier": "T1",
+      "default_unit": "ml",
       "dimensions": {
         "O3": "primary"
       }
     },
     {
-      "id": "supplements_ground_ginger",
-      "name": "Ground ginger",
-      "category": "supplements",
+      "id": "supp_fish_oil_nordic_pet",
+      "name": "Nordic Naturals Omega-3 Pet",
+      "brand": "Nordic Naturals",
+      "category": "single_nutrient",
       "tier": "T1",
-      "notes": "Anti-inflammatory, GI support. 1/4 tsp per 25 lbs",
-      "dimensions": {}
+      "default_unit": "ml",
+      "dimensions": {
+        "O3": "primary"
+      }
     },
     {
-      "id": "supplements_iodized_salt",
-      "name": "Iodized salt",
-      "category": "supplements",
-      "tier": "T1",
-      "notes": "~77mcg iodine per 1/4 tsp. Use if not using kelp",
+      "id": "supp_kelp_powder",
+      "name": "Kelp powder",
+      "brand": "generic",
+      "category": "single_nutrient",
+      "tier": "T2",
+      "default_unit": "g",
+      "notes": "Iodine content variable; constrain via NRC max.",
       "dimensions": {
         "I": "primary",
-        "Na": "primary"
+        "Se": "secondary",
+        "Mn": "secondary",
+        "Mg": "secondary"
       }
     },
     {
-      "id": "supplements_kelp_powder_21_22",
-      "name": "Kelp powder (organic) [^21][^22]",
-      "category": "supplements",
-      "tier": "T2",
-      "notes": "Iodine (646–1259 mcg/g), trace Mn/Se/Mg. Dose: 1/4 tsp per 25 lbs. Caution: iodine content varies widely by species/batch",
-      "dimensions": {
-        "I": "primary",
-        "Se": "primary",
-        "Mn": "primary",
-        "Mg": "primary"
-      }
-    },
-    {
-      "id": "supplements_nutritional_yeast",
-      "name": "Nutritional yeast",
-      "category": "supplements",
-      "tier": "T2",
-      "notes": "8g protein, 5mg Zn, all B vitamins per 2 tbsp. Dogs love the taste",
-      "dimensions": {
-        "B": "primary",
-        "Zn": "primary"
-      }
-    },
-    {
-      "id": "supplements_psyllium_husk_powder",
-      "name": "Psyllium husk powder",
-      "category": "supplements",
-      "tier": "T1",
-      "notes": "Soluble fiber. 1/2–1 tsp per meal for GI regularity",
-      "dimensions": {
-        "Fib": "primary"
-      }
-    },
-    {
-      "id": "supplements_taurine",
-      "name": "Taurine",
-      "category": "supplements",
-      "tier": "T2",
-      "notes": "250–500mg per 25 lbs BW/day. Cardiac function. In all commercial premixes",
-      "dimensions": {}
-    },
-    {
-      "id": "supplements_vitamin_d",
-      "name": "Vitamin D₃ (cholecalciferol)",
-      "category": "supplements",
-      "tier": "T1",
-      "notes": "500–1000 IU per 25 lbs BW/day. Critical gap if recipe has no fish. SUL = 20mcg/1000kcal",
-      "dimensions": {
-        "VD": "primary"
-      }
-    },
-    {
-      "id": "supplements_vitamin_e",
+      "id": "supp_vitamin_e",
       "name": "Vitamin E (d-alpha tocopherol)",
-      "category": "supplements",
+      "brand": "generic_human",
+      "category": "single_nutrient",
       "tier": "T1",
-      "notes": "1 IU = 0.67mg. Dose: 1–2 IU per lb BW/day. Critical when feeding fish oil (prevents PUFA oxidation)",
+      "default_unit": "IU",
       "dimensions": {
         "VE": "primary"
       }
     },
     {
-      "id": "supplements_zinc_gluconate_picolinate",
-      "name": "Zinc gluconate/picolinate",
-      "category": "supplements",
+      "id": "supp_zinc",
+      "name": "Zinc (gluconate/picolinate)",
+      "brand": "generic_human",
+      "category": "single_nutrient",
       "tier": "T1",
-      "notes": "15–25mg elemental Zn per tablet. Needed when primary protein is poultry",
+      "default_unit": "mg_elemental",
       "dimensions": {
         "Zn": "primary"
+      }
+    },
+    {
+      "id": "supp_taurine",
+      "name": "Taurine",
+      "brand": "generic",
+      "category": "single_nutrient",
+      "tier": "T2",
+      "default_unit": "mg",
+      "dimensions": {}
+    },
+    {
+      "id": "supp_psyllium",
+      "name": "Psyllium husk powder",
+      "brand": "generic",
+      "category": "single_nutrient",
+      "tier": "T1",
+      "default_unit": "g",
+      "dimensions": {
+        "Fib": "primary"
+      }
+    },
+    {
+      "id": "supp_vitamin_d3",
+      "name": "Vitamin D3 (cholecalciferol)",
+      "brand": "generic_human",
+      "category": "single_nutrient",
+      "tier": "T1",
+      "default_unit": "IU",
+      "dimensions": {
+        "VD": "primary"
+      }
+    },
+    {
+      "id": "supp_nutritional_yeast",
+      "name": "Nutritional yeast",
+      "brand": "generic",
+      "category": "single_nutrient",
+      "tier": "T2",
+      "default_unit": "g",
+      "dimensions": {
+        "B": "primary",
+        "Zn": "secondary"
+      }
+    },
+    {
+      "id": "supp_iodized_salt",
+      "name": "Iodized salt",
+      "brand": "generic",
+      "category": "single_nutrient",
+      "tier": "T1",
+      "default_unit": "g",
+      "dimensions": {
+        "I": "secondary",
+        "Na": "primary"
       }
     }
   ]
