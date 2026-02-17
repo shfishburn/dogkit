@@ -1,3 +1,5 @@
+# Human vs. Canine Pipeline: What Maps and What Doesn't
+
 ## What Maps Cleanly
 
 The **pipeline pattern** is nearly identical — both are `basal_rate → multiplier_chain → body_comp_correction → nutrient_targets`. Three concepts transfer directly: [perplexity](https://www.perplexity.ai/search/8931a25f-9d2b-4976-8afa-77b6bffd9cca)

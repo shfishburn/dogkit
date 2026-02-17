@@ -1,16 +1,14 @@
 # Canine Nutrition Science: Body Composition, Age, and Energy Algorithms
-# Comprehensive Research Summary with Formulas and Methodologies
-# =============================================================================
-# Compiled: February 2026
-# Sources: NRC 2006, FEDIAF 2024, and 47 peer-reviewed studies (2014–2025)
-# Purpose: Evidence base underpinning the Canine Meal Plan Pipeline Spec v1.0
-#          and Constraint Layer v1.0
-# =============================================================================
+> Comprehensive Research Summary with Formulas and Methodologies
+> Compiled: February 2026
+> Sources: NRC 2006, FEDIAF 2024, and 47 peer-reviewed studies (2014–2025)
+> Purpose: Evidence base underpinning the Canine Meal Plan Pipeline Spec v1.0
+> and Constraint Layer v1.0
 
 
-# =============================================================================
-# 1. ENERGY REQUIREMENT EQUATIONS
-# =============================================================================
+
+## 1. ENERGY REQUIREMENT EQUATIONS
+
 
 ## 1.1 Resting Energy Requirement (RER)
 
@@ -148,8 +146,8 @@ interaction on actual MER.
 
   The BCS × neuter interaction was statistically significant (p = 0.0089).
 
-  Key insight: the neutering penalty is most pronounced in dogs at ideal 
-  condition (~6.5% reduction) and essentially disappears in overweight/obese 
+  Key insight: the neutering penalty is most pronounced in dogs at ideal
+  condition (~6.5% reduction) and essentially disappears in overweight/obese
   dogs, where excess fat already suppresses metabolic rate.
 
   Practical implication: the NRC's 95 kcal/kg^0.75 overestimates MER for
@@ -214,9 +212,9 @@ body weight at a given age, used for monitoring growth rate:
   Pet Food for Cats and Dogs, Section 4.
 
 
-# =============================================================================
-# 2. BODY COMPOSITION: SCIENCE AND MEASUREMENT
-# =============================================================================
+
+## 2. BODY COMPOSITION: SCIENCE AND MEASUREMENT
+
 
 ## 2.1 Why Body Weight Alone Is Insufficient
 
@@ -472,9 +470,9 @@ to 16.1 years) at Hill's Pet Nutrition Center, Topeka, Kansas.
   * D₂O requires injection + blood draw (invasive, not sedation).
 
 
-# =============================================================================
-# 3. LIFE STAGE CLASSIFICATION
-# =============================================================================
+
+## 3. LIFE STAGE CLASSIFICATION
+
 
 ## 3.1 Breed-Size-Adjusted Life Stage Thresholds
 
@@ -511,9 +509,9 @@ Based on aging meta-analysis (Creevy et al. 2022, ~6.4M veterinary records):
   during growth in puppies of different breeds. J Nutr 134:2027S.
 
 
-# =============================================================================
-# 4. MACRONUTRIENT REQUIREMENTS
-# =============================================================================
+
+## 4. MACRONUTRIENT REQUIREMENTS
+
 
 ## 4.1 Minimum Macronutrient Targets (per 1000 kcal ME)
 
@@ -581,9 +579,9 @@ Based on aging meta-analysis (Creevy et al. 2022, ~6.4M veterinary records):
   management guidelines for dogs and cats. JAAHA 50:1-11.
 
 
-# =============================================================================
-# 5. MICRONUTRIENT REQUIREMENTS
-# =============================================================================
+
+## 5. MICRONUTRIENT REQUIREMENTS
+
 
 ## 5.1 NRC 2006 Recommended Allowances (per 1000 kcal ME)
 
@@ -684,9 +682,9 @@ Based on aging meta-analysis (Creevy et al. 2022, ~6.4M veterinary records):
   phosphorus requirements of growing dogs. PLoS ONE 14(8):e0220305.
 
 
-# =============================================================================
-# 6. SARCOPENIA AND AGING
-# =============================================================================
+
+## 6. SARCOPENIA AND AGING
+
 
 ## 6.1 Muscle Loss Trajectory
 
@@ -715,9 +713,9 @@ Based on aging meta-analysis (Creevy et al. 2022, ~6.4M veterinary records):
   31(3):519-527.
 
 
-# =============================================================================
-# 7. TOXIC INGREDIENTS AND ALLERGENS
-# =============================================================================
+
+## 7. TOXIC INGREDIENTS AND ALLERGENS
+
 
 ## 7.1 Absolute Toxins (Zero Tolerance — No Safe Dose)
 
@@ -773,9 +771,9 @@ Based on aging meta-analysis (Creevy et al. 2022, ~6.4M veterinary records):
   sources in dogs and cats. BMC Vet Res 12:9.
 
 
-# =============================================================================
-# 8. ALGORITHM: PUTTING IT ALL TOGETHER
-# =============================================================================
+
+## 8. ALGORITHM: PUTTING IT ALL TOGETHER
+
 
 ## 8.1 Complete Pipeline (pseudocode)
 
@@ -855,9 +853,9 @@ Based on aging meta-analysis (Creevy et al. 2022, ~6.4M veterinary records):
   See §1.4 for full factor table.
 
 
-# =============================================================================
-# 9. KEY FINDINGS SUMMARY
-# =============================================================================
+
+## 9. KEY FINDINGS SUMMARY
+
 
   1. Most pet dogs need 10–30% less energy than NRC predicts, depending on
      neuter status and BCS. (Marchi 2025, Bermingham 2014, Divol 2017)
@@ -894,9 +892,9 @@ Based on aging meta-analysis (Creevy et al. 2022, ~6.4M veterinary records):
      (Stockman et al. 2013; Heinze et al. 2012)
 
 
-# =============================================================================
-# 10. REFERENCES
-# =============================================================================
+
+## 10. REFERENCES
+
 
 NRC (2006). Nutrient Requirements of Dogs and Cats. National Academies Press.
 

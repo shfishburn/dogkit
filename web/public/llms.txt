@@ -1,0 +1,19 @@
+# Dogology HealthSpan Kits
+
+> Science-built food for more good years.
+
+Dogology is a subscription meal-kit service for dogs that combines canine metabolic modeling (MER), AAFCO-aligned nutrition, USDA FoodData Central nutrient data, and transparent sourcing into weekly cook-at-home kits.
+
+## Key Pages
+
+- Homepage: https://dogkit.vercel.app/
+- Plan Builder (MER calculator): https://dogkit.vercel.app/plan/
+- Ingredient Database: https://dogkit.vercel.app/ingredients/
+- Recipe Builder: https://dogkit.vercel.app/recipe/
+- Technical Specs: https://dogkit.vercel.app/specs/
+
+## Full Documentation
+
+For the complete technical specifications, research summaries, ingredient database, and business documentation in plain text:
+
+- llms-full.txt: https://dogkit.vercel.app/llms-full.txt

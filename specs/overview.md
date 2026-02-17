@@ -1,5 +1,6 @@
-**Dogology HealthSpan Kits: Transparent, Vet-Grade Meal Kits for Dogs**  
-*Tagline: Science‑Built Food for More Good Years*
+# Dogology HealthSpan Kits
+
+*Transparent, vet-grade meal kits. Science‑Built Food for More Good Years.*
 
 Dogology HealthSpan Kits is a subscription meal‑kit service for dogs that combines canine metabolic modeling, USDA‑grade nutrient data, and fully transparent sourcing. Instead of shipping finished dog food, it delivers weekly “cook at home” kits: precisely portioned human‑grade ingredients plus a custom micronutrient premix, all generated from each dog’s individual energy and nutrition profile.
 

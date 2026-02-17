@@ -9,14 +9,28 @@
   --color-link: LinkText;
   --color-code-surface: color-mix(in oklab, CanvasText 6%, Canvas);
 
+  /* Brand accent — warm amber */
+  --color-accent: #E0831A;
+  --color-accent-fg: #fff;
+  --color-accent-hover: #c9710e;
+  --color-accent-surface: color-mix(in oklab, #E0831A 12%, Canvas);
+
+  /* Hero (intentional full override — same in light + dark) */
+  --color-hero-bg: #0f0f0f;
+  --color-hero-text: rgba(255, 255, 255, 0.93);
+  --color-hero-sub: rgba(255, 255, 255, 0.62);
+  --color-hero-border: rgba(255, 255, 255, 0.14);
+
   /* Typography */
   --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
     "Segoe UI Emoji";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-display: var(--font-sans);
 
   /* Layout + spacing */
   --container-max: 72rem;
   --radius-1: 0.5rem;
+  --radius-2: 1rem;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -24,7 +38,11 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
+  --space-10: 2.5rem;
   --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
 
   /* Typography scale */
   --text-xs: 0.8125rem;
@@ -34,4 +52,6 @@
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
   --text-3xl: 1.875rem;
+  --text-4xl: 2.5rem;
+  --text-5xl: clamp(2.75rem, 6vw, 4.5rem);
 }

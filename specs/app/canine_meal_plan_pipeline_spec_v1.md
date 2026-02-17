@@ -1,19 +1,13 @@
-
 # Canine Meal Plan Pipeline Specification v1.0
-# Consumer Website — User-Facing Nutrition Recommendation Engine
-# 
-# Context: Extension of RecipeAlchemy platform for dog nutrition.
-# This spec defines the data pipeline from user inputs → nutrient targets → meal plan output.
-# All formulas sourced from NRC 2006, FEDIAF 2024, and post-2006 clinical validation studies.
 
-================================================================================
-STAGE 1: USER INPUT COLLECTION
-================================================================================
+> Consumer Website — User-Facing Nutrition Recommendation Engine Context: Extension of RecipeAlchemy platform for dog nutrition. This spec defines the data pipeline from user inputs → nutrient targets → meal plan output. All formulas sourced from NRC 2006, FEDIAF 2024, and post-2006 clinical validation studies.
+
+
+## STAGE 1: USER INPUT COLLECTION
+
 
 Required Inputs (must collect):
-─────────────────────────────────────────────────────────────
   Field                  Type        Constraints / Notes
-─────────────────────────────────────────────────────────────
   dog_name               string      Display only
   weight_kg              float       0.5–100 kg (convert from lbs if needed)
   weight_unit            enum        "kg" | "lbs"
@@ -25,7 +19,6 @@ Required Inputs (must collect):
   activity_level         enum        "sedentary" | "moderate" | "active" | "working"
 
 Optional Inputs (improve accuracy):
-─────────────────────────────────────────────────────────────
   expected_adult_weight_kg  float    Required if age < 12 months (puppy); user estimate or breed lookup
   reproductive_status       enum     "none" | "pregnant_early" | "pregnant_late" | "lactating"
   known_allergies           string[] From: ["beef","chicken","dairy","wheat","egg","lamb","soy","pork","fish","corn"]
@@ -33,41 +26,38 @@ Optional Inputs (improve accuracy):
   housing                   enum     "indoor" | "outdoor" | "mixed"
 
 UX Notes:
-  - BCS: Present the WSAVA 9-point visual chart with silhouette images + 
+  - BCS: Present the WSAVA 9-point visual chart with silhouette images +
     palpation instructions. Link to WSAVA PDF.
   - Breed: Offer autocomplete from AKC breed list → auto-map to size class.
     If "mixed/unknown", ask user to estimate adult weight range.
   - Activity: Define each level clearly:
       sedentary  = <30 min exercise/day, mostly indoor
-      moderate   = 30–60 min walks/play per day  
+      moderate   = 30–60 min walks/play per day
       active     = 1–3 hr vigorous exercise per day
       working    = 3+ hr sustained physical work (herding, sled, SAR)
 
 
-================================================================================
-STAGE 2: LIFE STAGE CLASSIFICATION
-================================================================================
+
+## STAGE 2: LIFE STAGE CLASSIFICATION
+
 
 Function: classifyLifeStage(age_months, breed_size_class) → LifeStage
 
   LifeStage enum: "puppy_early" | "puppy_late" | "adult" | "senior"
 
   Rules (breed-size-adjusted):
-  ───────────────────────────────────────────────────────────
   Breed Size     puppy_early     puppy_late    adult         senior
-  ───────────────────────────────────────────────────────────
   toy/small      < 4 mo          4–10 mo       10 mo–11 yr   ≥ 12 yr
   medium         < 4 mo          4–12 mo       12 mo–9 yr    ≥ 10 yr
   large          < 4 mo          4–15 mo       15 mo–7 yr    ≥ 8 yr
   giant          < 4 mo          4–18 mo       18 mo–5 yr    ≥ 6 yr
-  ───────────────────────────────────────────────────────────
 
   Source: FEDIAF 2024 growth curves + aging meta-analysis (Creevy et al. 2022)
 
 
-================================================================================
-STAGE 3: IDEAL BODY WEIGHT DERIVATION
-================================================================================
+
+## STAGE 3: IDEAL BODY WEIGHT DERIVATION
+
 
 Function: calcIdealBodyWeight(current_weight_kg, bcs) → float (kg)
 
@@ -89,27 +79,27 @@ Function: calcIdealBodyWeight(current_weight_kg, bcs) → float (kg)
   Source: Laflamme (1997) DEXA validation; German et al. (2006)
 
 
-================================================================================
-STAGE 4: ENERGY REQUIREMENT CALCULATION
-================================================================================
 
-Step 4a: Resting Energy Requirement (RER)
-──────────────────────────────────────────
+## STAGE 4: ENERGY REQUIREMENT CALCULATION
+
+
+
+### Step 4a: Resting Energy Requirement (RER)
+
   RER = 70 × IBW^0.75   (kcal/day)
 
   Use IBW (not current weight) for all calculations.
-  The linear shortcut (30 × BW + 70) is only valid for 2–45 kg; 
+  The linear shortcut (30 × BW + 70) is only valid for 2–45 kg;
   DO NOT USE IT — the allometric formula works for all sizes.
 
 
-Step 4b: Maintenance Energy Requirement (MER)
-──────────────────────────────────────────────
+
+### Step 4b: Maintenance Energy Requirement (MER)
+
   MER = RER × life_stage_factor × neuter_factor × activity_factor × weight_goal_factor
 
   Life Stage Factors (base multiplier on RER):
-  ─────────────────────────────────────────────
   Life Stage          Factor    Source
-  ─────────────────────────────────────────────
   puppy_early         3.0       NRC 2006
   puppy_late          2.0       NRC 2006
   adult               1.6       NRC 2006 (moderate)
@@ -119,21 +109,18 @@ Step 4b: Maintenance Energy Requirement (MER)
   lactating            3.0–6.0  NRC 2006 (scales with litter size)
 
   Neuter Factor:
-  ─────────────────────────────────────────────
   intact               1.0
   neutered             0.90      Marchi et al. 2025: ~7% reduction at ideal BCS;
                                  conservative 10% applied for safety margin.
 
   Activity Factor (multiplicative on base):
-  ─────────────────────────────────────────────
   sedentary            0.85      Divol & Priymenko 2017
   moderate             1.00      (baseline)
   active               1.15      NRC 2006
-  working              1.50      NRC 2006 (light work); 
+  working              1.50      NRC 2006 (light work);
                                  heavy work (sled dogs) = 2.0–6.0 but out of scope
 
   Weight Goal Factor:
-  ─────────────────────────────────────────────
   If BCS 6–7 (overweight):   0.90   (10% deficit for gradual loss)
   If BCS 8–9 (obese):        0.80   (20% deficit; flag vet referral)
   If BCS 1–3 (underweight):  1.10   (10% surplus)
@@ -142,8 +129,9 @@ Step 4b: Maintenance Energy Requirement (MER)
   FINAL MER (kcal/day) = RER × Π(all factors)
 
 
-Step 4c: Puppy Energy (alternative formula for puppies)
-───────────────────────────────────────────────────────
+
+### Step 4c: Puppy Energy (alternative formula for puppies)
+
   If life_stage in ["puppy_early", "puppy_late"]:
 
     p = current_weight_kg / expected_adult_weight_kg
@@ -160,41 +148,36 @@ Step 4c: Puppy Energy (alternative formula for puppies)
     Source: Norfolk Terrier study (Brenten et al. 2021); Yorkshire Terrier study (Brenten et al. 2017)
 
 
-================================================================================
-STAGE 5: MACRONUTRIENT TARGETS
-================================================================================
+
+## STAGE 5: MACRONUTRIENT TARGETS
+
 
 All targets expressed per 1000 kcal ME (nutrient density).
 Multiply by (MER / 1000) to get absolute daily amounts.
 
 Function: getMacroTargets(life_stage, bcs, age_months) → MacroTargets
 
-  ─────────────────────────────────────────────────────────────────────
   Nutrient        puppy_early  puppy_late  adult_maint  senior
-  ─────────────────────────────────────────────────────────────────────
   Protein (g)     62.5 min     50.0 min    45.0 min     62.5 min*
   Fat (g)         21.3 min     21.3 min    13.8 min     13.8 min
   Fiber (g)       —            —           ~10–20       ~10–20
   Carbs (g)       not required not req     not req      not req
-  ─────────────────────────────────────────────────────────────────────
 
   * Senior protein is HIGHER than adult, not lower.
     Senior dogs need ≥ 50% more protein to maintain lean body mass.
     Source: Purina Institute (Wannemacher & McCoy 1966; Kealy et al. 2002).
     DO NOT restrict protein in healthy seniors.
-    ONLY restrict if user selects health_condition = "kidney_disease" → 
+    ONLY restrict if user selects health_condition = "kidney_disease" →
       drop to 40.0 g/1000 kcal and flag vet referral.
 
 
-================================================================================
-STAGE 6: MICRONUTRIENT TARGETS
-================================================================================
+
+## STAGE 6: MICRONUTRIENT TARGETS
+
 
 Expressed per 1000 kcal ME. Source: NRC 2006 Recommended Allowance (RA).
 
-  ─────────────────────────────────────────────────────────────────────
   Nutrient          Adult RA    Puppy RA    Max (safe upper)   Unit
-  ─────────────────────────────────────────────────────────────────────
   Calcium            1.00        2.50        4.50               g
   Phosphorus         0.75        2.25        3.50               g
   Ca:P ratio         1:1–2:1     1:1–1.6:1   —                  ratio
@@ -216,7 +199,6 @@ Expressed per 1000 kcal ME. Source: NRC 2006 Recommended Allowance (RA).
   Folic Acid         0.068       0.068       —                  mg
   B12                8.75        8.75        —                  mcg
   Choline            425         425         —                  mg
-  ─────────────────────────────────────────────────────────────────────
 
   Senior adjustments (apply on top of adult RA):
     EPA + DHA (omega-3): add target of 1.0–3.0 g / 1000 kcal
@@ -229,9 +211,9 @@ Expressed per 1000 kcal ME. Source: NRC 2006 Recommended Allowance (RA).
     Source: Factorial Ca/P study (Mack et al. 2019)
 
 
-================================================================================
-STAGE 7: TOXIC / FORBIDDEN INGREDIENT ENFORCEMENT
-================================================================================
+
+## STAGE 7: TOXIC / FORBIDDEN INGREDIENT ENFORCEMENT
+
 
 HARD BLOCK — these never appear in any recipe, any quantity:
   ["onion", "garlic", "chives", "leeks",
@@ -252,9 +234,9 @@ WARNING TIER — flag but allow (with disclaimer):
   Liver: cap at ≤5% of total recipe weight (vitamin A toxicity risk).
 
 
-================================================================================
-STAGE 8: MEAL PLAN GENERATION
-================================================================================
+
+## STAGE 8: MEAL PLAN GENERATION
+
 
 Input to recipe engine:
 {
@@ -285,14 +267,14 @@ Output per recipe:
   - Prep instructions
 
 
-================================================================================
-STAGE 9: DISCLAIMERS & SAFETY RAILS
-================================================================================
+
+## STAGE 9: DISCLAIMERS & SAFETY RAILS
+
 
 ALWAYS display:
-  "This meal plan is generated using NRC 2006 and FEDIAF 2024 guidelines. 
-   It is not a substitute for veterinary nutritional consultation. 
-   Dogs with kidney disease, diabetes, pancreatitis, or other medical 
+  "This meal plan is generated using NRC 2006 and FEDIAF 2024 guidelines.
+   It is not a substitute for veterinary nutritional consultation.
+   Dogs with kidney disease, diabetes, pancreatitis, or other medical
    conditions require veterinary-supervised diets."
 
 AUTO-TRIGGER veterinary referral notice when:
@@ -300,7 +282,7 @@ AUTO-TRIGGER veterinary referral notice when:
   - health_conditions != "none"
   - age_months < 4 (neonatal / early puppy)
   - reproductive_status = "lactating" (complex energy scaling)
-  - User enters breed known for copper storage disease (Bedlington Terrier, 
+  - User enters breed known for copper storage disease (Bedlington Terrier,
     Doberman, West Highland White Terrier) → flag copper levels
 
 DO NOT claim:
@@ -312,9 +294,9 @@ DO claim:
   - "Nutrient targets based on peer-reviewed veterinary nutrition research"
 
 
-================================================================================
-PIPELINE SUMMARY (data flow)
-================================================================================
+
+## PIPELINE SUMMARY (data flow)
+
 
   User Input
       │

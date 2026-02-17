@@ -43,7 +43,7 @@ Key change vs earlier versions: individualized MER and constraints select from a
 
 ### 3.1 MER engine with explicit uncertainty
 
-- Use established canine RER and MER equations (e.g., \(RER = 70 \times BW^{0.75}\)) with factors for life stage, neuter status, and activity. [cambridge](https://www.cambridge.org/core/product/identifier/S0029665124001861/type/journal_article)
+- Use established canine RER and MER equations (e.g., `RER = 70 × BW^0.75`) with factors for life stage, neuter status, and activity. [cambridge](https://www.cambridge.org/core/product/identifier/S0029665124001861/type/journal_article)
 - Present MER as:
   - A central estimate (e.g., 1,000 kcal/day).
   - An uncertainty band (e.g., ±15–20%) acknowledging inter-dog variation.

@@ -1,0 +1,647 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "title": "Dogology DIY Weekly Meal Plan",
+    "description": "A 7-day rotating meal plan for DIY guardians. Each day has two meals with different protein sources for variety. All recipes target AAFCO adult maintenance nutrient profiles per 1000 kcal ME. Quantities are given per-day; split evenly across 2 meals.",
+    "source": "specs/ingredients/ingredients.json",
+    "target_profile": "AAFCO_adult_maintenance",
+    "notes": [
+      "Organ meat (liver) capped at ~5% total recipe weight to avoid vitamin A excess.",
+      "Eggshell powder or bone-in canned fish provides calcium in every recipe.",
+      "Fish oil + vitamin E are paired in every recipe that uses added oil.",
+      "All base quantities are per 1000 kcal. Multiply by the size scaling factor for daily totals.",
+      "This is a reference plan, not veterinary advice. Have a vet review before feeding."
+    ],
+    "size_scaling": {
+      "description": "Multiply all base_g amounts by the factor for your dog's size to get daily totals. Split into 2 meals.",
+      "small": {
+        "label": "Small (10 kg / 22 lb)",
+        "weight_kg": 10,
+        "approx_mer_kcal": 570,
+        "factor": 0.57
+      },
+      "medium": {
+        "label": "Medium (20 kg / 44 lb)",
+        "weight_kg": 20,
+        "approx_mer_kcal": 950,
+        "factor": 0.95
+      },
+      "large": {
+        "label": "Large (35 kg / 77 lb)",
+        "weight_kg": 35,
+        "approx_mer_kcal": 1450,
+        "factor": 1.45
+      }
+    }
+  },
+  "recipes": [
+    {
+      "id": "beef_sweet_potato_spinach",
+      "name": "Beef & Sweet Potato with Spinach",
+      "overview": "A mineral-rich staple built on lean ground beef. Sweet potato delivers vitamin A and potassium, spinach adds vitamin K, iron, and magnesium. Beef liver covers copper, B-vitamins, and choline.",
+      "tags": {
+        "protein_type": "beef",
+        "primary_carb": "sweet_potato",
+        "primary_veggie": "spinach",
+        "cook_method": "stovetop",
+        "prep_time_min": 30,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Zn", "Fe", "B", "Ch", "VA", "VK", "VE", "Ca", "K", "Mg", "Se", "O3", "Fib", "Cu"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_ground_beef_90_lean", "name": "Ground beef, 90% lean", "base_g": 220, "unit": "g", "prep": "raw weight" },
+        { "ingredient_id": "organ_meat_beef_liver", "name": "Beef liver", "base_g": 25, "unit": "g", "prep": "raw, diced small" },
+        { "ingredient_id": "starchy_carbohydrates_sweet_potato", "name": "Sweet potato", "base_g": 180, "unit": "g", "prep": "peeled, cubed, cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_spinach", "name": "Spinach", "base_g": 80, "unit": "g", "prep": "cooked weight (steamed or wilted)" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp, add after cooking" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight, add after cooking" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp, stir into finished food" }
+      ],
+      "instructions": [
+        "Peel and cube the sweet potato. Boil or steam until fork-tender, about 12 minutes. Drain.",
+        "Brown the ground beef in a skillet over medium heat, breaking into small pieces. Drain excess fat.",
+        "Dice the beef liver small and add to the skillet for the last 3–4 minutes until cooked through.",
+        "Steam or wilt the spinach in a separate pot (1–2 minutes). Drain and chop roughly.",
+        "Combine meat, sweet potato, and spinach in a bowl. Let cool to room temperature.",
+        "Stir in fish oil, eggshell powder, and vitamin E. Mix well.",
+        "Divide into 2 equal portions for AM and PM meals. Refrigerate the PM portion."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 52,
+        "fat_g": 20,
+        "fiber_g": 6,
+        "calcium_mg": 1100,
+        "phosphorus_mg": 850,
+        "ca_p_ratio": "1.3:1"
+      }
+    },
+    {
+      "id": "chicken_brown_rice_broccoli",
+      "name": "Chicken Thigh & Brown Rice with Broccoli",
+      "overview": "Chicken thigh provides moderate fat and good zinc. Brown rice adds manganese and iron. Broccoli is an excellent source of vitamin K, vitamin E, and fiber. Chicken liver rounds out the micronutrient profile.",
+      "tags": {
+        "protein_type": "chicken",
+        "primary_carb": "brown_rice",
+        "primary_veggie": "broccoli",
+        "cook_method": "stovetop",
+        "prep_time_min": 35,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Zn", "B", "Ch", "VA", "VK", "VE", "Ca", "K", "Mn", "Se", "O3", "Fib", "Fe"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_chicken_thigh_boneless", "name": "Chicken thigh, boneless", "base_g": 230, "unit": "g", "prep": "raw weight, skin on" },
+        { "ingredient_id": "organ_meat_chicken_liver", "name": "Chicken liver", "base_g": 25, "unit": "g", "prep": "raw, halved" },
+        { "ingredient_id": "starchy_carbohydrates_brown_rice", "name": "Brown rice", "base_g": 200, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_broccoli", "name": "Broccoli", "base_g": 100, "unit": "g", "prep": "steamed, chopped" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp, add after cooking" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Cook brown rice per package directions. This takes ~25 minutes; start it first.",
+        "Cut chicken thighs into bite-size pieces. Cook in a skillet over medium heat until internal temp reaches 165°F.",
+        "Add halved chicken livers to the skillet for the last 3 minutes. Cook through (no pink).",
+        "Steam broccoli florets for 4–5 minutes until bright green and just tender. Chop into small pieces.",
+        "Combine chicken, liver, rice, and broccoli. Let cool to room temperature.",
+        "Stir in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 equal meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 50,
+        "fat_g": 24,
+        "fiber_g": 7,
+        "calcium_mg": 1100,
+        "phosphorus_mg": 820,
+        "ca_p_ratio": "1.3:1"
+      }
+    },
+    {
+      "id": "turkey_quinoa_green_beans",
+      "name": "Turkey & Quinoa with Green Beans",
+      "overview": "Lean ground turkey paired with quinoa, which is one of the few grains delivering meaningful manganese, magnesium, and phosphorus. Green beans add fiber and vitamin K. Beef liver fills the copper and vitamin A gaps turkey lacks.",
+      "tags": {
+        "protein_type": "turkey",
+        "primary_carb": "quinoa",
+        "primary_veggie": "green_beans",
+        "cook_method": "stovetop",
+        "prep_time_min": 25,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Zn", "B", "VA", "VK", "Ca", "K", "Mn", "Mg", "Se", "O3", "Fib", "Fe", "Cu", "Ch"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_ground_turkey_93_lean", "name": "Ground turkey, 93% lean", "base_g": 240, "unit": "g", "prep": "raw weight" },
+        { "ingredient_id": "organ_meat_beef_liver", "name": "Beef liver", "base_g": 25, "unit": "g", "prep": "raw, diced small" },
+        { "ingredient_id": "starchy_carbohydrates_quinoa", "name": "Quinoa", "base_g": 180, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_green_beans", "name": "Green beans", "base_g": 120, "unit": "g", "prep": "steamed, cut into 1cm pieces" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Rinse quinoa well and cook per package directions (usually 15 minutes in 2:1 water ratio). Fluff with a fork.",
+        "Brown the ground turkey in a skillet, breaking into small crumbles.",
+        "Dice liver and add for the final 3 minutes until cooked through.",
+        "Steam green beans for 5 minutes until tender but still slightly firm. Cut into small pieces.",
+        "Combine turkey, liver, quinoa, and green beans. Cool to room temperature.",
+        "Mix in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 54,
+        "fat_g": 18,
+        "fiber_g": 8,
+        "calcium_mg": 1100,
+        "phosphorus_mg": 880,
+        "ca_p_ratio": "1.25:1"
+      }
+    },
+    {
+      "id": "pork_oatmeal_carrots",
+      "name": "Pork Loin & Oatmeal with Carrots",
+      "overview": "Lean pork loin is an underused protein with excellent B-vitamin content. Oatmeal provides soluble fiber and manganese. Carrots deliver a big dose of vitamin A and gentle fiber. Light and easy on sensitive stomachs.",
+      "tags": {
+        "protein_type": "pork",
+        "primary_carb": "oatmeal",
+        "primary_veggie": "carrots",
+        "cook_method": "stovetop",
+        "prep_time_min": 25,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Zn", "B", "VA", "VK", "Ca", "K", "Mn", "Mg", "O3", "Fib", "Fe", "Ch"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_pork_loin", "name": "Pork loin", "base_g": 230, "unit": "g", "prep": "raw weight, trimmed, cubed" },
+        { "ingredient_id": "organ_meat_chicken_liver", "name": "Chicken liver", "base_g": 25, "unit": "g", "prep": "raw, diced" },
+        { "ingredient_id": "starchy_carbohydrates_oatmeal", "name": "Oatmeal (rolled oats)", "base_g": 200, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_carrots", "name": "Carrots", "base_g": 120, "unit": "g", "prep": "peeled, diced, cooked" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Cook oatmeal with water per package directions. Set aside.",
+        "Peel and dice carrots. Boil or steam until soft, about 10 minutes.",
+        "Cut pork loin into small cubes. Sear in a skillet over medium-high heat until cooked through (internal 145°F), about 6–8 minutes.",
+        "Add diced chicken liver to the skillet for the last 3 minutes.",
+        "Combine pork, liver, oatmeal, and carrots. Cool to room temperature.",
+        "Stir in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 51,
+        "fat_g": 17,
+        "fiber_g": 7,
+        "calcium_mg": 1100,
+        "phosphorus_mg": 800,
+        "ca_p_ratio": "1.4:1"
+      }
+    },
+    {
+      "id": "salmon_white_rice_peas",
+      "name": "Canned Salmon & White Rice with Peas",
+      "overview": "Canned salmon with bones is a powerhouse: calcium, omega-3 EPA+DHA, vitamin D, and selenium in one ingredient. Paired with easily digestible white rice and peas for fiber and manganese. No added calcium supplement needed.",
+      "tags": {
+        "protein_type": "fish",
+        "primary_carb": "white_rice",
+        "primary_veggie": "peas",
+        "cook_method": "stovetop",
+        "prep_time_min": 20,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Ca", "Ph", "O3", "VD", "Se", "B", "VK", "K", "Mn", "Fib", "Fe", "Ch"]
+      },
+      "ingredients": [
+        { "ingredient_id": "fish_seafood_salmon_canned", "name": "Canned salmon (pink, with bones)", "base_g": 250, "unit": "g", "prep": "drained, bones mashed with a fork" },
+        { "ingredient_id": "organ_meat_chicken_liver", "name": "Chicken liver", "base_g": 20, "unit": "g", "prep": "raw, diced, pan-seared" },
+        { "ingredient_id": "starchy_carbohydrates_white_rice", "name": "White rice", "base_g": 220, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_peas", "name": "Peas", "base_g": 100, "unit": "g", "prep": "cooked (frozen peas work great)" },
+        { "ingredient_id": "fats_oils_olive_oil", "name": "Olive oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp, for cooking liver" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "whole_egg", "name": "Whole egg", "base_g": 50, "unit": "g", "prep": "hard-boiled, chopped" }
+      ],
+      "instructions": [
+        "Cook white rice per package directions.",
+        "Cook peas (boil frozen peas for 3 minutes, or steam fresh for 5 minutes).",
+        "Hard-boil an egg (10 minutes in boiling water). Peel and chop.",
+        "Sear diced chicken liver in olive oil for 3 minutes until cooked through.",
+        "Open canned salmon, drain liquid, and mash bones thoroughly with a fork.",
+        "Combine salmon, liver, egg, rice, and peas. Cool to room temperature.",
+        "Stir in vitamin E.",
+        "Divide into 2 meals. Note: no eggshell powder needed — salmon bones provide calcium."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 50,
+        "fat_g": 16,
+        "fiber_g": 5,
+        "calcium_mg": 1050,
+        "phosphorus_mg": 780,
+        "ca_p_ratio": "1.3:1"
+      }
+    },
+    {
+      "id": "beef_white_potato_kale",
+      "name": "Beef & White Potato with Kale",
+      "overview": "Ground beef with white potato is a classic combination that most dogs love. Kale is a nutrient-dense green delivering exceptional vitamin K, vitamin E, calcium, and manganese. Beef liver provides the copper and choline boost.",
+      "tags": {
+        "protein_type": "beef",
+        "primary_carb": "white_potato",
+        "primary_veggie": "kale",
+        "cook_method": "stovetop",
+        "prep_time_min": 30,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Zn", "Fe", "B", "Ch", "VA", "VK", "VE", "Ca", "K", "Mn", "Se", "O3", "Fib", "Cu", "Mg"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_ground_beef_85_lean", "name": "Ground beef, 85% lean", "base_g": 200, "unit": "g", "prep": "raw weight" },
+        { "ingredient_id": "organ_meat_beef_liver", "name": "Beef liver", "base_g": 25, "unit": "g", "prep": "raw, diced small" },
+        { "ingredient_id": "starchy_carbohydrates_white_potato", "name": "White potato", "base_g": 200, "unit": "g", "prep": "peeled, cubed, boiled" },
+        { "ingredient_id": "non_starchy_vegetables_kale", "name": "Kale", "base_g": 80, "unit": "g", "prep": "stems removed, steamed, chopped" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Peel and cube potatoes. Boil until fork-tender, about 12 minutes. Drain and mash lightly.",
+        "Brown the ground beef in a skillet over medium heat. Drain excess fat.",
+        "Add diced beef liver for the last 3 minutes.",
+        "Remove kale stems and steam leaves for 3–4 minutes. Chop finely.",
+        "Combine beef, liver, potato, and kale. Cool to room temperature.",
+        "Stir in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 48,
+        "fat_g": 26,
+        "fiber_g": 5,
+        "calcium_mg": 1150,
+        "phosphorus_mg": 840,
+        "ca_p_ratio": "1.4:1"
+      }
+    },
+    {
+      "id": "chicken_sweet_potato_zucchini",
+      "name": "Chicken Breast & Sweet Potato with Zucchini",
+      "overview": "A lean, low-fat meal ideal for weight management days or sensitive dogs. Chicken breast is the leanest common protein. Zucchini is gentle on digestion and adds potassium. Sweet potato provides vitamin A and slow carbs.",
+      "tags": {
+        "protein_type": "chicken",
+        "primary_carb": "sweet_potato",
+        "primary_veggie": "zucchini",
+        "cook_method": "stovetop",
+        "prep_time_min": 25,
+        "tier": "T1",
+        "dimensions_covered": ["P", "B", "VA", "Ch", "Ca", "K", "Fib", "Se", "O3", "Fe"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_chicken_breast_boneless", "name": "Chicken breast, boneless", "base_g": 240, "unit": "g", "prep": "raw weight" },
+        { "ingredient_id": "organ_meat_chicken_liver", "name": "Chicken liver", "base_g": 25, "unit": "g", "prep": "raw, diced" },
+        { "ingredient_id": "starchy_carbohydrates_sweet_potato", "name": "Sweet potato", "base_g": 200, "unit": "g", "prep": "peeled, cubed, cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_zucchini", "name": "Zucchini", "base_g": 120, "unit": "g", "prep": "sliced, steamed" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "fats_oils_olive_oil", "name": "Olive oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp, for cooking" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Peel and cube sweet potato. Boil or steam until tender, about 12 minutes.",
+        "Poach or pan-cook chicken breast in olive oil until internal temp reaches 165°F. Let rest, then dice or shred.",
+        "Sear diced chicken liver in the same pan for 3 minutes.",
+        "Slice zucchini and steam for 3–4 minutes.",
+        "Combine chicken, liver, sweet potato, and zucchini. Cool to room temperature.",
+        "Stir in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 56,
+        "fat_g": 14,
+        "fiber_g": 7,
+        "calcium_mg": 1100,
+        "phosphorus_mg": 780,
+        "ca_p_ratio": "1.4:1"
+      }
+    },
+    {
+      "id": "lamb_brown_rice_brussels",
+      "name": "Lamb & Brown Rice with Brussels Sprouts",
+      "overview": "Ground lamb has a richer fat profile and strong zinc content. Brussels sprouts provide among the highest vitamin K levels of any vegetable plus excellent fiber. A more robust meal for active dogs or cold weather.",
+      "tags": {
+        "protein_type": "lamb",
+        "primary_carb": "brown_rice",
+        "primary_veggie": "brussels_sprouts",
+        "cook_method": "stovetop",
+        "prep_time_min": 35,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Zn", "Fe", "B", "VA", "VK", "Ca", "K", "Mn", "Se", "O3", "Fib", "Cu", "Ch"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_lamb_ground", "name": "Ground lamb", "base_g": 200, "unit": "g", "prep": "raw weight" },
+        { "ingredient_id": "organ_meat_beef_liver", "name": "Beef liver", "base_g": 25, "unit": "g", "prep": "raw, diced small" },
+        { "ingredient_id": "starchy_carbohydrates_brown_rice", "name": "Brown rice", "base_g": 190, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_brussels_sprouts", "name": "Brussels sprouts", "base_g": 100, "unit": "g", "prep": "halved, steamed" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Start brown rice first (takes ~25 minutes). Cook per package.",
+        "Brown ground lamb in a skillet, breaking into crumbles. Drain excess fat — lamb renders more than most meats.",
+        "Add diced beef liver for the last 3 minutes.",
+        "Halve Brussels sprouts and steam for 6–8 minutes until tender. Chop into small pieces.",
+        "Combine lamb, liver, rice, and Brussels sprouts. Cool to room temperature.",
+        "Mix in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 47,
+        "fat_g": 28,
+        "fiber_g": 7,
+        "calcium_mg": 1100,
+        "phosphorus_mg": 810,
+        "ca_p_ratio": "1.35:1"
+      }
+    },
+    {
+      "id": "turkey_barley_carrots_peas",
+      "name": "Turkey & Barley with Carrots & Peas",
+      "overview": "A hearty stew-like recipe. Barley provides the highest fiber of any common grain. Carrots and peas together cover vitamin A, vitamin K, manganese, and potassium. Turkey keeps it lean while chicken liver fills the micronutrient gaps.",
+      "tags": {
+        "protein_type": "turkey",
+        "primary_carb": "barley",
+        "primary_veggie": "carrots_and_peas",
+        "cook_method": "stovetop",
+        "prep_time_min": 40,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Zn", "B", "VA", "VK", "Ca", "K", "Mn", "Se", "O3", "Fib", "Fe", "Ch"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_ground_turkey_93_lean", "name": "Ground turkey, 93% lean", "base_g": 230, "unit": "g", "prep": "raw weight" },
+        { "ingredient_id": "organ_meat_chicken_liver", "name": "Chicken liver", "base_g": 25, "unit": "g", "prep": "raw, diced" },
+        { "ingredient_id": "starchy_carbohydrates_barley", "name": "Barley (pearled)", "base_g": 180, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_carrots", "name": "Carrots", "base_g": 80, "unit": "g", "prep": "peeled, diced, cooked" },
+        { "ingredient_id": "non_starchy_vegetables_peas", "name": "Peas", "base_g": 60, "unit": "g", "prep": "cooked" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Cook pearled barley per package (usually 30–35 minutes in salted water). Start this first.",
+        "Brown ground turkey in a skillet. Add diced chicken liver for the last 3 minutes.",
+        "Boil or steam diced carrots for 8 minutes. Add peas for the final 3 minutes.",
+        "Combine turkey, liver, barley, carrots, and peas. Cool to room temperature.",
+        "Mix in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 53,
+        "fat_g": 17,
+        "fiber_g": 10,
+        "calcium_mg": 1100,
+        "phosphorus_mg": 860,
+        "ca_p_ratio": "1.3:1"
+      }
+    },
+    {
+      "id": "sardine_oatmeal_spinach",
+      "name": "Sardine & Oatmeal with Spinach",
+      "overview": "Sardines with bones are arguably the single most nutrient-dense ingredient: calcium, omega-3, vitamin D, selenium, and protein in one can. Paired with oatmeal for easy digestion and spinach for vitamin K and iron. No separate calcium supplement needed.",
+      "tags": {
+        "protein_type": "fish",
+        "primary_carb": "oatmeal",
+        "primary_veggie": "spinach",
+        "cook_method": "stovetop",
+        "prep_time_min": 15,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Ca", "Ph", "CaPh", "O3", "VD", "Se", "VK", "VE", "Fe", "Mg", "K", "Mn", "Fib", "B", "Ch"]
+      },
+      "ingredients": [
+        { "ingredient_id": "fish_seafood_sardines_canned_in_water", "name": "Sardines, canned in water (with bones)", "base_g": 240, "unit": "g", "prep": "drained, mashed" },
+        { "ingredient_id": "organ_meat_beef_liver", "name": "Beef liver", "base_g": 20, "unit": "g", "prep": "raw, diced, pan-seared" },
+        { "ingredient_id": "starchy_carbohydrates_oatmeal", "name": "Oatmeal", "base_g": 200, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_spinach", "name": "Spinach", "base_g": 100, "unit": "g", "prep": "steamed, chopped" },
+        { "ingredient_id": "fats_oils_olive_oil", "name": "Olive oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" }
+      ],
+      "instructions": [
+        "Cook oatmeal with water per package directions.",
+        "Steam spinach for 1–2 minutes. Drain and chop.",
+        "Sear diced beef liver in olive oil for 3 minutes.",
+        "Open sardines, drain, and mash with a fork (bones and all — they're soft and edible).",
+        "Combine sardines, liver, oatmeal, and spinach. Cool to room temperature.",
+        "Stir in vitamin E.",
+        "Divide into 2 meals. Note: sardine bones provide calcium — no eggshell needed."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 55,
+        "fat_g": 22,
+        "fiber_g": 6,
+        "calcium_mg": 1300,
+        "phosphorus_mg": 900,
+        "ca_p_ratio": "1.4:1"
+      }
+    },
+    {
+      "id": "beef_heart_lentils_bok_choy",
+      "name": "Beef Heart & Lentils with Bok Choy",
+      "overview": "Beef heart is a lean, affordable muscle meat rich in iron, copper, CoQ10, and B-vitamins. Lentils are the highest-fiber, highest-iron legume. Bok choy adds calcium and vitamin K. A nutrient-dense powerhouse for minimal cost.",
+      "tags": {
+        "protein_type": "beef",
+        "primary_carb": "lentils",
+        "primary_veggie": "bok_choy",
+        "cook_method": "stovetop",
+        "prep_time_min": 35,
+        "tier": "T2",
+        "dimensions_covered": ["P", "F", "Fe", "Cu", "B", "Ch", "VK", "Ca", "K", "Mn", "Fib", "O3", "Se", "Zn", "Mg"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_beef_heart", "name": "Beef heart", "base_g": 230, "unit": "g", "prep": "raw weight, trimmed of hard fat, cubed" },
+        { "ingredient_id": "starchy_carbohydrates_lentils", "name": "Lentils (green or brown)", "base_g": 180, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_bok_choy", "name": "Bok choy", "base_g": 120, "unit": "g", "prep": "chopped, steamed" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Cook lentils in water (usually 20–25 minutes until tender but not mushy). Drain excess water.",
+        "Trim hard fat and valves from beef heart. Cut into 1–2cm cubes.",
+        "Sear heart cubes in a skillet over medium-high heat for 5–6 minutes. Heart is best at medium — slightly pink inside is fine.",
+        "Chop bok choy (stems and leaves) and steam for 3–4 minutes.",
+        "Combine heart, lentils, and bok choy. Cool to room temperature.",
+        "Mix in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 58,
+        "fat_g": 14,
+        "fiber_g": 12,
+        "calcium_mg": 1150,
+        "phosphorus_mg": 870,
+        "ca_p_ratio": "1.3:1"
+      }
+    },
+    {
+      "id": "chicken_pumpkin_green_beans",
+      "name": "Ground Chicken & Pumpkin with Green Beans",
+      "overview": "A gentle, easy-to-digest meal. Pumpkin puree is excellent for digestive regularity and provides massive vitamin A. Ground chicken is moderate in fat with decent zinc. Green beans add fiber and vitamin K. Great for dogs with sensitive stomachs.",
+      "tags": {
+        "protein_type": "chicken",
+        "primary_carb": "pumpkin",
+        "primary_veggie": "green_beans",
+        "cook_method": "stovetop",
+        "prep_time_min": 20,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Zn", "B", "VA", "VK", "Ca", "K", "Fib", "Se", "O3", "Fe", "Ch"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_ground_chicken", "name": "Ground chicken", "base_g": 240, "unit": "g", "prep": "raw weight" },
+        { "ingredient_id": "organ_meat_chicken_liver", "name": "Chicken liver", "base_g": 25, "unit": "g", "prep": "raw, diced" },
+        { "ingredient_id": "starchy_carbohydrates_pumpkin_puree", "name": "Pumpkin puree (canned, plain)", "base_g": 150, "unit": "g", "prep": "from can — NOT pie filling" },
+        { "ingredient_id": "starchy_carbohydrates_white_rice", "name": "White rice", "base_g": 120, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_green_beans", "name": "Green beans", "base_g": 100, "unit": "g", "prep": "steamed, cut small" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Cook white rice per package directions.",
+        "Brown ground chicken in a skillet, breaking into small pieces.",
+        "Add diced chicken liver for the last 3 minutes.",
+        "Steam green beans for 5 minutes. Cut into small pieces.",
+        "Combine chicken, liver, rice, pumpkin puree, and green beans. The pumpkin mixes in easily — no cooking needed.",
+        "Cool to room temperature. Stir in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 49,
+        "fat_g": 21,
+        "fiber_g": 8,
+        "calcium_mg": 1100,
+        "phosphorus_mg": 800,
+        "ca_p_ratio": "1.4:1"
+      }
+    },
+    {
+      "id": "pork_shoulder_sweet_potato_broccoli",
+      "name": "Pork Shoulder & Sweet Potato with Broccoli",
+      "overview": "Pork shoulder is fattier than loin, making it a good higher-calorie option for active or underweight dogs. Sweet potato and broccoli together cover vitamin A, vitamin K, vitamin E, and fiber. Rich, hearty, and satisfying.",
+      "tags": {
+        "protein_type": "pork",
+        "primary_carb": "sweet_potato",
+        "primary_veggie": "broccoli",
+        "cook_method": "stovetop",
+        "prep_time_min": 35,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "Zn", "Fe", "B", "VA", "VK", "VE", "Ca", "K", "Mn", "Se", "O3", "Fib", "Ch", "Cu"]
+      },
+      "ingredients": [
+        { "ingredient_id": "muscle_meat_pork_shoulder_butt", "name": "Pork shoulder/butt", "base_g": 200, "unit": "g", "prep": "raw weight, cubed" },
+        { "ingredient_id": "organ_meat_beef_liver", "name": "Beef liver", "base_g": 25, "unit": "g", "prep": "raw, diced" },
+        { "ingredient_id": "starchy_carbohydrates_sweet_potato", "name": "Sweet potato", "base_g": 180, "unit": "g", "prep": "peeled, cubed, cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_broccoli", "name": "Broccoli", "base_g": 100, "unit": "g", "prep": "steamed, chopped" },
+        { "ingredient_id": "fats_oils_fish_oil", "name": "Fish oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 3, "unit": "g", "prep": "~½ tsp" }
+      ],
+      "instructions": [
+        "Peel and cube sweet potato. Boil or steam until tender, about 12 minutes.",
+        "Cut pork shoulder into small cubes. Cook in a skillet over medium heat until well done (internal 145°F+), about 8–10 minutes.",
+        "Add diced beef liver for the last 3 minutes.",
+        "Steam broccoli for 4–5 minutes. Chop small.",
+        "Combine pork, liver, sweet potato, and broccoli. Cool to room temperature.",
+        "Mix in fish oil, eggshell powder, and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 46,
+        "fat_g": 28,
+        "fiber_g": 7,
+        "calcium_mg": 1100,
+        "phosphorus_mg": 830,
+        "ca_p_ratio": "1.3:1"
+      }
+    },
+    {
+      "id": "mackerel_quinoa_kale",
+      "name": "Mackerel & Quinoa with Kale",
+      "overview": "Canned mackerel delivers the highest omega-3 and vitamin D content of any common canned fish. Quinoa provides complete plant protein plus manganese and magnesium. Kale adds exceptional vitamin K and calcium. A nutrient-dense fish day.",
+      "tags": {
+        "protein_type": "fish",
+        "primary_carb": "quinoa",
+        "primary_veggie": "kale",
+        "cook_method": "stovetop",
+        "prep_time_min": 20,
+        "tier": "T1",
+        "dimensions_covered": ["P", "F", "O3", "VD", "Se", "VK", "VE", "Ca", "Mn", "Mg", "K", "Fib", "B", "Fe", "Ch"]
+      },
+      "ingredients": [
+        { "ingredient_id": "fish_seafood_mackerel_canned", "name": "Mackerel, canned (jack)", "base_g": 220, "unit": "g", "prep": "drained" },
+        { "ingredient_id": "organ_meat_chicken_liver", "name": "Chicken liver", "base_g": 20, "unit": "g", "prep": "raw, diced, pan-seared" },
+        { "ingredient_id": "starchy_carbohydrates_quinoa", "name": "Quinoa", "base_g": 200, "unit": "g", "prep": "cooked weight" },
+        { "ingredient_id": "non_starchy_vegetables_kale", "name": "Kale", "base_g": 80, "unit": "g", "prep": "stems removed, steamed, chopped" },
+        { "ingredient_id": "fats_oils_olive_oil", "name": "Olive oil", "base_g": 5, "unit": "ml", "prep": "~1 tsp, for cooking liver" },
+        { "ingredient_id": "supplements_vitamin_e", "name": "Vitamin E", "base_g": null, "unit": "IU", "prep": "1 IU per lb body weight" },
+        { "ingredient_id": "calcium_sources_eggshell_powder", "name": "Eggshell powder", "base_g": 2, "unit": "g", "prep": "~⅓ tsp (mackerel provides some calcium)" }
+      ],
+      "instructions": [
+        "Rinse and cook quinoa per package directions (about 15 minutes).",
+        "Sear diced chicken liver in olive oil for 3 minutes.",
+        "Steam kale leaves for 3–4 minutes. Chop finely.",
+        "Drain canned mackerel and flake with a fork.",
+        "Combine mackerel, liver, quinoa, and kale. Cool to room temperature.",
+        "Stir in eggshell powder and vitamin E.",
+        "Divide into 2 meals."
+      ],
+      "per_1000kcal_estimate": {
+        "protein_g": 52,
+        "fat_g": 20,
+        "fiber_g": 6,
+        "calcium_mg": 1050,
+        "phosphorus_mg": 850,
+        "ca_p_ratio": "1.2:1"
+      }
+    }
+  ],
+  "weekly_plan": {
+    "description": "A 7-day rotation providing protein variety (beef, chicken, turkey, pork, fish, lamb) across 14 meals. Each day pairs different protein sources at AM and PM for maximum nutrient diversity. Fish appears 3 times per week for consistent omega-3 intake.",
+    "days": [
+      {
+        "day": 1,
+        "label": "Monday",
+        "am": { "recipe_id": "beef_sweet_potato_spinach" },
+        "pm": { "recipe_id": "chicken_brown_rice_broccoli" }
+      },
+      {
+        "day": 2,
+        "label": "Tuesday",
+        "am": { "recipe_id": "turkey_quinoa_green_beans" },
+        "pm": { "recipe_id": "sardine_oatmeal_spinach" }
+      },
+      {
+        "day": 3,
+        "label": "Wednesday",
+        "am": { "recipe_id": "pork_oatmeal_carrots" },
+        "pm": { "recipe_id": "beef_white_potato_kale" }
+      },
+      {
+        "day": 4,
+        "label": "Thursday",
+        "am": { "recipe_id": "salmon_white_rice_peas" },
+        "pm": { "recipe_id": "chicken_sweet_potato_zucchini" }
+      },
+      {
+        "day": 5,
+        "label": "Friday",
+        "am": { "recipe_id": "lamb_brown_rice_brussels" },
+        "pm": { "recipe_id": "turkey_barley_carrots_peas" }
+      },
+      {
+        "day": 6,
+        "label": "Saturday",
+        "am": { "recipe_id": "beef_heart_lentils_bok_choy" },
+        "pm": { "recipe_id": "mackerel_quinoa_kale" }
+      },
+      {
+        "day": 7,
+        "label": "Sunday",
+        "am": { "recipe_id": "chicken_pumpkin_green_beans" },
+        "pm": { "recipe_id": "pork_shoulder_sweet_potato_broccoli" }
+      }
+    ]
+  }
+}

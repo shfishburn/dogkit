@@ -4,9 +4,18 @@ import { getCollection } from "astro:content";
 
 type Props = {
   title?: string;
+  description?: string;
+  ogImage?: string;
+  fullBleed?: boolean;
 };
 
-const { title } = Astro.props;
+const { title, description, ogImage, fullBleed } = Astro.props;
+
+const defaultDescription = "Science-built cook-at-home dog food kits with AAFCO-aligned nutrition, transparent MER modeling, and weekly ingredient delivery.";
+const pageTitle = title ? `${title} | Dogology` : "Dogology — Science-Built Food for More Good Years";
+const pageDescription = description || defaultDescription;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+const ogImageUrl = new URL(ogImage || "/hero.jpg", Astro.site);
 
 function slugifySegment(segment: string): string {
   return segment
@@ -38,7 +47,23 @@ const docLinks = entries
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title ? `${title} | Dogology` : "Dogology"}</title>
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonicalUrl.href} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Dogology" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonicalUrl.href} />
+    <meta property="og:image" content={ogImageUrl.href} />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImageUrl.href} />
   </head>
   <body>
     <header class="site-header">
@@ -62,8 +87,8 @@ const docLinks = entries
       </div>
     </header>
 
-    <main>
-      <div class="container">
+    <main class:list={["", { "full-bleed": fullBleed }]}>
+      <div class={fullBleed ? undefined : "container"}>
         <slot />
       </div>
     </main>
@@ -71,5 +96,28 @@ const docLinks = entries
     <footer class="site-footer">
       <div class="container">Dogology</div>
     </footer>
+
+    <script type="module">
+      // Render mermaid diagrams in markdown pages
+      const codeBlocks = document.querySelectorAll("pre code.language-mermaid");
+      if (codeBlocks.length > 0) {
+        const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");
+        mermaid.initialize({ startOnLoad: false, theme: "neutral" });
+        for (const code of codeBlocks) {
+          const pre = code.parentElement;
+          const definition = code.textContent ?? "";
+          const div = document.createElement("div");
+          div.className = "mermaid-diagram";
+          div.style.overflowX = "auto";
+          div.style.margin = "1.5rem 0";
+          const { svg } = await mermaid.render(
+            "mermaid-" + Math.random().toString(36).slice(2),
+            definition
+          );
+          div.innerHTML = svg;
+          pre.replaceWith(div);
+        }
+      }
+    </script>
   </body>
 </html>
