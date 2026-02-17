@@ -71,7 +71,8 @@ async function generateImage(systemPrompt, userPrompt) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("OPENROUTER_API_KEY not set");
 
-  const res = await fetch("https://openrouter.ai/api/v1/images/generations", {
+  // OpenRouter serves image generation through chat/completions, not /images/generations
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -81,10 +82,10 @@ async function generateImage(systemPrompt, userPrompt) {
     },
     body: JSON.stringify({
       model: "openai/gpt-5-image",
-      prompt: `${systemPrompt}\n\n${userPrompt}`,
-      n: 1,
-      size: "1024x1024",
-      quality: "high",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
     }),
   });
 
@@ -94,19 +95,47 @@ async function generateImage(systemPrompt, userPrompt) {
   }
 
   const json = await res.json();
-  const imageData = json.data?.[0];
+  const choice = json.choices?.[0];
+  const content = choice?.message?.content;
 
-  if (imageData?.url) {
-    // URL-based response — download the image
-    const imgRes = await fetch(imageData.url);
-    if (!imgRes.ok) throw new Error(`Failed to download image: ${imgRes.status}`);
-    return Buffer.from(await imgRes.arrayBuffer());
-  } else if (imageData?.b64_json) {
-    // Base64 response
-    return Buffer.from(imageData.b64_json, "base64");
-  } else {
-    throw new Error("No image data in response: " + JSON.stringify(json));
+  if (!content) {
+    throw new Error("No content in response: " + JSON.stringify(json).slice(0, 500));
   }
+
+  // Response may contain a mix of text and image parts, or inline base64 data URI
+  // Case 1: content is an array of parts (OpenAI multimodal style)
+  if (Array.isArray(content)) {
+    const imagePart = content.find((p) => p.type === "image_url" || p.type === "image");
+    if (imagePart) {
+      const url = imagePart.image_url?.url ?? imagePart.url ?? imagePart.b64;
+      if (url?.startsWith("data:")) {
+        const b64 = url.split(",")[1];
+        return Buffer.from(b64, "base64");
+      }
+      if (url) {
+        const imgRes = await fetch(url);
+        if (!imgRes.ok) throw new Error(`Failed to download image: ${imgRes.status}`);
+        return Buffer.from(await imgRes.arrayBuffer());
+      }
+    }
+  }
+
+  // Case 2: content is a string containing a data URI
+  if (typeof content === "string") {
+    const dataUriMatch = content.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
+    if (dataUriMatch) {
+      return Buffer.from(dataUriMatch[1], "base64");
+    }
+    // Case 3: content is a string URL to an image
+    const urlMatch = content.match(/https?:\/\/\S+\.(?:png|jpg|jpeg|webp)\S*/i);
+    if (urlMatch) {
+      const imgRes = await fetch(urlMatch[0]);
+      if (!imgRes.ok) throw new Error(`Failed to download image: ${imgRes.status}`);
+      return Buffer.from(await imgRes.arrayBuffer());
+    }
+  }
+
+  throw new Error("Could not extract image from response: " + JSON.stringify(json).slice(0, 500));
 }
 
 // ── Supabase upload ──────────────────────────────────────────

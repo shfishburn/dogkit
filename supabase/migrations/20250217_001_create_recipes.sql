@@ -16,7 +16,7 @@ create table if not exists public.recipes (
   primary_carb  text not null default '',
   primary_veggie text not null default '',
   cook_method   text not null default 'stovetop',
-  prep_time_min integer not null default 30,
+  prep_time_min integer not null default 30 check (prep_time_min > 0),
   tier          text not null default 'T1' check (tier in ('T1', 'T2')),
   dimensions_covered text[] not null default '{}',
 
@@ -38,7 +38,7 @@ create table if not exists public.recipes (
 create index if not exists idx_recipes_protein on public.recipes (protein_type);
 create index if not exists idx_recipes_tier on public.recipes (tier);
 
--- Updated_at trigger
+-- Updated_at trigger (reusable across tables)
 create or replace function public.set_updated_at()
 returns trigger as $$
 begin
@@ -53,12 +53,13 @@ create trigger trg_recipes_updated_at
   for each row execute function public.set_updated_at();
 
 -- ============================================================
--- Row Level Security
+-- Row Level Security — recipes
 -- ============================================================
 
 alter table public.recipes enable row level security;
 
--- Public read access (anon + authenticated can SELECT)
+-- Idempotent policy: drop then create
+drop policy if exists "Recipes are publicly readable" on public.recipes;
 create policy "Recipes are publicly readable"
   on public.recipes for select
   using (true);
@@ -74,11 +75,25 @@ create table if not exists public.meal_plan_days (
   day           integer primary key,
   label         text not null,
   am_recipe_id  text not null references public.recipes(id),
-  pm_recipe_id  text not null references public.recipes(id)
+  pm_recipe_id  text not null references public.recipes(id),
+
+  -- Timestamps
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
 );
+
+drop trigger if exists trg_meal_plan_days_updated_at on public.meal_plan_days;
+create trigger trg_meal_plan_days_updated_at
+  before update on public.meal_plan_days
+  for each row execute function public.set_updated_at();
+
+-- ============================================================
+-- Row Level Security — meal plan
+-- ============================================================
 
 alter table public.meal_plan_days enable row level security;
 
+drop policy if exists "Meal plan is publicly readable" on public.meal_plan_days;
 create policy "Meal plan is publicly readable"
   on public.meal_plan_days for select
   using (true);
@@ -91,7 +106,8 @@ insert into storage.buckets (id, name, public)
 values ('recipe-images', 'recipe-images', true)
 on conflict (id) do nothing;
 
--- Allow public reads on recipe images
+-- Idempotent storage policy
+drop policy if exists "Recipe images are publicly accessible" on storage.objects;
 create policy "Recipe images are publicly accessible"
   on storage.objects for select
   using (bucket_id = 'recipe-images');
