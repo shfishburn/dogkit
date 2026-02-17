@@ -1,0 +1,96 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+type ManufacturerCandidate = {
+  rank: number;
+  name: string;
+  website?: string;
+  location?: string;
+  type?: string;
+  ideal_stage?: string;
+  description?: string;
+  fit_notes?: string[];
+  risks?: string[];
+};
+
+type ManufacturerDb = {
+  candidates: ManufacturerCandidate[];
+};
+
+const jsonPath = path.resolve(process.cwd(), "..", "specs", "app", "manufacturer", "manufacturer.json");
+const raw = await readFile(jsonPath, "utf-8");
+const db = JSON.parse(raw) as ManufacturerDb;
+
+const candidates = [...(db.candidates ?? [])].sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
+---
+
+<BaseLayout title="Admin — Manufacturer">
+  <div class="prose" style="max-width: 100%;">
+    <h1>Manufacturer candidates</h1>
+    <p class="small">Source: specs/app/manufacturer/manufacturer.json</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Location</th>
+          <th>Type</th>
+          <th>Ideal stage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {candidates.map((c) => (
+          <tr>
+            <td>{c.rank}</td>
+            <td>
+              <div>
+                <strong>{c.name}</strong>
+                {c.website ? (
+                  <div class="small"><a href={c.website} target="_blank" rel="noreferrer">{c.website}</a></div>
+                ) : null}
+              </div>
+            </td>
+            <td>{c.location ?? ""}</td>
+            <td>{c.type ?? ""}</td>
+            <td>{c.ideal_stage ?? ""}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    {candidates.map((c) => (
+      <section id={String(c.rank)}>
+        <h2>#{c.rank} — {c.name}</h2>
+        {c.description ? <p>{c.description}</p> : null}
+
+        {c.fit_notes?.length ? (
+          <>
+            <h3>Fit notes</h3>
+            <ul>
+              {c.fit_notes.map((n) => (
+                <li>{n}</li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+
+        {c.risks?.length ? (
+          <>
+            <h3>Risks</h3>
+            <ul>
+              {c.risks.map((r) => (
+                <li>{r}</li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+      </section>
+    ))}
+
+    <h2>Raw JSON</h2>
+    <pre><code>{raw}</code></pre>
+  </div>
+</BaseLayout>

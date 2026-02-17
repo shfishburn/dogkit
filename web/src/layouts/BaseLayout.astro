@@ -1,11 +1,35 @@
 ---
 import "../styles/global.css";
+import { getCollection } from "astro:content";
 
 type Props = {
   title?: string;
 };
 
 const { title } = Astro.props;
+
+function slugifySegment(segment: string): string {
+  return segment
+    .trim()
+    .replace(/\.md$/i, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function entryToPath(entryId: string): string {
+  const parts = entryId.split("/").map(slugifySegment).filter(Boolean);
+  return parts.join("/");
+}
+
+const entries = await getCollection("specs");
+const docLinks = entries
+  .map((entry) => {
+    const slugPath = entryToPath(entry.id);
+    const name = entry.data.title ?? entry.id.replace(/\.md$/i, "");
+    return { href: `/specs/${slugPath}`, name, slugPath };
+  })
+  .sort((a, b) => a.slugPath.localeCompare(b.slugPath));
 ---
 
 <!doctype html>
@@ -21,8 +45,19 @@ const { title } = Astro.props;
       <div class="container site-header__inner">
         <p class="site-title"><a href="/" style="text-decoration:none;color:inherit;">Dogology</a></p>
         <nav class="site-nav" aria-label="Primary">
-          <a href="/specs">Specs</a>
-          <a href="/ingredients">Ingredients</a>
+          <details class="nav-dropdown">
+            <summary>Library</summary>
+            <div class="nav-dropdown__panel" role="menu">
+              <a role="menuitem" href="/ingredients">Ingredients</a>
+              <a role="menuitem" href="/recipe">Recipe builder</a>
+              <a role="menuitem" href="/specs">All specs</a>
+              <a role="menuitem" href="/admin">Admin</a>
+              <div class="nav-dropdown__divider" aria-hidden="true"></div>
+              {docLinks.map((d) => (
+                <a role="menuitem" href={d.href}>{d.name}</a>
+              ))}
+            </div>
+          </details>
         </nav>
       </div>
     </header>

@@ -1,39 +1,59 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getCollection } from "astro:content";
-
-function slugifySegment(segment: string): string {
-	return segment
-		.trim()
-		.replace(/\.md$/i, "")
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/(^-|-$)/g, "");
-}
-
-function entryToPath(entryId: string): string {
-	const parts = entryId.split("/").map(slugifySegment).filter(Boolean);
-	return parts.join("/");
-}
-
-const entries = await getCollection("specs");
-const items = entries
-	.map((entry) => {
-		const slugPath = entryToPath(entry.id);
-		const name = entry.data.title ?? entry.id.replace(/\.md$/i, "");
-		return { href: `/specs/${slugPath}`, name, slugPath };
-	})
-	.sort((a, b) => a.slugPath.localeCompare(b.slugPath));
 ---
 
-<BaseLayout title="Hello Dogology">
+<BaseLayout title="Dogology HealthSpan Kits">
 	<div class="prose">
-		<h1>Hello Dogology</h1>
-		<p><a href="/ingredients">Browse ingredients by category</a></p>
+		<h1>Dogology HealthSpan Kits</h1>
+		<p class="small"><em>Science‑Built Food for More Good Years</em></p>
+		<p>
+			Dogology HealthSpan Kits is a subscription meal‑kit service for dogs that combines canine metabolic
+			modeling, USDA‑grade nutrient data, and fully transparent sourcing. Instead of shipping finished dog
+			food, it delivers weekly cook‑at‑home kits: precisely portioned human‑grade ingredients plus a custom
+			micronutrient premix, generated from each dog’s individual energy and nutrition profile.
+		</p>
+
+		<div class="cta-row">
+			<a class="button" href="/plan">Build my dog’s plan</a>
+			<a class="button" href="/specs/overview">Read the overview</a>
+			<a class="button" href="/ingredients">Browse ingredients</a>
+			<a class="button" href="/specs">View all specs</a>
+		</div>
+
+		<h2>How it works</h2>
 		<ul>
-			{items.map((i) => (
-				<li><a href={i.href}>{i.name}</a></li>
-			))}
+			<li>Guardians create a profile (age, weight, body condition, activity, goals, medical flags).</li>
+			<li>We calculate MER (maintenance or weight‑change energy requirement) using published canine equations.</li>
+			<li>
+				A constraint solver formulates recipes that hit kcal/day and protein/fat ranges, satisfy NRC/AAFCO
+				micronutrient requirements, and respect constraints like allergens and budget.
+			</li>
+			<li>
+				Each week you receive pre‑measured ingredients + a matched premix + a personalized recipe card with
+				gram weights and simple cooking instructions.
+			</li>
+		</ul>
+
+		<h2>Radical transparency</h2>
+		<ul>
+			<li>Every ingredient links to a FoodData Central nutrient profile (surfaced as a “data sheet”).</li>
+			<li>Recipe views show per‑ingredient contributions and a full nutrient table vs targets.</li>
+			<li>Guardians can inspect the exact MER math and see how changes update the plan over time.</li>
+		</ul>
+
+		<h2>Key differentiators</h2>
+		<ul>
+			<li><strong>Model‑driven</strong>: formulas and constraint logic are visible and explainable.</li>
+			<li><strong>Meal kits</strong>: you cook fresh food at home, with micro + macro targets already solved.</li>
+			<li><strong>Food‑ and data‑grade</strong>: sourcing + machine‑readable nutrient data for vets and power users.</li>
+			<li><strong>Adjusts over time</strong>: updates as weight, body condition, and goals change.</li>
+		</ul>
+
+		<h2>Revenue model</h2>
+		<ul>
+			<li>Subscription plans (weekly or bi‑weekly) with tiers by dog size, dogs per household, and customization.</li>
+			<li>Add‑ons: extra premix for fully DIY cooking; specialized protocols (weight‑loss, senior, sport/working).</li>
+			<li>Professional tier: co‑branded portal for veterinarians and nutritionists.</li>
 		</ul>
 	</div>
 </BaseLayout>

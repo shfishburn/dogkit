@@ -1,0 +1,189 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Build a plan">
+  <div class="prose">
+    <h1>Build my dog’s plan</h1>
+    <p class="small">Quick estimate. Not veterinary advice.</p>
+
+    <form id="plan-form" class="card" style="max-width: 42rem;">
+      <div class="form-grid">
+        <label>
+          <span>Weight (kg)</span>
+          <input name="weight_kg" type="number" min="0.5" step="0.1" value="10" required />
+        </label>
+
+        <label>
+          <span>Age (months)</span>
+          <input name="age_months" type="number" min="1" step="1" value="24" required />
+        </label>
+
+        <label>
+          <span>Body condition score (1–9)</span>
+          <input name="bcs" type="number" min="1" max="9" step="1" value="5" required />
+        </label>
+
+        <label>
+          <span>Neuter status</span>
+          <select name="neuter_status">
+            <option value="neutered" selected>Neutered</option>
+            <option value="intact">Intact</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Activity</span>
+          <select name="activity_level">
+            <option value="sedentary">Sedentary</option>
+            <option value="moderate" selected>Moderate</option>
+            <option value="active">Active</option>
+            <option value="working">Working</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Goal</span>
+          <select name="weight_goal">
+            <option value="maintain" selected>Maintain</option>
+            <option value="lose">Lose</option>
+            <option value="gain">Gain</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="cta-row">
+        <button class="button" type="submit">Calculate</button>
+        <button class="button" type="button" id="copy-json">Copy JSON</button>
+      </div>
+    </form>
+
+    <div id="results" class="card" style="max-width: 42rem; margin-top: var(--space-6);">
+      <h2 style="margin-top:0;">Result</h2>
+      <div class="small" id="explain"></div>
+      <pre><code id="json-out">(submit the form)</code></pre>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('plan-form');
+    const jsonOut = document.getElementById('json-out');
+    const explain = document.getElementById('explain');
+    const copyBtn = document.getElementById('copy-json');
+
+    function round(n) {
+      return Math.round(n);
+    }
+
+    function computeRER(weightKg) {
+      return 70 * Math.pow(weightKg, 0.75);
+    }
+
+    function mealsPerDay(ageMonths) {
+      if (ageMonths < 4) return 4;
+      if (ageMonths < 12) return 3;
+      return 2;
+    }
+
+    function merMultiplier({ ageMonths, neuterStatus, activityLevel, weightGoal, bcs }) {
+      // Simple, explainable defaults (not a clinical calculator)
+      if (ageMonths < 4) return { mult: 3.0, reason: 'Puppy (<4 months)' };
+      if (ageMonths < 12) return { mult: 2.0, reason: 'Puppy (4–12 months)' };
+
+      let base = neuterStatus === 'neutered' ? 1.6 : 1.8;
+      let reason = neuterStatus === 'neutered' ? 'Adult neutered baseline' : 'Adult intact baseline';
+
+      const activity = {
+        sedentary: 1.4,
+        moderate: base,
+        active: 2.0,
+        working: 3.0,
+      };
+
+      const activityMult = activity[activityLevel] ?? base;
+      if (activityLevel !== 'moderate') {
+        base = activityMult;
+        reason = `Adult ${activityLevel}`;
+      }
+
+      // Goal adjustment
+      if (weightGoal === 'lose') {
+        base = Math.min(base, 1.0);
+        reason += ' + weight loss';
+      } else if (weightGoal === 'gain') {
+        base = Math.max(base, 2.0);
+        reason += ' + weight gain';
+      }
+
+      // Light BCS nudge
+      if (bcs >= 7) {
+        base *= 0.9;
+        reason += ' (BCS high)';
+      } else if (bcs <= 3) {
+        base *= 1.1;
+        reason += ' (BCS low)';
+      }
+
+      return { mult: base, reason };
+    }
+
+    function computePlan(values) {
+      const weightKg = Number(values.weight_kg);
+      const ageMonths = Number(values.age_months);
+      const bcs = Number(values.bcs);
+
+      const rer = computeRER(weightKg);
+      const { mult, reason } = merMultiplier({
+        ageMonths,
+        neuterStatus: values.neuter_status,
+        activityLevel: values.activity_level,
+        weightGoal: values.weight_goal,
+        bcs,
+      });
+
+      const dailyKcal = rer * mult;
+      const meals = mealsPerDay(ageMonths);
+
+      return {
+        inputs: {
+          weight_kg: weightKg,
+          age_months: ageMonths,
+          bcs,
+          neuter_status: values.neuter_status,
+          activity_level: values.activity_level,
+          weight_goal: values.weight_goal,
+        },
+        energy: {
+          rer_kcal_per_day: round(rer),
+          mer_multiplier: Number(mult.toFixed(3)),
+          mer_reason: reason,
+          daily_kcal_target: round(dailyKcal),
+          meals_per_day: meals,
+          kcal_per_meal: round(dailyKcal / meals),
+        },
+      };
+    }
+
+    function getValues() {
+      const fd = new FormData(form);
+      return Object.fromEntries(fd.entries());
+    }
+
+    function render() {
+      const values = getValues();
+      const plan = computePlan(values);
+      explain.textContent = `${plan.energy.rer_kcal_per_day} kcal RER × ${plan.energy.mer_multiplier} = ${plan.energy.daily_kcal_target} kcal/day (${plan.energy.mer_reason}).`;
+      jsonOut.textContent = JSON.stringify(plan, null, 2);
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      render();
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      if (!navigator.clipboard) return;
+      await navigator.clipboard.writeText(jsonOut.textContent || '');
+    });
+  </script>
+</BaseLayout>

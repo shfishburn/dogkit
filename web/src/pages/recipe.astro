@@ -1,0 +1,214 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+type Ingredient = {
+  id: string;
+  name: string;
+  category: string;
+  tier: string;
+  notes?: string;
+  dimensions?: Record<string, string>;
+};
+
+type IngredientDb = {
+  metadata?: {
+    dimensions?: Record<string, string>;
+    availability_tiers?: Record<string, string>;
+  };
+  ingredients: Ingredient[];
+};
+
+const jsonPath = path.resolve(process.cwd(), "..", "specs", "ingredients", "ingredients.json");
+const raw = await readFile(jsonPath, "utf-8");
+const db = JSON.parse(raw) as IngredientDb;
+
+const dimensionLabels = db.metadata?.dimensions ?? {};
+const tierLabels = db.metadata?.availability_tiers ?? {};
+
+const byCategory = new Map<string, Ingredient[]>();
+for (const ing of db.ingredients ?? []) {
+  const category = ing.category ?? "uncategorized";
+  const arr = byCategory.get(category) ?? [];
+  arr.push(ing);
+  byCategory.set(category, arr);
+}
+
+const categories = Array.from(byCategory.keys()).sort((a, b) => a.localeCompare(b));
+const sections = categories.map((c) => ({
+  key: c,
+  label: c
+    .split("_")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" "),
+  items: (byCategory.get(c) ?? []).sort((a, b) => (a.name ?? a.id).localeCompare(b.name ?? b.id)),
+}));
+
+// Dimension keys present in the DB (used for display)
+const dimensionKeys = Object.keys(dimensionLabels).sort((a, b) => a.localeCompare(b));
+
+// Simple “complete meal” checklist (dimension codes, not computed nutrients)
+const coreDimensions: string[] = [
+  "P",
+  "F",
+  "Ca",
+  "Ph",
+  "CaPh",
+  "O3",
+  "O6",
+  "Fib",
+  "Zn",
+  "Fe",
+  "I",
+  "Se",
+  "VA",
+  "VD",
+  "VE",
+  "VK",
+  "B",
+  "Ch",
+];
+---
+
+<BaseLayout title="Recipe builder">
+  <div class="prose" style="max-width: 100%;">
+    <h1>Recipe builder (MVP)</h1>
+    <p class="small">
+      Select ingredients and see which constraint dimensions they cover. This MVP does not calculate grams or full
+      nutrient totals yet.
+    </p>
+
+    <div class="two-col">
+      <section class="card" style="margin: 0;">
+        <h2 style="margin-top: 0;">Pick ingredients</h2>
+
+        {sections.map((section) => (
+          <details class="picker" open={section.key === "muscle_meat"}>
+            <summary>
+              {section.label} <span class="small">({section.items.length})</span>
+            </summary>
+            <div class="picker__list">
+              {section.items.map((ing) => {
+                const tierText = tierLabels[ing.tier] ? `${ing.tier} (${tierLabels[ing.tier]})` : ing.tier;
+                return (
+                  <label class="pick-item">
+                    <input type="checkbox" name="ingredient" value={ing.id} />
+                    <span>
+                      <strong>{ing.name}</strong>
+                      <span class="small"> • {tierText}{ing.notes ? ` • ${ing.notes}` : ""}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </details>
+        ))}
+
+        <div class="cta-row" style="margin-top: var(--space-4);">
+          <button class="button" type="button" id="clear">Clear</button>
+          <button class="button" type="button" id="copy">Copy JSON</button>
+        </div>
+      </section>
+
+      <section class="card" style="margin: 0;">
+        <h2 style="margin-top: 0;">Coverage</h2>
+
+        <div class="small" id="summary">(select ingredients)</div>
+
+        <h3>Core checklist</h3>
+        <ul id="core"></ul>
+
+        <h3>All dimensions</h3>
+        <ul id="all"></ul>
+
+        <h3>JSON</h3>
+        <pre><code id="json">{}</code></pre>
+      </section>
+    </div>
+  </div>
+
+  <script define:vars={{
+    INGREDIENTS: db.ingredients ?? [],
+    DIM_LABELS: dimensionLabels,
+    CORE: coreDimensions,
+    ALL_KEYS: dimensionKeys,
+  }}>
+    const ingredients = INGREDIENTS;
+    const labels = DIM_LABELS;
+    const core = CORE;
+    const allKeys = ALL_KEYS;
+
+    const summaryEl = document.getElementById('summary');
+    const coreEl = document.getElementById('core');
+    const allEl = document.getElementById('all');
+    const jsonEl = document.getElementById('json');
+
+    const byId = new Map(ingredients.map(i => [i.id, i]));
+
+    function getSelectedIds() {
+      return Array.from(document.querySelectorAll('input[name="ingredient"]:checked')).map((el) => el.value);
+    }
+
+    function dimsFor(ing) {
+      return Object.keys(ing.dimensions || {});
+    }
+
+    function computeCoverage(selectedIds) {
+      const selected = selectedIds.map(id => byId.get(id)).filter(Boolean);
+      const covered = new Set();
+      for (const ing of selected) {
+        for (const d of dimsFor(ing)) covered.add(d);
+      }
+      return { selected, covered };
+    }
+
+    function renderList(el, keys, covered) {
+      el.innerHTML = '';
+      for (const k of keys) {
+        const li = document.createElement('li');
+        const ok = covered.has(k);
+        const label = labels[k] || k;
+        li.textContent = `${ok ? '✓' : '•'} [${k}] ${label}`;
+        if (!ok) li.className = 'small';
+        el.appendChild(li);
+      }
+    }
+
+    function render() {
+      const selectedIds = getSelectedIds();
+      const { selected, covered } = computeCoverage(selectedIds);
+
+      summaryEl.textContent = `${selected.length} ingredient(s) selected. ${covered.size} dimension(s) covered.`;
+      renderList(coreEl, core, covered);
+      renderList(allEl, allKeys, covered);
+
+      const out = {
+        ingredients: selected.map((i) => ({ id: i.id, name: i.name, category: i.category, tier: i.tier })),
+        dimensions_covered: Array.from(covered).sort((a, b) => a.localeCompare(b)),
+        dimensions_missing_core: core.filter((k) => !covered.has(k)),
+      };
+
+      jsonEl.textContent = JSON.stringify(out, null, 2);
+    }
+
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.matches('input[name="ingredient"]')) render();
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+      for (const el of document.querySelectorAll('input[name="ingredient"]:checked')) {
+        el.checked = false;
+      }
+      render();
+    });
+
+    document.getElementById('copy').addEventListener('click', async () => {
+      if (!navigator.clipboard) return;
+      await navigator.clipboard.writeText(jsonEl.textContent || '');
+    });
+
+    render();
+  </script>
+</BaseLayout>
