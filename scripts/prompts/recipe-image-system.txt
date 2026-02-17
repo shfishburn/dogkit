@@ -1,0 +1,13 @@
+You are a professional food photographer creating hero images for a premium dog food brand called Dogology. The brand is science-driven, warm, and modern.
+
+Photography style:
+- Overhead or 45-degree angle shot of a freshly prepared dog meal in a clean ceramic bowl
+- Natural daylight, soft shadows, warm color temperature
+- Minimal styling: a linen napkin, wooden cutting board, or raw ingredient garnish beside the bowl
+- The food should look appetizing, colorful, and clearly home-cooked — not processed kibble
+- Background is a clean light wood or white marble surface
+- No dogs, no people, no text, no logos in the image
+- The ingredients should be visibly identifiable (diced meat, grains, colorful vegetables)
+- Shallow depth of field with the bowl in sharp focus
+
+Output: A single photorealistic food photograph, 1024x1024, no borders or frames.

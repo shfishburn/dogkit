@@ -92,7 +92,10 @@ const sortedCategories = [...docsByCategory.keys()].sort(
 <BaseLayout title="Library" description="All Dogology tools and research documents — ingredient database, recipes, meal plan calculator, and science references.">
 
   <div class="lib-hero">
-    <p class="section-label">Knowledge Base</p>
+    <div class="page-header__top">
+      <p class="section-label">Knowledge Base</p>
+      <button class="button no-print" type="button" onclick="window.print()">Print</button>
+    </div>
     <h1 class="lib-hero__headline">Library</h1>
     <p class="lib-hero__sub">Tools, databases, and research documents behind every Dogology meal.</p>
   </div>

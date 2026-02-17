@@ -5,7 +5,7 @@ import path from 'node:path';
 import process from 'node:process';
 
 const REPO_ROOT = path.resolve(process.cwd(), '..');
-const SOURCE_DIR = path.join(REPO_ROOT, 'specs');
+const SOURCE_DIR = path.join(REPO_ROOT, 'packages');
 const DEST_DIR = path.join(process.cwd(), 'src', 'content', 'specs');
 
 async function rimraf(dir) {
@@ -45,7 +45,7 @@ async function main() {
     count += 1;
   }
 
-  process.stdout.write(`Synced ${count} markdown file(s) from specs/ to web/src/content/specs/\n`);
+  process.stdout.write(`Synced ${count} markdown file(s) from packages/ to web/src/content/specs/\n`);
 }
 
 main().catch((err) => {

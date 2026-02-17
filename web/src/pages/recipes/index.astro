@@ -24,7 +24,10 @@ function labelify(s: string): string {
   description={`${recipes.length} complete canine meal recipes with size-scaled ingredient amounts, a 21-day rotation plan, and per-1000 kcal nutrient estimates.`}
 >
   <div class="page-header">
-    <p class="section-label">Meal Library</p>
+    <div class="page-header__top">
+      <p class="section-label">Meal Library</p>
+      <button class="button no-print" type="button" onclick="window.print()">Print</button>
+    </div>
     <h1 class="section-headline">Recipes</h1>
     <p class="page-sub">{recipes.length} recipes across {proteins.length} protein sources — select any recipe for full details, ingredients, and instructions.</p>
   </div>
@@ -112,8 +115,8 @@ function labelify(s: string): string {
 
   <!-- ── Weekly plan ── -->
   <section class="weekly-plan-section">
-    <h2 class="section-headline" style="font-size:var(--text-2xl);margin-bottom:1rem;">21-Day Rotation Plan</h2>
-    <p class="page-sub" style="margin-bottom:1.5rem;">{weeklyPlan.description}</p>
+    <h2 class="section-headline" style="font-size:var(--text-2xl);margin-bottom:var(--space-4);">21-Day Rotation Plan</h2>
+    <p class="page-sub" style="margin-bottom:var(--space-6);">{weeklyPlan.description}</p>
 
     {[
       { label: "Week 1", days: weeklyPlan.days?.slice(0, 7) },

@@ -1,8 +1,13 @@
 # Python virtual environment
 .venv/
 
+# Dependencies
+node_modules/
+
 # macOS
 .DS_Store
 
 # Environment variables
 .env
+.env.local
+.env*.local

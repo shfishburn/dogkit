@@ -21,15 +21,26 @@ const items = entries
   .map((entry) => {
     const slugPath = entryToPath(entry.id);
     const name = entry.data.title ?? entry.id.replace(/\.md$/i, "");
-    return { href: `/specs/${slugPath}`, name, slugPath };
+    const version = entry.data.version ?? null;
+    const status = entry.data.status ?? null;
+    const description = entry.data.description ?? null;
+    const category = entry.data.category ?? null;
+    return { href: `/specs/${slugPath}`, name, slugPath, version, status, description, category };
   })
   .sort((a, b) => a.slugPath.localeCompare(b.slugPath));
+
+const statusColors: Record<string, string> = {
+  stable: "#16a34a",
+  draft: "#d97706",
+  reference: "#6366f1",
+  deprecated: "#ef4444",
+};
 ---
 
 <BaseLayout title="All Specs" description="Technical specifications and research documentation for Dogology HealthSpan Kits.">
 
   <div class="page-header">
-    <p class="section-label">Documentation</p>
+    <p class="section-label">Documentation &middot; {items.length} specs</p>
     <h1 class="section-headline" style="font-size:var(--text-3xl);">All Specs</h1>
     <p class="page-sub">Technical specifications, research summaries, and pipeline documentation behind Dogology HealthSpan Kits.</p>
   </div>
@@ -38,8 +49,13 @@ const items = entries
     {items.map((i) => (
       <a href={i.href} class="lib-card lib-card--doc">
         <div class="lib-card__body">
+          <div class="spec-card-meta">
+            {i.status && <span class="spec-badge spec-badge--sm" style={`--badge-color:${statusColors[i.status] ?? "var(--color-muted)"}`}>{i.status}</span>}
+            {i.version && <span class="spec-badge spec-badge--muted spec-badge--sm">v{i.version}</span>}
+            {i.category && <span class="spec-badge spec-badge--muted spec-badge--sm">{i.category}</span>}
+          </div>
           <h3 class="lib-card__title">{i.name}</h3>
-          <p class="lib-card__desc">{i.slugPath}</p>
+          {i.description && <p class="lib-card__desc">{i.description}</p>}
         </div>
         <span class="lib-card__arrow" aria-hidden="true">&rarr;</span>
       </a>

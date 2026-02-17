@@ -30,8 +30,14 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 const pageTitle = entry.data.title ?? entry.id.replace(/\.md$/i, "");
+const version = entry.data.version ?? null;
+const status = entry.data.status ?? null;
+const description = entry.data.description ?? null;
+const category = entry.data.category ?? null;
+const tags = entry.data.tags ?? [];
+const seeAlso = entry.data.seeAlso ?? [];
 
-// Derive a description from the first meaningful lines of the body
+// Derive page description from body
 const bodyText = (entry.body ?? "")
   .replace(/^#[^\n]*/gm, "")
   .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
@@ -39,17 +45,53 @@ const bodyText = (entry.body ?? "")
   .replace(/[*_`~]/g, "")
   .replace(/\s+/g, " ")
   .trim();
-const pageDescription = bodyText.length > 155
+const pageDescription = description ?? (bodyText.length > 155
   ? bodyText.slice(0, 155).trimEnd() + "..."
-  : bodyText;
+  : bodyText);
+
+const statusColors: Record<string, string> = {
+  stable: "#16a34a",
+  draft: "#d97706",
+  reference: "#6366f1",
+  deprecated: "#ef4444",
+};
+const statusColor = status ? (statusColors[status] ?? "var(--color-muted)") : "var(--color-muted)";
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
-  <div class="page-header" style="padding-bottom:var(--space-4);">
-    <a href="/specs" class="breadcrumb">&larr; All specs</a>
-    <h1 class="section-headline" style="font-size:var(--text-3xl);margin-top:var(--space-3);margin-bottom:0;">{pageTitle}</h1>
+  <div class="spec-header">
+    <div class="spec-header__top">
+      <div class="spec-header__meta">
+        {status && <span class="spec-badge" style={`--badge-color:${statusColor}`}>{status}</span>}
+        {version && <span class="spec-badge spec-badge--muted">v{version}</span>}
+        {category && <span class="spec-badge spec-badge--muted">{category}</span>}
+      </div>
+      <button class="button no-print" id="print-btn" type="button" onclick="window.print()">Print</button>
+    </div>
+    <h1 class="spec-header__title">{pageTitle}</h1>
+    {description && <p class="spec-header__desc">{description}</p>}
+    {tags.length > 0 && (
+      <div class="spec-tags">
+        {tags.map((t) => <span class="spec-tag">{t}</span>)}
+      </div>
+    )}
   </div>
-  <article class="prose" style="padding-top:var(--space-6);">
+
+  <article class="prose spec-body">
     <Content />
   </article>
+
+  {seeAlso.length > 0 && (
+    <aside class="spec-xref no-print">
+      <h2 class="spec-xref__title">Related documents</h2>
+      <div class="spec-xref__grid">
+        {seeAlso.map((ref) => (
+          <a href={`/specs/${ref.id}`} class="spec-xref__link">
+            <span class="spec-xref__arrow">→</span>
+            <span>{ref.title}</span>
+          </a>
+        ))}
+      </div>
+    </aside>
+  )}
 </BaseLayout>

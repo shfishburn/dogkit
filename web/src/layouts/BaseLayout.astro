@@ -17,6 +17,33 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 const ogImageUrl = new URL(ogImage || "/hero.jpg", Astro.site);
 
 const pathname = Astro.url.pathname;
+
+// Auto-breadcrumbs from URL path
+const segmentLabels: Record<string, string> = {
+  recipes: "Recipes",
+  recipe: "Recipe Builder",
+  specs: "Specs",
+  ingredients: "Ingredients",
+  library: "Library",
+  plan: "Plan",
+  admin: "Admin",
+  business: "Business",
+  manufacturer: "Manufacturers",
+};
+
+function labelify(s: string): string {
+  return segmentLabels[s] ?? s.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const segments = pathname.replace(/\/$/, "").split("/").filter(Boolean);
+const crumbs: { label: string; href: string }[] = [];
+if (segments.length > 1) {
+  for (let i = 0; i < segments.length; i++) {
+    const href = "/" + segments.slice(0, i + 1).join("/");
+    const label = labelify(segments[i]);
+    crumbs.push({ label, href });
+  }
+}
 ---
 
 <!doctype html>
@@ -59,6 +86,20 @@ const pathname = Astro.url.pathname;
 
     <main class:list={["", { "full-bleed": fullBleed }]}>
       <div class={fullBleed ? undefined : "container"}>
+        {crumbs.length > 0 && (
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            {crumbs.map((c, i) => (
+              <>
+                <span class="breadcrumb__sep" aria-hidden="true">›</span>
+                {i < crumbs.length - 1
+                  ? <a href={c.href}>{c.label}</a>
+                  : <span class="breadcrumb__current" aria-current="page">{c.label}</span>
+                }
+              </>
+            ))}
+          </nav>
+        )}
         <slot />
       </div>
     </main>

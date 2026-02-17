@@ -60,7 +60,10 @@ const categorySections = categories.map((c) => ({
 <BaseLayout title="Ingredients" description="Browse the full canine ingredient database with nutrient dimensions, availability tiers, and USDA FoodData Central references.">
 
   <div class="page-header">
-    <p class="section-label">Database &middot; {db.ingredients?.length ?? 0} ingredients</p>
+    <div class="page-header__top">
+      <p class="section-label">Database &middot; {db.ingredients?.length ?? 0} ingredients</p>
+      <button class="button no-print" type="button" onclick="window.print()">Print</button>
+    </div>
     <h1 class="section-headline" style="font-size:var(--text-3xl);">Ingredient Database</h1>
     <p class="page-sub">Complete nutrient dimension coverage, availability tiers, and USDA FoodData Central references for every ingredient in the Dogology system.</p>
   </div>

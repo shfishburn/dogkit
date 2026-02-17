@@ -6,5 +6,23 @@
     "build": "npm --prefix web run build",
     "preview": "npm --prefix web run preview",
     "gen:ingredients": "npm --prefix web run gen:ingredients"
+  },
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shfishburn/dogkit.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/shfishburn/dogkit/issues"
+  },
+  "homepage": "https://github.com/shfishburn/dogkit#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.96.0"
   }
 }
