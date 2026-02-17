@@ -45,9 +45,11 @@ const pageDescription = bodyText.length > 155
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
-  <article class="prose">
-    <h1>{pageTitle}</h1>
-    <div class="small">Source: {entry.id}</div>
+  <div class="page-header" style="padding-bottom:var(--space-4);">
+    <a href="/specs" class="breadcrumb">&larr; All specs</a>
+    <h1 class="section-headline" style="font-size:var(--text-3xl);margin-top:var(--space-3);margin-bottom:0;">{pageTitle}</h1>
+  </div>
+  <article class="prose" style="padding-top:var(--space-6);">
     <Content />
   </article>
 </BaseLayout>

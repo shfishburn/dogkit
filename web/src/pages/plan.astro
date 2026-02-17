@@ -3,11 +3,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="Build a plan" description="Calculate your dog's daily energy needs with our MER-based plan builder. Enter weight, age, and activity level to get a personalized feeding guide.">
-  <div class="prose">
-    <h1>Build my dog’s plan</h1>
-    <p class="small">Quick estimate. Not veterinary advice.</p>
 
-    <form id="plan-form" class="card" style="max-width: 42rem;">
+  <div class="page-header">
+    <p class="section-label">MER Calculator</p>
+    <h1 class="section-headline" style="font-size:var(--text-3xl);">Build my dog's plan</h1>
+    <p class="page-sub">Enter your dog's profile to calculate daily energy needs and a personalized feeding guide. Quick estimate &mdash; not veterinary advice.</p>
+  </div>
+
+  <div class="plan-layout">
+    <form id="plan-form" class="card plan-form">
       <div class="form-grid">
         <label>
           <span>Weight (kg)</span>
@@ -52,16 +56,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         </label>
       </div>
 
-      <div class="cta-row">
-        <button class="button" type="submit">Calculate</button>
+      <div class="plan-form__actions">
+        <button class="button button--primary" type="submit">Calculate</button>
         <button class="button" type="button" id="copy-json">Copy JSON</button>
       </div>
     </form>
 
-    <div id="results" class="card" style="max-width: 42rem; margin-top: var(--space-6);">
-      <h2 style="margin-top:0;">Result</h2>
-      <div class="small" id="explain"></div>
-      <pre><code id="json-out">(submit the form)</code></pre>
+    <div id="results" class="card plan-results">
+      <h2 class="plan-results__title">Result</h2>
+      <p class="plan-results__explain" id="explain">Submit the form to calculate your dog's energy needs.</p>
+      <pre class="plan-results__json"><code id="json-out"></code></pre>
     </div>
   </div>
 

@@ -58,28 +58,32 @@ const categorySections = categories.map((c) => ({
 ---
 
 <BaseLayout title="Ingredients" description="Browse the full canine ingredient database with nutrient dimensions, availability tiers, and USDA FoodData Central references.">
-  <div class="prose" style="max-width: 100%;">
-    <h1>Ingredients</h1>
 
-    <p class="small">Source: specs/ingredients/ingredients.json</p>
+  <div class="page-header">
+    <p class="section-label">Database &middot; {db.ingredients?.length ?? 0} ingredients</p>
+    <h1 class="section-headline" style="font-size:var(--text-3xl);">Ingredient Database</h1>
+    <p class="page-sub">Complete nutrient dimension coverage, availability tiers, and USDA FoodData Central references for every ingredient in the Dogology system.</p>
+  </div>
 
-    <h2>Categories</h2>
-    <ul>
-      {categorySections.map((c) => (
-        <li><a href={`#${c.key}`}>{c.label}</a> <span class="small">({c.items.length})</span></li>
-      ))}
-    </ul>
-
+  <!-- Category jump nav -->
+  <nav class="ing-jumps" aria-label="Jump to category">
     {categorySections.map((c) => (
-      <section id={c.key}>
-        <h2>{c.label}</h2>
-        <table>
+      <a href={`#${c.key}`} class="ing-jump-link">{c.label} <span class="ing-jump-count">{c.items.length}</span></a>
+    ))}
+  </nav>
+
+  <!-- Category sections -->
+  {categorySections.map((c) => (
+    <section id={c.key} class="ing-section">
+      <h2 class="ing-section__title">{c.label} <span class="ing-section__count">{c.items.length}</span></h2>
+      <div class="ing-table-wrap">
+        <table class="ing-table">
           <thead>
             <tr>
-              <th>Name</th>
+              <th>Ingredient</th>
               <th>Tier</th>
               <th>Notes</th>
-              <th>Dimensions</th>
+              <th>Nutrients</th>
             </tr>
           </thead>
           <tbody>
@@ -88,24 +92,23 @@ const categorySections = categories.map((c) => ({
               const dimsText = Object.entries(dims)
                 .map(([k, v]) => `${dimensionLabels[k] ?? k}: ${v}`)
                 .join(", ");
-              const tierText = tierLabels[ing.tier] ? `${ing.tier} (${tierLabels[ing.tier]})` : ing.tier;
+              const tierText = tierLabels[ing.tier] ? `${ing.tier} — ${tierLabels[ing.tier]}` : ing.tier;
               return (
                 <tr>
                   <td>
-                    <div>
-                      <strong>{ing.name}</strong>
-                      <div class="small">{ing.id}{ing.usda_fdc_id ? ` • USDA FDC ${ing.usda_fdc_id}` : ""}{ing.default_unit ? ` • ${ing.default_unit}` : ""}</div>
-                    </div>
+                    <strong class="ing-name">{ing.name}</strong>
+                    {ing.usda_fdc_id && <div class="ing-meta">USDA FDC {ing.usda_fdc_id}{ing.default_unit ? ` · ${ing.default_unit}` : ""}</div>}
                   </td>
-                  <td>{tierText}</td>
-                  <td>{ing.notes ?? ""}</td>
-                  <td>{dimsText}</td>
+                  <td><span class="tier-badge">{tierText}</span></td>
+                  <td class="ing-notes">{ing.notes ?? ""}</td>
+                  <td class="ing-dims">{dimsText}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-      </section>
-    ))}
-  </div>
+      </div>
+    </section>
+  ))}
+
 </BaseLayout>

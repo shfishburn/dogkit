@@ -1,0 +1,213 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+const jsonPath = path.resolve(process.cwd(), "..", "specs", "recipes", "weekly_meal_plan.json");
+const raw = await readFile(jsonPath, "utf-8");
+const plan = JSON.parse(raw);
+
+const recipes: any[] = plan.recipes ?? [];
+const sizing: Record<string, any> = plan.metadata?.size_scaling ?? {};
+const weeklyPlan: any = plan.weekly_plan ?? {};
+
+const { id } = Astro.params;
+const recipe = recipes.find((r: any) => r.id === id);
+
+if (!recipe) {
+  return Astro.redirect("/recipes");
+}
+
+function labelify(s: string): string {
+  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const protein = recipe.tags?.protein_type ?? "";
+const carb = recipe.tags?.primary_carb ?? "";
+const veggie = recipe.tags?.primary_veggie ?? "";
+const tier = recipe.tags?.tier ?? "";
+const prep = recipe.tags?.prep_time_min ?? 0;
+
+// Find which days this recipe appears in the meal plan
+const appearances: { day: number; label: string; meal: string }[] = [];
+for (const day of weeklyPlan.days ?? []) {
+  if (day.am?.recipe_id === id) appearances.push({ day: day.day, label: day.label, meal: "AM" });
+  if (day.pm?.recipe_id === id) appearances.push({ day: day.day, label: day.label, meal: "PM" });
+}
+
+export async function getStaticPaths() {
+  const jsonPath = path.resolve(process.cwd(), "..", "specs", "recipes", "weekly_meal_plan.json");
+  const raw = await readFile(jsonPath, "utf-8");
+  const plan = JSON.parse(raw);
+  return (plan.recipes ?? []).map((r: any) => ({ params: { id: r.id } }));
+}
+---
+
+<BaseLayout
+  title={recipe.name}
+  description={recipe.overview}
+>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/recipes">Recipes</a>
+    <span aria-hidden="true">›</span>
+    <span>{recipe.name}</span>
+  </nav>
+
+  <article class="recipe-detail">
+    <!-- Header -->
+    <header class="recipe-detail__header">
+      <div class="recipe-detail__badges">
+        <span class:list={["badge", tier === "T2" ? "badge--t2" : "badge--t1"]}>{tier}</span>
+        <span class="badge badge--time">⏱ {prep} min</span>
+      </div>
+      <h1 class="recipe-detail__title">{recipe.name}</h1>
+      <p class="recipe-detail__tags">
+        <span class="tag tag--protein">{labelify(protein)}</span>
+        <span class="tag tag--carb">{labelify(carb)}</span>
+        <span class="tag tag--veggie">{labelify(veggie)}</span>
+      </p>
+      <p class="recipe-detail__overview">{recipe.overview}</p>
+    </header>
+
+    <!-- Size selector -->
+    <div class="recipe-detail__size-bar">
+      <span class="filter-label">Dog size</span>
+      <div class="pill-row" id="size-picker">
+        {Object.entries(sizing).map(([key, val]: [string, any]) => (
+          <button
+            type="button"
+            class:list={["pill", { "pill--active": key === "medium" }]}
+            data-size={key}
+          >
+            {val.label}
+            <span class="pill-sub">{val.weight_kg} kg · {val.approx_mer_kcal} kcal/day</span>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Two-column body -->
+    <div class="recipe-detail__body">
+      <!-- Ingredients -->
+      <section class="recipe-detail__section">
+        <h2 class="recipe-detail__section-title">Ingredients</h2>
+        <table class="ingredient-table">
+          <thead>
+            <tr>
+              <th>Ingredient</th>
+              <th class="amount-col">Amount</th>
+              <th>Prep</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recipe.ingredients.map((ing: any) => (
+              <tr>
+                <td>{ing.name}</td>
+                <td
+                  class="amount-col"
+                  data-base-g={ing.base_g ?? null}
+                  data-unit={ing.unit}
+                >
+                  {ing.base_g != null
+                    ? `${Math.round(ing.base_g * 0.95)} ${ing.unit}`
+                    : ing.prep}
+                </td>
+                <td class="prep-col">{ing.base_g != null ? ing.prep : ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Instructions -->
+      <section class="recipe-detail__section">
+        <h2 class="recipe-detail__section-title">Instructions</h2>
+        <ol class="instruction-list instruction-list--detail">
+          {recipe.instructions.map((step: string) => (
+            <li>{step}</li>
+          ))}
+        </ol>
+      </section>
+    </div>
+
+    <!-- Nutrition -->
+    <section class="recipe-detail__section recipe-detail__nutrition">
+      <h2 class="recipe-detail__section-title">Nutrition per 1,000 kcal</h2>
+      <div class="nutrient-row nutrient-row--detail">
+        <div class="nutrient-stat">
+          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.protein_g}g</span>
+          <span class="nutrient-lbl">Protein</span>
+        </div>
+        <div class="nutrient-stat">
+          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.fat_g}g</span>
+          <span class="nutrient-lbl">Fat</span>
+        </div>
+        <div class="nutrient-stat">
+          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.fiber_g}g</span>
+          <span class="nutrient-lbl">Fiber</span>
+        </div>
+        <div class="nutrient-stat">
+          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.ca_p_ratio}</span>
+          <span class="nutrient-lbl">Ca:P</span>
+        </div>
+        <div class="nutrient-stat">
+          <span class="nutrient-val">{recipe.per_1000kcal_estimate?.calcium_mg}mg</span>
+          <span class="nutrient-lbl">Calcium</span>
+        </div>
+      </div>
+
+      {recipe.tags?.dimensions_covered?.length > 0 && (
+        <div style="margin-top: var(--space-4);">
+          <span class="recipe-detail__section-title" style="margin-bottom: var(--space-2); display: block;">Nutrient dimensions covered</span>
+          <p class="dim-chips">
+            {recipe.tags.dimensions_covered.map((d: string) => (
+              <span class="dim-chip">{d}</span>
+            ))}
+          </p>
+        </div>
+      )}
+    </section>
+
+    <!-- Meal plan appearances -->
+    {appearances.length > 0 && (
+      <section class="recipe-detail__section">
+        <h2 class="recipe-detail__section-title">In the meal plan</h2>
+        <div class="recipe-detail__plan-chips">
+          {appearances.map((a) => (
+            <span class:list={["plan-chip", a.meal === "AM" ? "plan-chip--am" : "plan-chip--pm"]}>
+              {a.label} · {a.meal}
+            </span>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<script define:vars={{ sizing }}>
+  let activeSize = "medium";
+
+  const sizePicker = document.getElementById("size-picker");
+
+  function applySize(sizeKey) {
+    const factor = sizing[sizeKey]?.factor ?? 0.95;
+    for (const cell of document.querySelectorAll("td[data-base-g]")) {
+      const base = parseFloat(cell.dataset.baseG);
+      if (!isNaN(base)) {
+        const unit = cell.dataset.unit ?? "g";
+        cell.textContent = `${Math.round(base * factor)} ${unit}`;
+      }
+    }
+  }
+
+  sizePicker.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-size]");
+    if (!btn) return;
+    for (const p of sizePicker.querySelectorAll(".pill")) p.classList.remove("pill--active");
+    btn.classList.add("pill--active");
+    activeSize = btn.dataset.size;
+    applySize(activeSize);
+  });
+
+  applySize("medium");
+</script>

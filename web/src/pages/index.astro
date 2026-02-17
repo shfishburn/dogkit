@@ -4,60 +4,55 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <BaseLayout title="Dogology HealthSpan Kits" description="Science-built cook-at-home dog food kits with AAFCO-aligned nutrition, transparent MER modeling, and weekly ingredient delivery." fullBleed={true}>
 
-  <!-- ── Hero ─────────────────────────────────────────────── -->
+  <!-- Hero -->
   <section class="hero">
     <div class="container">
       <span class="hero__eyebrow">HealthSpan Kits</span>
       <h1 class="hero__headline">More good<br />years.</h1>
-		<p class="small"><em>Science‑Built Food for More Good Years</em></p>
-		<p>
-			Dogology HealthSpan Kits is a subscription meal‑kit service for dogs that combines canine metabolic
-			modeling, USDA‑grade nutrient data, and fully transparent sourcing. Instead of shipping finished dog
-			food, it delivers weekly cook‑at‑home kits: precisely portioned human‑grade ingredients plus a custom
-			micronutrient premix, generated from each dog’s individual energy and nutrition profile.
-		</p>
+      <p class="hero__sub">Science-built cook-at-home meals matched to your dog's exact energy and nutrition profile. Real food. Real data. Radical transparency.</p>
+      <div class="hero__actions">
+        <a class="button button--primary" href="/plan">Build my dog's plan</a>
+        <a class="button button--ghost" href="/specs/overview">Read the overview</a>
+      </div>
+      <p class="hero__proof">AAFCO-aligned &middot; USDA FoodData Central &middot; NRC micronutrient targets</p>
+    </div>
+  </section>
 
-		<div class="cta-row">
-			<a class="button" href="/plan">Build my dog’s plan</a>
-			<a class="button" href="/specs/overview">Read the overview</a>
-			<a class="button" href="/ingredients">Browse ingredients</a>
-			<a class="button" href="/specs">View all specs</a>
-		</div>
+  <!-- How it works -->
+  <section class="callout-band">
+    <div class="container">
+      <h2 class="section-headline" style="font-size:var(--text-2xl);margin-bottom:var(--space-6);">How it works</h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-card__number">1</span>
+          <h3 class="step-card__title">Profile your dog</h3>
+          <p class="step-card__desc">Enter age, weight, body condition, activity level, and any medical flags or allergens.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-card__number">2</span>
+          <h3 class="step-card__title">We calculate the plan</h3>
+          <p class="step-card__desc">MER modeling generates recipes that hit energy, protein/fat, and all NRC/AAFCO micronutrient targets.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-card__number">3</span>
+          <h3 class="step-card__title">Cook at home</h3>
+          <p class="step-card__desc">Receive pre-measured human-grade ingredients, a matched premix, and a personalized recipe card each week.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-		<h2>How it works</h2>
-		<ul>
-			<li>Guardians create a profile (age, weight, body condition, activity, goals, medical flags).</li>
-			<li>We calculate MER (maintenance or weight‑change energy requirement) using published canine equations.</li>
-			<li>
-				A constraint solver formulates recipes that hit kcal/day and protein/fat ranges, satisfy NRC/AAFCO
-				micronutrient requirements, and respect constraints like allergens and budget.
-			</li>
-			<li>
-				Each week you receive pre‑measured ingredients + a matched premix + a personalized recipe card with
-				gram weights and simple cooking instructions.
-			</li>
-		</ul>
+  <!-- Bottom CTA -->
+  <section class="bottom-cta">
+    <div class="container" style="text-align:center;padding-block:var(--space-16);">
+      <h2 class="section-headline" style="font-size:var(--text-2xl);margin-bottom:var(--space-4);">Ready to get started?</h2>
+      <p class="page-sub" style="margin-bottom:var(--space-6);max-width:45ch;margin-inline:auto;">Build your dog's personalized nutrition plan, browse our ingredient database, or explore the recipes.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:var(--space-3);justify-content:center;">
+        <a class="button button--primary" href="/plan">Build my dog's plan</a>
+        <a class="button" href="/ingredients">Browse ingredients</a>
+        <a class="button" href="/recipes">View recipes</a>
+      </div>
+    </div>
+  </section>
 
-		<h2>Radical transparency</h2>
-		<ul>
-			<li>Every ingredient links to a FoodData Central nutrient profile (surfaced as a “data sheet”).</li>
-			<li>Recipe views show per‑ingredient contributions and a full nutrient table vs targets.</li>
-			<li>Guardians can inspect the exact MER math and see how changes update the plan over time.</li>
-		</ul>
-
-		<h2>Key differentiators</h2>
-		<ul>
-			<li><strong>Model‑driven</strong>: formulas and constraint logic are visible and explainable.</li>
-			<li><strong>Meal kits</strong>: you cook fresh food at home, with micro + macro targets already solved.</li>
-			<li><strong>Food‑ and data‑grade</strong>: sourcing + machine‑readable nutrient data for vets and power users.</li>
-			<li><strong>Adjusts over time</strong>: updates as weight, body condition, and goals change.</li>
-		</ul>
-
-		<h2>Revenue model</h2>
-		<ul>
-			<li>Subscription plans (weekly or bi‑weekly) with tiers by dog size, dogs per household, and customization.</li>
-			<li>Add‑ons: extra premix for fully DIY cooking; specialized protocols (weight‑loss, senior, sport/working).</li>
-			<li>Professional tier: co‑branded portal for veterinarians and nutritionists.</li>
-		</ul>
-	</div>
 </BaseLayout>
