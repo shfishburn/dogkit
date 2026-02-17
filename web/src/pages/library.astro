@@ -1,0 +1,139 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+// ── Tools ──────────────────────────────────────────────────────
+const tools = [
+  {
+    href: "/ingredients",
+    icon: "🧪",
+    title: "Ingredient Database",
+    description: "76 ingredients with nutrient dimensions, availability tiers, and USDA FoodData Central references.",
+    label: "Database",
+  },
+  {
+    href: "/recipes",
+    icon: "🍲",
+    title: "Meal Recipes",
+    description: "14 complete recipes with size-scaled ingredient amounts, 7-day rotation plan, and per-1000 kcal nutrient estimates.",
+    label: "Recipes",
+  },
+  {
+    href: "/recipe",
+    icon: "⚗️",
+    title: "Recipe Builder",
+    description: "Interactive tool to compose a custom meal from the ingredient database and check nutrient coverage.",
+    label: "Tool",
+  },
+  {
+    href: "/plan",
+    icon: "📐",
+    title: "MER Calculator",
+    description: "Calculate Metabolisable Energy Requirement by breed, weight, and activity level using the NRC formula.",
+    label: "Tool",
+  },
+];
+
+// ── Spec docs from content collection ─────────────────────────
+function slugifySegment(s: string): string {
+  return s.trim().replace(/\.md$/i, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+function entryToSlug(id: string): string {
+  return id.split("/").map(slugifySegment).filter(Boolean).join("/");
+}
+function humanTitle(id: string): string {
+  const base = id.replace(/\.md$/i, "").replace(/^.*\//, "");
+  return base.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+function categoryFromId(id: string): string {
+  const parts = id.split("/");
+  if (parts.length < 2) return "Overview";
+  const folder = parts[0];
+  const map: Record<string, string> = {
+    research: "Research",
+    business: "Business",
+    app: "Pipeline",
+    human: "Comparison",
+    ingredients: "Database",
+  };
+  return map[folder] ?? folder.charAt(0).toUpperCase() + folder.slice(1);
+}
+
+const entries = await getCollection("specs");
+const docs = entries
+  .map((entry) => ({
+    href: `/specs/${entryToSlug(entry.id)}`,
+    title: entry.data.title ?? humanTitle(entry.id),
+    category: categoryFromId(entry.id),
+    body: entry.body?.slice(0, 200).replace(/[#*>`\-_\[\]]/g, "").trim() ?? "",
+  }))
+  .sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
+
+// Group docs by category
+const docsByCategory = new Map<string, typeof docs>();
+for (const doc of docs) {
+  const arr = docsByCategory.get(doc.category) ?? [];
+  arr.push(doc);
+  docsByCategory.set(doc.category, arr);
+}
+const categoryOrder = ["Overview", "Research", "Pipeline", "Business", "Comparison", "Database"];
+const sortedCategories = [...docsByCategory.keys()].sort(
+  (a, b) => {
+    const ai = categoryOrder.indexOf(a);
+    const bi = categoryOrder.indexOf(b);
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  }
+);
+---
+
+<BaseLayout title="Library" description="All Dogology tools and research documents — ingredient database, recipes, meal plan calculator, and science references.">
+
+  <div class="lib-hero">
+    <p class="section-label">Knowledge Base</p>
+    <h1 class="lib-hero__headline">Library</h1>
+    <p class="lib-hero__sub">Tools, databases, and research documents behind every Dogology meal.</p>
+  </div>
+
+  <!-- ── Tools ── -->
+  <section class="lib-section">
+    <h2 class="lib-section__title">Tools</h2>
+    <div class="lib-grid lib-grid--tools">
+      {tools.map((t) => (
+        <a href={t.href} class="lib-card lib-card--tool">
+          <div class="lib-card__icon">{t.icon}</div>
+          <div class="lib-card__body">
+            <span class="lib-badge">{t.label}</span>
+            <h3 class="lib-card__title">{t.title}</h3>
+            <p class="lib-card__desc">{t.description}</p>
+          </div>
+          <span class="lib-card__arrow" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- ── Research & Docs ── -->
+  <section class="lib-section">
+    <h2 class="lib-section__title">Research &amp; Docs</h2>
+    {sortedCategories.map((cat) => (
+      <div class="lib-category">
+        <h3 class="lib-category__title">{cat}</h3>
+        <div class="lib-grid lib-grid--docs">
+          {docsByCategory.get(cat)!.map((doc) => (
+            <a href={doc.href} class="lib-card lib-card--doc">
+              <div class="lib-card__body">
+                <h4 class="lib-card__title">{doc.title}</h4>
+                {doc.body && <p class="lib-card__desc">{doc.body}{doc.body.length >= 200 ? "…" : ""}</p>}
+              </div>
+              <span class="lib-card__arrow" aria-hidden="true">→</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    ))}
+  </section>
+
+</BaseLayout>
