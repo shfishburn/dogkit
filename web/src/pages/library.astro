@@ -34,6 +34,30 @@ const tools = [
   },
 ];
 
+const adminTools = [
+  {
+    href: "/admin/business",
+    icon: "📋",
+    title: "Business Documents",
+    description: "Business plan, financial model, and operational documents.",
+    label: "Business",
+  },
+  {
+    href: "/admin/manufacturer",
+    icon: "🏭",
+    title: "Manufacturer Candidates",
+    description: "Co-manufacturer evaluation and candidate tracking.",
+    label: "Mfg",
+  },
+  {
+    href: "/admin",
+    icon: "✅",
+    title: "Project Plan",
+    description: "Phased project checklist with task tracking and milestones.",
+    label: "Plan",
+  },
+];
+
 // ── Spec docs from content collection ─────────────────────────
 function slugifySegment(s: string): string {
   return s.trim().replace(/\.md$/i, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -105,6 +129,24 @@ const sortedCategories = [...docsByCategory.keys()].sort(
     <h2 class="lib-section__title">Tools</h2>
     <div class="lib-grid lib-grid--tools">
       {tools.map((t) => (
+        <a href={t.href} class="lib-card lib-card--tool">
+          <div class="lib-card__icon">{t.icon}</div>
+          <div class="lib-card__body">
+            <span class="lib-badge">{t.label}</span>
+            <h3 class="lib-card__title">{t.title}</h3>
+            <p class="lib-card__desc">{t.description}</p>
+          </div>
+          <span class="lib-card__arrow" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- ── Admin ── -->
+  <section class="lib-section">
+    <h2 class="lib-section__title">Admin</h2>
+    <div class="lib-grid lib-grid--tools">
+      {adminTools.map((t) => (
         <a href={t.href} class="lib-card lib-card--tool">
           <div class="lib-card__icon">{t.icon}</div>
           <div class="lib-card__body">
