@@ -1,25 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { loadIngredientDb, loadWeeklyMealPlan } from "../../lib/loaders";
-import { loadFdcMappings } from "../../lib/supabaseFdc";
-import type { FdcMapping } from "../../lib/supabaseFdc";
 
 const db = await loadIngredientDb();
 const ingredients = db.ingredients;
 
-/* ── FDC mappings from Supabase ──────────────────────── */
-let fdcMappings: FdcMapping[] = [];
-try {
-  fdcMappings = await loadFdcMappings();
-} catch {
-  // Supabase may not be configured
-}
-
-const mappingByIngredient = new Map(
-  fdcMappings.map((m) => [m.ingredient_id, m]),
-);
-
-/* ── Recipe ingredient usage ─────────────────────────── */
+/* ── Recipe ingredient usage (local JSON — always available) ── */
 const mealPlan = await loadWeeklyMealPlan();
 const recipeUsage = new Map<string, number>();
 for (const recipe of mealPlan.recipes) {
@@ -28,32 +14,31 @@ for (const recipe of mealPlan.recipes) {
   }
 }
 
-/* ── Build rows ──────────────────────────────────────── */
-const rows = ingredients.map((ing) => {
-  const mapping = mappingByIngredient.get(ing.id);
-  return {
-    id: ing.id,
-    name: ing.name,
-    category: ing.category,
-    tier: ing.tier,
-    fdc_id: mapping?.fdc_id ?? null,
-    fdc_description: mapping?.fdc_description ?? null,
-    data_type: mapping?.data_type ?? null,
-    inRecipes: recipeUsage.get(ing.id) ?? 0,
-  };
-});
+/* ── Build rows (FDC columns filled client-side) ─────── */
+const rows = ingredients.map((ing) => ({
+  id: ing.id,
+  name: ing.name,
+  category: ing.category,
+  tier: ing.tier,
+  inRecipes: recipeUsage.get(ing.id) ?? 0,
+}));
 
-const mapped = rows.filter((r) => r.fdc_id !== null).length;
 const inRecipeCount = rows.filter((r) => r.inRecipes > 0).length;
 
 // Group by category for section headers
 const categories = [...new Set(rows.map((r) => r.category))];
 
 const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
+
+/* Supabase public credentials (anon key — safe for client, RLS-enforced) */
+const supabaseUrl = import.meta.env.SUPABASE_URL ?? "https://zrlplilzpwsxqxskeoqc.supabase.co";
+const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybHBsaWx6cHdzeHF4c2tlb3FjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNjkzNDYsImV4cCI6MjA4Njk0NTM0Nn0.NuwLsAdj1TKsPMWadJjhVd_F97gBuntcsiNCtwypbG0";
 ---
 
 <BaseLayout title="Admin — FDC Mapping" container="lg">
-  <div class="prose">
+  <div class="prose" id="fdc-root"
+       data-supabase-url={supabaseUrl}
+       data-supabase-anon-key={supabaseAnonKey}>
     <h1>FDC Ingredient Mapping</h1>
     <p class="small">Map ingredients to USDA FoodData Central IDs for nutrient data extraction.</p>
 
@@ -68,7 +53,7 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
     </div>
 
     <p class="fdc-stats">
-      <strong id="fdc-mapped-count">{mapped}</strong> / {rows.length} mapped to FDC
+      <strong id="fdc-mapped-count">…</strong> / {rows.length} mapped to FDC
       &nbsp;&middot;&nbsp;
       <strong>{inRecipeCount}</strong> used in recipes
     </p>
@@ -81,7 +66,7 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
           <summary class="plan-phase__summary">
             <strong>{catLabel}</strong>
             <span class="small" style="margin-left: var(--space-2); color: var(--color-muted);">
-              ({catRows.filter((r) => r.fdc_id !== null).length}/{catRows.length})
+              (<span class="cat-mapped">0</span>/{catRows.length})
             </span>
           </summary>
           <div class="fdc-table-wrap" style="border:none; border-radius:0;">
@@ -101,16 +86,9 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
                 {catRows.map((row) => (
                   <tr
                     data-ingredient-id={row.id}
-                    data-fdc-id={row.fdc_id ?? ""}
-                    data-fdc-description={row.fdc_description ?? ""}
-                    data-data-type={row.data_type ?? ""}
                   >
                     <td>
-                      {row.fdc_id ? (
-                        <a href={`/ingredients/${row.id}`} class="ing-link">{row.name}</a>
-                      ) : (
-                        <span class="ing-name">{row.name}</span>
-                      )}
+                      <span class="ing-name">{row.name}</span>
                     </td>
                     <td><span class="tier-badge">{row.tier}</span></td>
                     <td class="num-col">
@@ -121,21 +99,10 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
                       )}
                     </td>
                     <td class="fdc-id-cell">
-                      {row.fdc_id ? (
-                        <a href={`https://fdc.nal.usda.gov/food-details/${row.fdc_id}/nutrients`}
-                           target="_blank" rel="noopener" class="fdc-mapped">
-                          {row.fdc_id}
-                        </a>
-                      ) : (
-                        <span class="fdc-unmapped">—</span>
-                      )}
+                      <span class="fdc-loading">…</span>
                     </td>
-                    <td class="fdc-desc-cell">
-                      {row.fdc_description ?? ""}
-                    </td>
-                    <td class="fdc-type-cell">
-                      {row.data_type ?? ""}
-                    </td>
+                    <td class="fdc-desc-cell"></td>
+                    <td class="fdc-type-cell"></td>
                     <td class="fdc-action-cell">
                       <button
                         class="fdc-search-btn"
@@ -149,7 +116,7 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
                         class="fdc-clear-btn"
                         type="button"
                         data-ingredient-id={row.id}
-                        style={row.fdc_id ? "" : "display:none"}
+                        style="display:none"
                       >
                         ✕
                       </button>
@@ -212,6 +179,10 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
 </style>
 
 <script>
+  document.addEventListener("astro:page-load", () => {
+  const root = document.getElementById("fdc-root");
+  if (!root) return; // Not on admin ingredients page
+
   type MappingEntry = {
     fdc_id: number;
     fdc_description: string;
@@ -219,25 +190,61 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
     mapped_at: string;
   };
 
-  // --- State ---
   const mappings = new Map<string, MappingEntry>();
+  const SUPABASE_URL = root.dataset.supabaseUrl ?? "";
+  const SUPABASE_ANON_KEY = root.dataset.supabaseAnonKey ?? "";
 
-  // Seed from server-rendered data attributes
-  document
-    .querySelectorAll<HTMLTableRowElement>("[data-ingredient-id]")
-    .forEach((row) => {
-      if (!(row instanceof HTMLTableRowElement)) return;
-      const id = row.dataset.ingredientId!;
-      const fdcId = row.dataset.fdcId;
-      if (fdcId) {
-        mappings.set(id, {
-          fdc_id: Number(fdcId),
-          fdc_description: row.dataset.fdcDescription ?? "",
-          data_type: row.dataset.dataType ?? "",
-          mapped_at: "",
+  // --- Fetch FDC mappings from Supabase at page load ---
+  async function fetchFdcMappings() {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      console.warn("[fdc] Supabase config not available");
+      clearLoadingIndicators();
+      return;
+    }
+
+    const url = `${SUPABASE_URL}/rest/v1/fdc_mappings?select=ingredient_id,fdc_id,fdc_description,data_type,mapped_at,updated_at&order=ingredient_id`;
+    try {
+      const res = await fetch(url, {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          Accept: "application/json",
+        },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const rows: MappingEntry[] = await res.json();
+
+      for (const m of rows) {
+        mappings.set((m as any).ingredient_id, {
+          fdc_id: m.fdc_id,
+          fdc_description: m.fdc_description,
+          data_type: m.data_type,
+          mapped_at: m.mapped_at ?? "",
         });
       }
+
+      // Populate all table rows with FDC data
+      document.querySelectorAll<HTMLTableRowElement>("tr[data-ingredient-id]").forEach((row) => {
+        const id = row.dataset.ingredientId!;
+        const entry = mappings.get(id) ?? null;
+        rerenderRow(id, entry);
+      });
+
+      updateStats();
+    } catch (err) {
+      console.error("[fdc] Failed to load mappings:", err);
+      clearLoadingIndicators();
+    }
+  }
+
+  function clearLoadingIndicators() {
+    document.querySelectorAll(".fdc-loading").forEach((el) => {
+      el.textContent = "—";
+      el.className = "fdc-unmapped";
     });
+    const countEl = document.getElementById("fdc-mapped-count");
+    if (countEl) countEl.textContent = "0";
+  }
 
   // --- API Key ---
   const KEY_STORAGE = "dogology:fdc_api_key";
@@ -495,8 +502,8 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
         rows.forEach((row) => {
           if (mappings.has(row.dataset.ingredientId!)) mapped++;
         });
-        const badge = details.querySelector("summary .small");
-        if (badge) badge.textContent = `(${mapped}/${total})`;
+        const badge = details.querySelector(".cat-mapped");
+        if (badge) badge.textContent = String(mapped);
       });
   }
 
@@ -510,4 +517,8 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
   function escapeAttr(s: string): string {
     return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
+
+  // --- Go! ---
+  fetchFdcMappings();
+  }); // end astro:page-load
 </script>

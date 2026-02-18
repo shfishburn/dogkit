@@ -1,19 +1,35 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { loadWeeklyMealPlan } from "../../lib/loaders";
+import { loadWeeklyMealPlan, loadNistConversions } from "../../lib/loaders";
+import { loadFdcNutrientMap } from "../../lib/supabaseFdc";
 import { supabaseRenderImageUrl, supabaseSrcSetWH } from "../../lib/supabaseImages";
+import {
+  computeRecipeNutrients,
+  NUTRIENT_DISPLAY_SECTIONS,
+  fmtNutrient,
+  caPRatio,
+} from "../../lib/nutrition";
 
-const mealPlan = await loadWeeklyMealPlan();
-const recipes = mealPlan.recipes;
-const sizing = mealPlan.metadata.size_scaling;
-const weeklyPlan = mealPlan.weekly_plan;
+export async function getStaticPaths() {
+  const plan = await loadWeeklyMealPlan();
+  const [fdcMap, conversions] = await Promise.all([
+    loadFdcNutrientMap(),
+    loadNistConversions(),
+  ]);
 
-const { id } = Astro.params;
-const recipe = recipes.find((r) => r.id === id);
-
-if (!recipe) {
-  return Astro.redirect("/recipes");
+  return plan.recipes.map((r) => ({
+    params: { id: r.id },
+    props: {
+      recipe: r,
+      sizing: plan.metadata.size_scaling,
+      weeklyPlan: plan.weekly_plan,
+      nutrientTotals: computeRecipeNutrients(r.ingredients, fdcMap, conversions),
+      hasFdcData: fdcMap.size > 0,
+    },
+  }));
 }
+
+const { recipe, sizing, weeklyPlan, nutrientTotals, hasFdcData } = Astro.props;
 
 function labelify(s: string): string {
   return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -24,7 +40,8 @@ const carb = recipe.tags?.primary_carb ?? "";
 const veggie = recipe.tags?.primary_veggie ?? "";
 const tier = recipe.tags?.tier ?? "";
 const prep = recipe.tags?.prep_time_min ?? 0;
-const nutrients = recipe.per_1000kcal_estimate ?? {};
+const staticNutrients = recipe.per_1000kcal_estimate ?? {};
+const computedCaPRatio = caPRatio(nutrientTotals);
 
 const heroImageUrl = recipe.image_url;
 const heroSrc = heroImageUrl
@@ -53,13 +70,8 @@ const heroSrcSet = heroImageUrl
 
 const appearances: { day: number; label: string; meal: string }[] = [];
 for (const day of weeklyPlan.days ?? []) {
-  if (day.am?.recipe_id === id) appearances.push({ day: day.day, label: day.label, meal: "AM" });
-  if (day.pm?.recipe_id === id) appearances.push({ day: day.day, label: day.label, meal: "PM" });
-}
-
-export async function getStaticPaths() {
-  const plan = await loadWeeklyMealPlan();
-  return plan.recipes.map((r) => ({ params: { id: r.id } }));
+  if (day.am?.recipe_id === recipe.id) appearances.push({ day: day.day, label: day.label, meal: "AM" });
+  if (day.pm?.recipe_id === recipe.id) appearances.push({ day: day.day, label: day.label, meal: "PM" });
 }
 ---
 
@@ -165,29 +177,82 @@ export async function getStaticPaths() {
 
     {/* Nutrition */}
     <section class="rd__section reveal">
-      <h2 class="rd__section-title">Nutrition per 1,000 kcal</h2>
+      <h2 class="rd__section-title">
+        Nutrition
+        <span class="rd__section-note">per 1,000 kcal base</span>
+      </h2>
+
+      {/* Top-level glanceable stats */}
       <div class="rd__stat-grid">
         <div class="rd__stat">
-          <span class="rd__stat-val">{nutrients.protein_g}<small>g</small></span>
+          <span class="rd__stat-val" data-base-val={hasFdcData ? nutrientTotals.protein_g : ""} data-decimals="0">
+            {hasFdcData ? fmtNutrient(nutrientTotals.protein_g, 0) : staticNutrients.protein_g}<small>g</small>
+          </span>
           <span class="rd__stat-lbl">Protein</span>
         </div>
         <div class="rd__stat">
-          <span class="rd__stat-val">{nutrients.fat_g}<small>g</small></span>
+          <span class="rd__stat-val" data-base-val={hasFdcData ? nutrientTotals.fat_g : ""} data-decimals="0">
+            {hasFdcData ? fmtNutrient(nutrientTotals.fat_g, 0) : staticNutrients.fat_g}<small>g</small>
+          </span>
           <span class="rd__stat-lbl">Fat</span>
         </div>
         <div class="rd__stat">
-          <span class="rd__stat-val">{nutrients.fiber_g}<small>g</small></span>
+          <span class="rd__stat-val" data-base-val={hasFdcData ? nutrientTotals.fiber_g : ""} data-decimals="0">
+            {hasFdcData ? fmtNutrient(nutrientTotals.fiber_g, 0) : staticNutrients.fiber_g}<small>g</small>
+          </span>
           <span class="rd__stat-lbl">Fiber</span>
         </div>
         <div class="rd__stat">
-          <span class="rd__stat-val">{nutrients.ca_p_ratio}</span>
+          <span class="rd__stat-val" data-nutrient="ca_p_ratio">
+            {hasFdcData ? (computedCaPRatio ?? "—") : staticNutrients.ca_p_ratio}
+          </span>
           <span class="rd__stat-lbl">Ca:P</span>
         </div>
         <div class="rd__stat">
-          <span class="rd__stat-val">{nutrients.calcium_mg}<small>mg</small></span>
+          <span class="rd__stat-val" data-base-val={hasFdcData ? nutrientTotals.calcium_mg : ""} data-decimals="0">
+            {hasFdcData ? fmtNutrient(nutrientTotals.calcium_mg, 0) : staticNutrients.calcium_mg}<small>mg</small>
+          </span>
           <span class="rd__stat-lbl">Calcium</span>
         </div>
       </div>
+
+      {/* Full nutrient breakdown (FDC computed) */}
+      {hasFdcData && (
+        <details class="rd__nutrient-details">
+          <summary>Full nutrient breakdown</summary>
+          <div class="nutrient-grid">
+            {NUTRIENT_DISPLAY_SECTIONS.map((section) => (
+              <div class="nutrient-card">
+                <h3 class="nutrient-card__title">{section.title}</h3>
+                <table class="nutrient-table">
+                  <tbody>
+                    {section.rows.map((row) => {
+                      const val = nutrientTotals[row.key];
+                      return (
+                        <tr class={val === 0 ? "null-row" : ""}>
+                          <td class="nl">{row.label}</td>
+                          <td class="nv" data-base-val={val} data-decimals={row.decimals}>
+                            {fmtNutrient(val, row.decimals)}
+                          </td>
+                          <td class="nu">{row.unit}</td>
+                        </tr>
+                      );
+                    })}
+                    {section.title === "Minerals" && computedCaPRatio && (
+                      <tr>
+                        <td class="nl">Ca:P Ratio</td>
+                        <td class="nv" data-nutrient="ca_p_ratio">{computedCaPRatio}</td>
+                        <td class="nu"></td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+
       {recipe.tags?.dimensions_covered?.length > 0 && (
         <div class="rd__dimensions">
           <h3 class="rd__section-title">Dimensions covered</h3>
@@ -227,18 +292,37 @@ export async function getStaticPaths() {
   </article>
 </BaseLayout>
 
-<script define:vars={{ sizing, RECIPE: recipe }}>
+<script define:vars={{ sizing, RECIPE: recipe, nutrientTotals }}>
   let activeSize = "medium";
   const sizePicker = document.getElementById("size-picker");
 
   function applySize(sizeKey) {
     const factor = sizing[sizeKey]?.factor ?? 0.95;
+
+    // Scale ingredient amounts
     for (const el of document.querySelectorAll("[data-base-g]")) {
       const base = parseFloat(el.dataset.baseG);
       if (!isNaN(base)) {
         const unit = el.dataset.unit ?? "g";
         el.textContent = `${Math.round(base * factor)} ${unit}`;
       }
+    }
+
+    // Scale nutrient values
+    for (const el of document.querySelectorAll("[data-base-val]")) {
+      const base = parseFloat(el.dataset.baseVal);
+      if (isNaN(base)) continue;
+      const decimals = parseInt(el.dataset.decimals ?? "1", 10);
+      const scaled = base * factor;
+      el.textContent = scaled.toFixed(decimals);
+    }
+
+    // Ca:P ratio is size-invariant (factor cancels), but update from computed totals
+    const caP = nutrientTotals.phosphorus_mg > 0
+      ? (nutrientTotals.calcium_mg / nutrientTotals.phosphorus_mg).toFixed(2) + ":1"
+      : "—";
+    for (const el of document.querySelectorAll('[data-nutrient="ca_p_ratio"]')) {
+      el.textContent = caP;
     }
   }
 

@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "source": "NIST Handbook 133 / USDA SR Legacy density values",
+    "description": "Volume-to-mass conversion factors for common cooking ingredients. density_g_per_ml is the primary conversion factor; volume_units provides standard ml equivalents."
+  },
+  "volume_units": {
+    "ml": 1.0,
+    "tsp": 4.92892,
+    "tbsp": 14.7868,
+    "fl_oz": 29.5735,
+    "cup": 236.588
+  },
+  "densities": {
+    "fats_oils_fish_oil": { "density_g_per_ml": 0.93 },
+    "fats_oils_olive_oil": { "density_g_per_ml": 0.92 },
+    "fats_oils_coconut_oil": { "density_g_per_ml": 0.92 },
+    "fats_oils_sunflower_oil": { "density_g_per_ml": 0.92 },
+    "fats_oils_safflower_oil": { "density_g_per_ml": 0.92 },
+    "fats_oils_canola_oil": { "density_g_per_ml": 0.91 },
+    "fats_oils_cod_liver_oil": { "density_g_per_ml": 0.93 },
+    "water": { "density_g_per_ml": 1.00 },
+    "eggs_dairy_kefir": { "density_g_per_ml": 1.03 },
+    "eggs_dairy_plain_yogurt": { "density_g_per_ml": 1.04 },
+    "_default_liquid": { "density_g_per_ml": 0.93 }
+  }
+}

@@ -7,6 +7,7 @@ import { ManufacturerDbSchema } from "./schemas/manufacturer";
 import { PlanItemArraySchema } from "./schemas/planItem";
 import { FdcMappingDbSchema } from "./schemas/fdc";
 import { NutrientDbSchema } from "./schemas/fdc";
+import { NistConversionsSchema } from "./schemas/conversions";
 
 const DATA_ROOT = path.resolve(process.cwd(), "..", "data");
 const PLAN_ROOT = path.resolve(process.cwd(), "..", "plan");
@@ -55,5 +56,12 @@ export function loadNutrientDb() {
   return loadAndParse(
     path.join(DATA_ROOT, "ingredients", "nutrients.json"),
     NutrientDbSchema,
+  );
+}
+
+export function loadNistConversions() {
+  return loadAndParse(
+    path.join(DATA_ROOT, "conversions", "nist_conversions.json"),
+    NistConversionsSchema,
   );
 }

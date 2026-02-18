@@ -6,7 +6,7 @@
     "sync:specs": "node scripts/sync-specs.mjs",
     "gen:ingredients-db": "node ../scripts/generate_ingredients_db.mjs",
     "gen:ingredients": "../.venv/bin/python ../scripts/extract_median_nutrients.py --input ../data/kyokon-synthetic-ingredients.json --format json --output src/data/ingredients_medians.json",
-    "predev": "npm run gen:ingredients-db && npm run sync:specs && npm run gen:ingredients",
+    "predev": "npm run gen:ingredients-db && npm run sync:specs",
     "dev": "astro dev",
     "prebuild": "npm run gen:ingredients-db && npm run sync:specs",
     "build": "astro build",
