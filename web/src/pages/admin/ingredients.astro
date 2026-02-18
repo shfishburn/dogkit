@@ -1,35 +1,50 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { loadIngredientDb } from "../../lib/loaders";
-import type { FdcMappingEntry } from "../../lib/schemas";
+import { loadIngredientDb, loadWeeklyMealPlan } from "../../lib/loaders";
+import { loadFdcMappings } from "../../lib/supabaseFdc";
+import type { FdcMapping } from "../../lib/supabaseFdc";
 
 const db = await loadIngredientDb();
 const ingredients = db.ingredients;
 
-let fdcMappings: FdcMappingEntry[] = [];
+/* ── FDC mappings from Supabase ──────────────────────── */
+let fdcMappings: FdcMapping[] = [];
 try {
-  const { loadFdcMapping } = await import("../../lib/loaders");
-  const mapping = await loadFdcMapping();
-  fdcMappings = mapping.mappings;
+  fdcMappings = await loadFdcMappings();
 } catch {
-  // fdc_mapping.json may not exist yet
+  // Supabase may not be configured
 }
 
 const mappingByIngredient = new Map(
   fdcMappings.map((m) => [m.ingredient_id, m]),
 );
 
-const rows = ingredients.map((ing) => ({
-  id: ing.id,
-  name: ing.name,
-  category: ing.category,
-  tier: ing.tier,
-  fdc_id: mappingByIngredient.get(ing.id)?.fdc_id ?? null,
-  fdc_description: mappingByIngredient.get(ing.id)?.fdc_description ?? null,
-  data_type: mappingByIngredient.get(ing.id)?.data_type ?? null,
-}));
+/* ── Recipe ingredient usage ─────────────────────────── */
+const mealPlan = await loadWeeklyMealPlan();
+const recipeUsage = new Map<string, number>();
+for (const recipe of mealPlan.recipes) {
+  for (const ing of recipe.ingredients) {
+    recipeUsage.set(ing.ingredient_id, (recipeUsage.get(ing.ingredient_id) ?? 0) + 1);
+  }
+}
+
+/* ── Build rows ──────────────────────────────────────── */
+const rows = ingredients.map((ing) => {
+  const mapping = mappingByIngredient.get(ing.id);
+  return {
+    id: ing.id,
+    name: ing.name,
+    category: ing.category,
+    tier: ing.tier,
+    fdc_id: mapping?.fdc_id ?? null,
+    fdc_description: mapping?.fdc_description ?? null,
+    data_type: mapping?.data_type ?? null,
+    inRecipes: recipeUsage.get(ing.id) ?? 0,
+  };
+});
 
 const mapped = rows.filter((r) => r.fdc_id !== null).length;
+const inRecipeCount = rows.filter((r) => r.inRecipes > 0).length;
 
 // Group by category for section headers
 const categories = [...new Set(rows.map((r) => r.category))];
@@ -53,7 +68,9 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
     </div>
 
     <p class="fdc-stats">
-      <strong id="fdc-mapped-count">{mapped}</strong> / {rows.length} ingredients mapped
+      <strong id="fdc-mapped-count">{mapped}</strong> / {rows.length} mapped to FDC
+      &nbsp;&middot;&nbsp;
+      <strong>{inRecipeCount}</strong> used in recipes
     </p>
 
     {categories.map((cat) => {
@@ -73,6 +90,7 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
                 <tr>
                   <th>Name</th>
                   <th>Tier</th>
+                  <th class="num-col">Recipes</th>
                   <th>FDC ID</th>
                   <th>FDC Description</th>
                   <th>Type</th>
@@ -88,12 +106,26 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
                     data-data-type={row.data_type ?? ""}
                   >
                     <td>
-                      <span class="ing-name">{row.name}</span>
+                      {row.fdc_id ? (
+                        <a href={`/ingredients/${row.id}`} class="ing-link">{row.name}</a>
+                      ) : (
+                        <span class="ing-name">{row.name}</span>
+                      )}
                     </td>
                     <td><span class="tier-badge">{row.tier}</span></td>
+                    <td class="num-col">
+                      {row.inRecipes > 0 ? (
+                        <span class="recipe-count">{row.inRecipes}</span>
+                      ) : (
+                        <span class="fdc-unmapped">—</span>
+                      )}
+                    </td>
                     <td class="fdc-id-cell">
                       {row.fdc_id ? (
-                        <span class="fdc-mapped">{row.fdc_id}</span>
+                        <a href={`https://fdc.nal.usda.gov/food-details/${row.fdc_id}/nutrients`}
+                           target="_blank" rel="noopener" class="fdc-mapped">
+                          {row.fdc_id}
+                        </a>
                       ) : (
                         <span class="fdc-unmapped">—</span>
                       )}
@@ -145,6 +177,39 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
     </div>
   </dialog>
 </BaseLayout>
+
+<style>
+  .num-col {
+    text-align: center;
+    white-space: nowrap;
+  }
+  .recipe-count {
+    display: inline-block;
+    min-width: 1.5em;
+    text-align: center;
+    font-size: var(--text-micro);
+    font-weight: 600;
+    background: var(--color-code-surface);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.4em;
+  }
+  .ing-link {
+    font-weight: 600;
+    color: var(--color-link);
+    text-decoration: none;
+  }
+  .ing-link:hover {
+    text-decoration: underline;
+  }
+  .fdc-mapped {
+    color: var(--color-link);
+    text-decoration: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .fdc-mapped:hover {
+    text-decoration: underline;
+  }
+</style>
 
 <script>
   type MappingEntry = {
@@ -333,10 +398,21 @@ const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
     );
     if (!row) return;
 
+    // Update name cell: add/remove link
+    const nameCell = row.querySelector("td:first-child");
+    if (nameCell) {
+      const name = nameCell.textContent?.trim() ?? ingredientId;
+      if (entry) {
+        nameCell.innerHTML = `<a href="/ingredients/${ingredientId}" class="ing-link">${escapeHtml(name)}</a>`;
+      } else {
+        nameCell.innerHTML = `<span class="ing-name">${escapeHtml(name)}</span>`;
+      }
+    }
+
     const idCell = row.querySelector(".fdc-id-cell");
     if (idCell) {
       idCell.innerHTML = entry
-        ? `<span class="fdc-mapped">${entry.fdc_id}</span>`
+        ? `<a href="https://fdc.nal.usda.gov/food-details/${entry.fdc_id}/nutrients" target="_blank" rel="noopener" class="fdc-mapped">${entry.fdc_id}</a>`
         : `<span class="fdc-unmapped">—</span>`;
     }
     const descCell = row.querySelector(".fdc-desc-cell");

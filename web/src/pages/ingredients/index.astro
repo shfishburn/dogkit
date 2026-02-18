@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { loadIngredientDb } from "../../lib/loaders";
 import { loadFdcNutrientMap } from "../../lib/supabaseFdc";
 import type { Ingredient } from "../../lib/schemas";
-import type { FdcNutrient } from "../lib/supabaseFdc";
+import type { FdcNutrient } from "../../lib/supabaseFdc";
 
 function titleCaseCategory(category: string): string {
   return category
