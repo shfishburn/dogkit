@@ -30,6 +30,10 @@ export async function supabaseQuery<T = unknown>(
   table: string,
   params: Record<string, string> = {},
 ): Promise<T[]> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    return [];
+  }
+
   const url = new URL(`${BASE}/${table}`);
   for (const [k, v] of Object.entries(params)) {
     url.searchParams.set(k, v);
