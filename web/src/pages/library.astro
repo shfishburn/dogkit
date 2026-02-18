@@ -2,13 +2,14 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 
-const adminTools = [
+// ── Internal docs (not in content collection) ────────────────
+const internalDocs = [
   {
-    href: "/library/business",
-    icon: "📋",
-    title: "Business Documents",
-    description: "Business plan, financial model, and operational documents.",
-    label: "Business",
+    href: "/library/project-plan",
+    icon: "✅",
+    title: "Project Plan",
+    description: "Phased project checklist with task tracking and milestones.",
+    label: "Plan",
   },
   {
     href: "/library/manufacturer",
@@ -16,13 +17,6 @@ const adminTools = [
     title: "Manufacturer Candidates",
     description: "Co-manufacturer evaluation and candidate tracking.",
     label: "Mfg",
-  },
-  {
-    href: "/library/project-plan",
-    icon: "✅",
-    title: "Project Plan",
-    description: "Phased project checklist with task tracking and milestones.",
-    label: "Plan",
   },
 ];
 
@@ -68,7 +62,7 @@ for (const doc of docs) {
   arr.push(doc);
   docsByCategory.set(doc.category, arr);
 }
-const categoryOrder = ["Overview", "Research", "Pipeline", "Business", "Comparison", "Database"];
+const categoryOrder = ["Overview", "Research", "Pipeline", "Database", "Business", "Comparison"];
 const sortedCategories = [...docsByCategory.keys()].sort(
   (a, b) => {
     const ai = categoryOrder.indexOf(a);
@@ -81,7 +75,7 @@ const sortedCategories = [...docsByCategory.keys()].sort(
 );
 ---
 
-<BaseLayout title="Library" description="All Dogology tools and research documents — ingredient database, recipes, meal plan calculator, and science references.">
+<BaseLayout title="Library" description="Research documents, specs, and internal tools behind every Dogology meal.">
 
   <div class="lib-hero">
     <div class="page-header__top">
@@ -89,26 +83,8 @@ const sortedCategories = [...docsByCategory.keys()].sort(
       <button class="button no-print" type="button" onclick="window.print()">Print</button>
     </div>
     <h1 class="lib-hero__headline">Library</h1>
-    <p class="lib-hero__sub">Admin tools, research documents, and specs behind every Dogology meal.</p>
+    <p class="lib-hero__sub">Research documents, specs, and internal tools behind every Dogology meal.</p>
   </div>
-
-  <!-- ── Admin ── -->
-  <section class="lib-section">
-    <h2 class="lib-section__title">Admin</h2>
-    <div class="lib-grid lib-grid--tools">
-      {adminTools.map((t) => (
-        <a href={t.href} class="lib-card lib-card--tool">
-          <div class="lib-card__icon">{t.icon}</div>
-          <div class="lib-card__body">
-            <span class="lib-badge">{t.label}</span>
-            <h3 class="lib-card__title">{t.title}</h3>
-            <p class="lib-card__desc">{t.description}</p>
-          </div>
-          <span class="lib-card__arrow" aria-hidden="true">→</span>
-        </a>
-      ))}
-    </div>
-  </section>
 
   <!-- ── Research & Docs ── -->
   <section class="lib-section">
@@ -129,6 +105,24 @@ const sortedCategories = [...docsByCategory.keys()].sort(
         </div>
       </div>
     ))}
+  </section>
+
+  <!-- ── Internal ── -->
+  <section class="lib-section">
+    <h2 class="lib-section__title">Internal</h2>
+    <div class="lib-grid lib-grid--tools">
+      {internalDocs.map((t) => (
+        <a href={t.href} class="lib-card lib-card--tool">
+          <div class="lib-card__icon">{t.icon}</div>
+          <div class="lib-card__body">
+            <span class="lib-badge">{t.label}</span>
+            <h3 class="lib-card__title">{t.title}</h3>
+            <p class="lib-card__desc">{t.description}</p>
+          </div>
+          <span class="lib-card__arrow" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </div>
   </section>
 
 </BaseLayout>
