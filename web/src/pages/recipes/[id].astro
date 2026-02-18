@@ -63,7 +63,7 @@ export async function getStaticPaths() {
 }
 ---
 
-<BaseLayout title={recipe.name} description={recipe.overview} container="sm">
+<BaseLayout title={recipe.name} description={recipe.overview} container="lg">
   <article class="rd">
 
     {/* Hero image */}
@@ -73,7 +73,7 @@ export async function getStaticPaths() {
           class="rd__hero-img"
           src={heroSrc}
           srcset={heroSrcSet}
-          sizes="(max-width: 42rem) 100vw, 42rem"
+          sizes="(max-width: 72rem) 100vw, 72rem"
           alt={recipe.name}
           width="960"
           height="600"

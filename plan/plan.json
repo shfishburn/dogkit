@@ -72,6 +72,13 @@
   {
     "phase": "2",
     "month_range": "4–6",
+    "task_id": "2.1.1",
+    "title": "Make Plan the first Library card",
+    "description": "In the Library page Tools section, ensure the Plan (MER-based plan builder) appears as the first card so users discover the core flow immediately."
+  },
+  {
+    "phase": "2",
+    "month_range": "4–6",
     "task_id": "2.2",
     "title": "Run small pilot production batches",
     "description": "Push the recipes and treats through a first production run at modest scale. Produce limited quantities of several meal recipes and the initial treat SKUs. Use this run to test actual manufacturing behavior, packaging durability, freezing and thawing performance, and basic quality checks like weight accuracy and visual consistency."

@@ -51,7 +51,7 @@ import { BREEDS } from "../lib/breeds";
           <div class="dog-card__header">
             <strong class="dog-card__title">
               <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
-              Dog 1
+              <span class="dog-card__label">Dog 1</span>
             </strong>
           </div>
 
@@ -106,7 +106,7 @@ import { BREEDS } from "../lib/breeds";
           <div class="dog-card__header">
             <strong class="dog-card__title">
               <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
-              Dog __N__
+              <span class="dog-card__label">Dog __N__</span>
             </strong>
             <button type="button" class="dog-card__remove" data-remove="__IDX__" aria-label="Remove dog">Remove</button>
           </div>
@@ -177,7 +177,7 @@ import { BREEDS } from "../lib/breeds";
           <div class="dog-card__header">
             <strong class="dog-card__title">
               <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
-              Dog 1
+              <span class="dog-card__label">Dog 1</span>
             </strong>
           </div>
 
@@ -226,7 +226,7 @@ import { BREEDS } from "../lib/breeds";
           <div class="dog-card__header">
             <strong class="dog-card__title">
               <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
-              Dog __N__
+              <span class="dog-card__label">Dog __N__</span>
             </strong>
           </div>
 
@@ -288,7 +288,7 @@ import { BREEDS } from "../lib/breeds";
           <div class="dog-card__header">
             <strong class="dog-card__title">
               <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
-              Dog 1
+              <span class="dog-card__label">Dog 1</span>
             </strong>
           </div>
 
@@ -313,7 +313,7 @@ import { BREEDS } from "../lib/breeds";
           <div class="dog-card__header">
             <strong class="dog-card__title">
               <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
-              Dog __N__
+              <span class="dog-card__label">Dog __N__</span>
             </strong>
           </div>
 
@@ -394,15 +394,30 @@ import { BREEDS } from "../lib/breeds";
       }
 
       function dogTitle(idx: number) {
-        return `Dog ${idx + 1}`;
+        const el = form.elements.namedItem(`dog_${idx}_name`) as HTMLInputElement | null;
+        const name = (el?.value ?? '').trim();
+        return name ? `Dog ${idx + 1} — ${name}` : `Dog ${idx + 1}`;
+      }
+
+      function syncDogTitles() {
+        for (const host of [step1Host, step2Host, step3Host]) {
+          if (!host) continue;
+          for (const card of Array.from(host.querySelectorAll<HTMLElement>('.dog-card[data-dog]'))) {
+            if (card.dataset.removed === 'true') continue;
+            const idx = Number(card.dataset.dog);
+            if (!Number.isFinite(idx)) continue;
+            const label = card.querySelector<HTMLElement>('.dog-card__label');
+            if (label) label.textContent = dogTitle(idx);
+          }
+        }
       }
 
       function hydrateDogTemplate(fragment: DocumentFragment, idx: number) {
         for (const el of Array.from(fragment.querySelectorAll<HTMLElement>('[data-dog]'))) {
           el.dataset.dog = String(idx);
         }
-        for (const title of Array.from(fragment.querySelectorAll<HTMLElement>('.dog-card__title'))) {
-          title.textContent = dogTitle(idx);
+        for (const label of Array.from(fragment.querySelectorAll<HTMLElement>('.dog-card__label'))) {
+          label.textContent = dogTitle(idx);
         }
         // Replace name attributes like dog___IDX___weight_kg → dog_1_weight_kg
         for (const input of Array.from(fragment.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input[name], select[name]'))) {
@@ -591,6 +606,9 @@ import { BREEDS } from "../lib/breeds";
         el.value = val;
       }
 
+      // Keep dog titles (Dog 1 — Name) in sync across steps.
+      syncDogTitles();
+
       updateWeightLabels();
 
       // Units toggle
@@ -609,6 +627,14 @@ import { BREEDS } from "../lib/breeds";
       addDogBtn?.addEventListener('click', () => {
         const next = currentDogCount() + 1;
         ensureDogCount(next);
+        syncDogTitles();
+      });
+
+      // Live-update titles when a name changes.
+      form.addEventListener('input', (e) => {
+        const target = e.target as HTMLElement | null;
+        if (!target) return;
+        if (target.matches('input[name$="_name"]')) syncDogTitles();
       });
 
       // Remove dog (step 1 only; keeps indices stable by just hiding)
@@ -626,6 +652,8 @@ import { BREEDS } from "../lib/breeds";
             field.disabled = true;
           }
         }
+
+        syncDogTitles();
       });
 
       function go(idx: number) {

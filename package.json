@@ -6,7 +6,8 @@
     "build": "npm --prefix web run build",
     "preview": "npm --prefix web run preview",
     "gen:ingredients": "npm --prefix web run gen:ingredients",
-    "prepare": "husky"
+    "prepare": "husky",
+    "fetch:nutrients": "node scripts/fetch_fdc_nutrients.mjs"
   },
   "version": "1.0.0",
   "description": "",

@@ -1,0 +1,431 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { loadIngredientDb } from "../../lib/loaders";
+import type { FdcMappingEntry } from "../../lib/schemas";
+
+const db = await loadIngredientDb();
+const ingredients = db.ingredients;
+
+let fdcMappings: FdcMappingEntry[] = [];
+try {
+  const { loadFdcMapping } = await import("../../lib/loaders");
+  const mapping = await loadFdcMapping();
+  fdcMappings = mapping.mappings;
+} catch {
+  // fdc_mapping.json may not exist yet
+}
+
+const mappingByIngredient = new Map(
+  fdcMappings.map((m) => [m.ingredient_id, m]),
+);
+
+const rows = ingredients.map((ing) => ({
+  id: ing.id,
+  name: ing.name,
+  category: ing.category,
+  tier: ing.tier,
+  fdc_id: mappingByIngredient.get(ing.id)?.fdc_id ?? null,
+  fdc_description: mappingByIngredient.get(ing.id)?.fdc_description ?? null,
+  data_type: mappingByIngredient.get(ing.id)?.data_type ?? null,
+}));
+
+const mapped = rows.filter((r) => r.fdc_id !== null).length;
+
+// Group by category for section headers
+const categories = [...new Set(rows.map((r) => r.category))];
+---
+
+<BaseLayout title="Admin — FDC Mapping" container="lg">
+  <div class="prose">
+    <h1>FDC Ingredient Mapping</h1>
+    <p class="small">Map ingredients to USDA FoodData Central IDs for nutrient data extraction.</p>
+
+    <div class="fdc-toolbar">
+      <label>
+        FDC API Key
+        <input type="password" id="fdc-api-key" placeholder="Enter your FDC API key" autocomplete="off" />
+      </label>
+      <button class="button" id="fdc-import-btn" type="button">Import JSON</button>
+      <button class="button" id="fdc-export-btn" type="button">Export JSON</button>
+      <input type="file" id="fdc-import-file" accept=".json" hidden />
+    </div>
+
+    <p class="fdc-stats">
+      <strong id="fdc-mapped-count">{mapped}</strong> / {rows.length} ingredients mapped
+    </p>
+
+    {categories.map((cat) => {
+      const catRows = rows.filter((r) => r.category === cat);
+      const catLabel = cat.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+      return (
+        <details class="plan-phase" open>
+          <summary class="plan-phase__summary">
+            <strong>{catLabel}</strong>
+            <span class="small" style="margin-left: var(--space-2); color: var(--color-muted);">
+              ({catRows.filter((r) => r.fdc_id !== null).length}/{catRows.length})
+            </span>
+          </summary>
+          <div class="fdc-table-wrap" style="border:none; border-radius:0;">
+            <table class="fdc-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Tier</th>
+                  <th>FDC ID</th>
+                  <th>FDC Description</th>
+                  <th>Type</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {catRows.map((row) => (
+                  <tr
+                    data-ingredient-id={row.id}
+                    data-fdc-id={row.fdc_id ?? ""}
+                    data-fdc-description={row.fdc_description ?? ""}
+                    data-data-type={row.data_type ?? ""}
+                  >
+                    <td>
+                      <span class="ing-name">{row.name}</span>
+                    </td>
+                    <td><span class="tier-badge">{row.tier}</span></td>
+                    <td class="fdc-id-cell">
+                      {row.fdc_id ? (
+                        <span class="fdc-mapped">{row.fdc_id}</span>
+                      ) : (
+                        <span class="fdc-unmapped">—</span>
+                      )}
+                    </td>
+                    <td class="fdc-desc-cell">
+                      {row.fdc_description ?? ""}
+                    </td>
+                    <td class="fdc-type-cell">
+                      {row.data_type ?? ""}
+                    </td>
+                    <td class="fdc-action-cell">
+                      <button
+                        class="fdc-search-btn"
+                        type="button"
+                        data-ingredient-id={row.id}
+                        data-ingredient-name={row.name}
+                      >
+                        Search
+                      </button>
+                      <button
+                        class="fdc-clear-btn"
+                        type="button"
+                        data-ingredient-id={row.id}
+                        style={row.fdc_id ? "" : "display:none"}
+                      >
+                        ✕
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      );
+    })}
+  </div>
+
+  {/* Search dialog */}
+  <dialog id="fdc-search-dialog" class="fdc-dialog">
+    <h3 id="fdc-dialog-title">Search FDC</h3>
+    <div class="fdc-dialog-row">
+      <input type="text" id="fdc-search-input" placeholder="Search FoodData Central..." />
+      <button class="button" id="fdc-do-search" type="button">Search</button>
+    </div>
+    <div id="fdc-search-results"></div>
+    <div style="margin-top: var(--space-4); text-align: right;">
+      <button class="button" id="fdc-dialog-close" type="button">Close</button>
+    </div>
+  </dialog>
+</BaseLayout>
+
+<script>
+  type MappingEntry = {
+    fdc_id: number;
+    fdc_description: string;
+    data_type: string;
+    mapped_at: string;
+  };
+
+  // --- State ---
+  const mappings = new Map<string, MappingEntry>();
+
+  // Seed from server-rendered data attributes
+  document
+    .querySelectorAll<HTMLTableRowElement>("[data-ingredient-id]")
+    .forEach((row) => {
+      if (!(row instanceof HTMLTableRowElement)) return;
+      const id = row.dataset.ingredientId!;
+      const fdcId = row.dataset.fdcId;
+      if (fdcId) {
+        mappings.set(id, {
+          fdc_id: Number(fdcId),
+          fdc_description: row.dataset.fdcDescription ?? "",
+          data_type: row.dataset.dataType ?? "",
+          mapped_at: "",
+        });
+      }
+    });
+
+  // --- API Key ---
+  const KEY_STORAGE = "dogology:fdc_api_key";
+  const keyInput = document.getElementById("fdc-api-key") as HTMLInputElement;
+  keyInput.value = localStorage.getItem(KEY_STORAGE) ?? "";
+  keyInput.addEventListener("input", () => {
+    localStorage.setItem(KEY_STORAGE, keyInput.value.trim());
+  });
+
+  function getApiKey(): string {
+    return localStorage.getItem(KEY_STORAGE)?.trim() ?? "";
+  }
+
+  // --- Search dialog ---
+  const dialog = document.getElementById(
+    "fdc-search-dialog",
+  ) as HTMLDialogElement;
+  const dialogTitle = document.getElementById(
+    "fdc-dialog-title",
+  ) as HTMLElement;
+  const searchInput = document.getElementById(
+    "fdc-search-input",
+  ) as HTMLInputElement;
+  const resultsEl = document.getElementById(
+    "fdc-search-results",
+  ) as HTMLDivElement;
+  let activeIngredientId = "";
+
+  // Open dialog from search buttons
+  document
+    .querySelectorAll<HTMLButtonElement>(".fdc-search-btn")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeIngredientId = btn.dataset.ingredientId!;
+        const name = btn.dataset.ingredientName!;
+        dialogTitle.textContent = `Search FDC — ${name}`;
+        searchInput.value = name;
+        resultsEl.innerHTML = "";
+        dialog.showModal();
+      });
+    });
+
+  // Close dialog
+  document.getElementById("fdc-dialog-close")!.addEventListener("click", () => {
+    dialog.close();
+  });
+
+  // Close on backdrop click
+  dialog.addEventListener("click", (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+
+  // Enter key in search input
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      doSearch();
+    }
+  });
+
+  // Search button
+  document.getElementById("fdc-do-search")!.addEventListener("click", doSearch);
+
+  async function doSearch() {
+    const key = getApiKey();
+    if (!key) {
+      alert("Enter your FDC API key first.");
+      return;
+    }
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    resultsEl.innerHTML = "<p>Searching...</p>";
+
+    try {
+      const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${key}&query=${encodeURIComponent(query)}&pageSize=25&dataType=SR%20Legacy,Foundation`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      if (!data.foods?.length) {
+        resultsEl.innerHTML = "<p>No results found.</p>";
+        return;
+      }
+
+      resultsEl.innerHTML = data.foods
+        .map(
+          (f: {
+            fdcId: number;
+            description: string;
+            dataType: string;
+            foodCategory?: string;
+          }) => `
+        <div class="fdc-result">
+          <div class="fdc-result-info">
+            <div class="fdc-result-desc">${escapeHtml(f.description)}</div>
+            <div class="fdc-result-meta">FDC ${f.fdcId} · ${escapeHtml(f.dataType)}${f.foodCategory ? ` · ${escapeHtml(f.foodCategory)}` : ""}</div>
+          </div>
+          <button class="fdc-assign-btn"
+                  data-fdc-id="${f.fdcId}"
+                  data-fdc-desc="${escapeAttr(f.description)}"
+                  data-fdc-type="${escapeAttr(f.dataType)}">
+            Assign
+          </button>
+        </div>
+      `,
+        )
+        .join("");
+
+      // Bind assign buttons
+      resultsEl
+        .querySelectorAll<HTMLButtonElement>(".fdc-assign-btn")
+        .forEach((btn) => {
+          btn.addEventListener("click", () => {
+            assignMapping(activeIngredientId, {
+              fdc_id: Number(btn.dataset.fdcId),
+              fdc_description: btn.dataset.fdcDesc!,
+              data_type: btn.dataset.fdcType!,
+              mapped_at: new Date().toISOString(),
+            });
+            dialog.close();
+          });
+        });
+    } catch (err) {
+      resultsEl.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
+    }
+  }
+
+  // --- Clear (unmap) buttons ---
+  document
+    .querySelectorAll<HTMLButtonElement>(".fdc-clear-btn")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => {
+        clearMapping(btn.dataset.ingredientId!);
+      });
+    });
+
+  // --- Assign + re-render row ---
+  function assignMapping(ingredientId: string, entry: MappingEntry) {
+    mappings.set(ingredientId, entry);
+    rerenderRow(ingredientId, entry);
+    updateStats();
+  }
+
+  function clearMapping(ingredientId: string) {
+    mappings.delete(ingredientId);
+    rerenderRow(ingredientId, null);
+    updateStats();
+  }
+
+  function rerenderRow(ingredientId: string, entry: MappingEntry | null) {
+    const row = document.querySelector(
+      `tr[data-ingredient-id="${ingredientId}"]`,
+    );
+    if (!row) return;
+
+    const idCell = row.querySelector(".fdc-id-cell");
+    if (idCell) {
+      idCell.innerHTML = entry
+        ? `<span class="fdc-mapped">${entry.fdc_id}</span>`
+        : `<span class="fdc-unmapped">—</span>`;
+    }
+    const descCell = row.querySelector(".fdc-desc-cell");
+    if (descCell) descCell.textContent = entry?.fdc_description ?? "";
+    const typeCell = row.querySelector(".fdc-type-cell");
+    if (typeCell) typeCell.textContent = entry?.data_type ?? "";
+
+    // Show / hide clear button
+    const clearBtn = row.querySelector<HTMLButtonElement>(".fdc-clear-btn");
+    if (clearBtn) clearBtn.style.display = entry ? "" : "none";
+  }
+
+  // --- Export ---
+  document.getElementById("fdc-export-btn")!.addEventListener("click", () => {
+    const payload = {
+      version: "1.0",
+      updated_at: new Date().toISOString(),
+      mappings: Array.from(mappings.entries()).map(([id, e]) => ({
+        ingredient_id: id,
+        fdc_id: e.fdc_id,
+        fdc_description: e.fdc_description,
+        data_type: e.data_type,
+      })),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], {
+      type: "application/json",
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "fdc_mapping.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  // --- Import ---
+  const importFile = document.getElementById(
+    "fdc-import-file",
+  ) as HTMLInputElement;
+  document
+    .getElementById("fdc-import-btn")!
+    .addEventListener("click", () => importFile.click());
+
+  importFile.addEventListener("change", async () => {
+    const file = importFile.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      let count = 0;
+      for (const m of data.mappings ?? []) {
+        if (m.ingredient_id && m.fdc_id) {
+          assignMapping(m.ingredient_id, {
+            fdc_id: m.fdc_id,
+            fdc_description: m.fdc_description ?? "",
+            data_type: m.data_type ?? "",
+            mapped_at: m.mapped_at ?? "",
+          });
+          count++;
+        }
+      }
+      alert(`Imported ${count} mapping(s).`);
+    } catch (err) {
+      alert(`Import failed: ${err}`);
+    }
+    importFile.value = "";
+  });
+
+  // --- Stats ---
+  function updateStats() {
+    const el = document.getElementById("fdc-mapped-count");
+    if (el) el.textContent = String(mappings.size);
+
+    // Update per-category counts in <summary> badges
+    document
+      .querySelectorAll<HTMLDetailsElement>("details.plan-phase")
+      .forEach((details) => {
+        const rows = details.querySelectorAll<HTMLTableRowElement>("tr[data-ingredient-id]");
+        const total = rows.length;
+        let mapped = 0;
+        rows.forEach((row) => {
+          if (mappings.has(row.dataset.ingredientId!)) mapped++;
+        });
+        const badge = details.querySelector("summary .small");
+        if (badge) badge.textContent = `(${mapped}/${total})`;
+      });
+  }
+
+  // --- Helpers ---
+  function escapeHtml(s: string): string {
+    const div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function escapeAttr(s: string): string {
+    return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+</script>
