@@ -1,8 +1,6 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 
 function stripMarkdown(s: string): string {
   return s
@@ -64,23 +62,22 @@ businessEntries.sort((a, b) => {
 
 const docs = await Promise.all(
   businessEntries.map(async (entry) => {
-    const srcPath = path.resolve(process.cwd(), "..", "specs", entry.id);
-    const md = await readFile(srcPath, "utf-8");
+    const md = entry.body ?? "";
     const slug = entry.id.replace(/^business\//, "").replace(/\.md$/i, "");
     const title = extractTitle(md, slug);
     const summary = extractSummary(md);
     return {
       title,
       href: `/admin/business/${slug}`,
-      source: `specs/${entry.id}`,
+      source: `src/content/specs/${entry.id}`,
       summary,
     };
   })
 );
 ---
 
-<BaseLayout title="Admin — Business">
-  <div class="prose" style="max-width: 100%;">
+<BaseLayout title="Admin — Business" container="md">
+  <div class="prose">
     <h1>Business documents</h1>
     <p>Reading order and summary for each document in the Dogology business package.</p>
 

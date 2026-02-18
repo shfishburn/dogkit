@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '..');
-const SOURCE_MD = path.join(REPO_ROOT, 'specs', 'ingredients', 'Canine Ingredient Database.md');
-const DEST_JSON = path.join(REPO_ROOT, 'specs', 'ingredients', 'ingredients.json');
+const SOURCE_MD = path.join(REPO_ROOT, 'packages', 'ingredients', 'Canine Ingredient Database.md');
+const DEST_JSON = path.join(REPO_ROOT, 'data', 'ingredients', 'ingredients.json');
 
 const AVAILABILITY_TIERS = {
   T1: 'any_grocery',
@@ -258,7 +258,7 @@ async function main() {
       currency: 'USD',
       availability_tiers: AVAILABILITY_TIERS,
       dimensions: DIMENSIONS,
-      generatedFrom: 'specs/ingredients/Canine Ingredient Database.md',
+      generatedFrom: 'packages/ingredients/Canine Ingredient Database.md',
     },
     ingredients,
   };

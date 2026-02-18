@@ -20,7 +20,7 @@ type IngredientDb = {
   ingredients: Ingredient[];
 };
 
-const jsonPath = path.resolve(process.cwd(), "..", "specs", "ingredients", "ingredients.json");
+const jsonPath = path.resolve(process.cwd(), "..", "data", "ingredients", "ingredients.json");
 const raw = await readFile(jsonPath, "utf-8");
 const db = JSON.parse(raw) as IngredientDb;
 
@@ -73,7 +73,7 @@ const coreDimensions: string[] = [
 ---
 
 <BaseLayout title="Recipe builder" description="Build balanced dog food recipes by picking ingredients and checking nutrient dimension coverage against AAFCO profiles.">
-  <div class="prose" style="max-width: 100%;">
+  <div class="prose">
     <h1>Recipe builder (MVP)</h1>
     <p class="small">
       Select ingredients and see which constraint dimensions they cover. This MVP does not calculate grams or full

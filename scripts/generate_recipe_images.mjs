@@ -19,7 +19,7 @@ import { createClient } from "@supabase/supabase-js";
 // ── Paths ────────────────────────────────────────────────────
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const RECIPE_JSON = path.join(ROOT, "specs", "recipes", "weekly_meal_plan.json");
+const RECIPE_JSON = path.join(ROOT, "data", "recipes", "weekly_meal_plan.json");
 const SYSTEM_PROMPT = path.join(__dirname, "prompts", "recipe-image-system.txt");
 const USER_TEMPLATE = path.join(__dirname, "prompts", "recipe-image-user.txt");
 

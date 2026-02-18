@@ -1,0 +1,149 @@
+[
+  {
+    "phase": "0",
+    "month_range": "0–2",
+    "task_id": "0.1",
+    "title": "Define product scope and constraints",
+    "description": "Decide exactly what Dogology will and will not do in Year 1. Focus on adult‑maintenance dogs only, avoid disease or therapeutic claims, and commit to meeting AAFCO 'complete and balanced' standards for any recipe marketed as a sole diet. Clarify that extra life stages and medical conditions will come later once the core model is stable."
+  },
+  {
+    "phase": "0",
+    "month_range": "0–2",
+    "task_id": "0.2",
+    "title": "Select initial SKUs for Year 1",
+    "description": "Choose a small, focused set of products to launch with. Target 5–10 complete-and-balanced template recipes for full meal kits, 1–2 DIY premix SKUs for home cooks, and 2–3 functional treat or supplement SKUs (for example, joint support chews and low-calorie training treats). The goal is enough variety to learn, but few enough SKUs to keep operations simple."
+  },
+  {
+    "phase": "0",
+    "month_range": "0–2",
+    "task_id": "0.3",
+    "title": "Hire veterinary nutrition and regulatory advisors",
+    "description": "Engage an experienced veterinary nutritionist and a pet food regulatory specialist. The nutritionist should help design nutrient targets, review recipes, and validate MER assumptions. The regulatory specialist should interpret AAFCO rules, advise on label wording, and outline state registration and compliance steps."
+  },
+  {
+    "phase": "0",
+    "month_range": "0–2",
+    "task_id": "0.4",
+    "title": "Build a basic MER and nutrient modeling tool",
+    "description": "Create an internal calculator that estimates each dog’s daily calorie needs from weight, age, neuter status, and activity level. Add an uncertainty band rather than a single hard number. Integrate a nutrient engine that pulls ingredient data (e.g., from USDA-style tables), sums nutrients per recipe, and compares them to adult AAFCO targets per 1000 kcal. This does not need to be pretty yet—accuracy and transparency matter more than UX."
+  },
+  {
+    "phase": "0",
+    "month_range": "0–2",
+    "task_id": "0.5",
+    "title": "Outline ingredient and supplement sourcing strategy",
+    "description": "Make a first-pass list of meats, organs, carbs, vegetables, oils, and supplements you want to use. For each category, identify at least one viable supplier and understand approximate availability, quality, and price. In parallel, shortlist 2–3 pet supplement/treat manufacturers who can make soft chews or powders under good manufacturing practices."
+  },
+  {
+    "phase": "1",
+    "month_range": "2–4",
+    "task_id": "1.1",
+    "title": "Formulate initial complete-and-balanced recipes",
+    "description": "Working with your nutrition advisor, design 5–10 full meal recipes. Start from simple combinations (one primary protein, one main carbohydrate, a few vegetables, and an oil). Run each recipe through the nutrient model, then design a premix that fills in missing vitamins and minerals so the full diet meets AAFCO adult-maintenance levels. Iterate until each recipe hits targets without obvious excesses."
+  },
+  {
+    "phase": "1",
+    "month_range": "2–4",
+    "task_id": "1.2",
+    "title": "Select and onboard a fresh-food co-packer",
+    "description": "Identify and contract with a manufacturer who can handle fresh or frozen dog food. Confirm they can produce separate meat/organ and carb/vegetable components, portion into bags, freeze or chill appropriately, and label and store product safely. Negotiate batch sizes, pricing, lead times, and quality control expectations."
+  },
+  {
+    "phase": "1",
+    "month_range": "2–4",
+    "task_id": "1.3",
+    "title": "Define first functional treat and supplement formulas",
+    "description": "Choose 2–3 treat or supplement concepts that clearly support the main meals—for example, a joint-health soft chew and a low-cal training treat. With your chosen supplement manufacturer, decide on active ingredients, target doses per treat, and calories per piece. Ensure that these products can be safely used alongside your meals without pushing nutrients past safe levels."
+  },
+  {
+    "phase": "1",
+    "month_range": "2–4",
+    "task_id": "1.4",
+    "title": "Draft labels and claims for meals and treats",
+    "description": "Create draft labels for every product, including ingredient lists, guaranteed analyses, feeding directions, and nutritional adequacy statements where appropriate. Write marketing copy that explains benefits without making disease claims. Have your regulatory advisor and legal counsel review everything so it aligns with pet food rules and can be registered in target states."
+  },
+  {
+    "phase": "2",
+    "month_range": "4–6",
+    "task_id": "2.1",
+    "title": "Build a simple customer-facing app or web flow",
+    "description": "Create an initial online experience where a guardian can enter basic dog information, see an estimated calorie target with a range, and select from a small set of recipes. The system should output clear feeding instructions in grams per day and per meal, plus guidance on how many treats per day fit inside the total calorie budget."
+  },
+  {
+    "phase": "2",
+    "month_range": "4–6",
+    "task_id": "2.2",
+    "title": "Run small pilot production batches",
+    "description": "Push the recipes and treats through a first production run at modest scale. Produce limited quantities of several meal recipes and the initial treat SKUs. Use this run to test actual manufacturing behavior, packaging durability, freezing and thawing performance, and basic quality checks like weight accuracy and visual consistency."
+  },
+  {
+    "phase": "2",
+    "month_range": "4–6",
+    "task_id": "2.3",
+    "title": "Recruit a small closed beta of households",
+    "description": "Find 30–50 dog-owning households—ideally those already interested in fresh or homemade feeding—to participate in a 1–3 month pilot. Provide them with full kits, detailed cooking instructions, and treats. Ask them to log weight, body condition, stool quality, appetite, and day-to-day experience in a simple survey or app."
+  },
+  {
+    "phase": "2",
+    "month_range": "4–6",
+    "task_id": "2.4",
+    "title": "Observe real-world preparation and feeding behavior",
+    "description": "During the beta, track not only outcomes but also friction. Note where people struggle: measuring ingredients, thawing, cooking steps, remembering treat limits, or following feeding charts. Use interviews or structured feedback to understand what is confusing or time-consuming, and capture all recurring patterns."
+  },
+  {
+    "phase": "3",
+    "month_range": "6–9",
+    "task_id": "3.1",
+    "title": "Refine recipes, instructions, and treat usage",
+    "description": "Based on pilot data, adjust any recipes that appear too rich, too lean, or consistently lead to over- or under-feeding. Simplify cooking instructions where people get stuck. Tighten treat guidance so owners clearly see how treats fit into daily calories. Fix obvious UX issues in the app or onboarding flow."
+  },
+  {
+    "phase": "3",
+    "month_range": "6–9",
+    "task_id": "3.2",
+    "title": "Lock the Year-1 SKU set",
+    "description": "Choose the subset of meal recipes and treat SKUs that performed best in the beta. Aim for a compact product line that balances variety with operational simplicity. Finalize formulations, serving sizes, and packaging specs so these products can be produced consistently for paying customers."
+  },
+  {
+    "phase": "3",
+    "month_range": "6–9",
+    "task_id": "3.3",
+    "title": "Start limited regional production and fulfillment",
+    "description": "Begin shipping to a small, clearly defined geographic region (for example, one metro area or one multi-state region). Establish a predictable production schedule—such as weekly or biweekly runs—and dial in the logistics chain for cold storage, packing, and delivery. Monitor spoilage, late deliveries, and customer unboxing issues closely."
+  },
+  {
+    "phase": "3",
+    "month_range": "6–9",
+    "task_id": "3.4",
+    "title": "Launch small-budget paid acquisition tests",
+    "description": "Turn on low to moderate levels of online advertising, primarily search and social. Send traffic to a focused landing experience that explains the problem with typical homemade diets and shows how Dogology solves it. Measure cost per acquired customer, conversion rates, and the impact of adding treat bundles to the first order."
+  },
+  {
+    "phase": "4",
+    "month_range": "9–12",
+    "task_id": "4.1",
+    "title": "Set up core metrics and reporting",
+    "description": "Define a small set of key metrics: new customers per month, active subscribers, churn in early months, gross margin, marketing spend, and customer acquisition cost for each channel. Build simple dashboards or reports that automatically update monthly so you can see trends and make decisions quickly."
+  },
+  {
+    "phase": "4",
+    "month_range": "9–12",
+    "task_id": "4.2",
+    "title": "Scale marketing and expand reach where unit economics work",
+    "description": "If early customers are staying, margins are healthy, and acquisition costs are acceptable, gradually increase ad spend. Expand your shipping radius or add another target region once you are confident in your cold-chain reliability. Continue to use treats as an add-on to increase average order value and as a tool for re-engaging customers at risk of churning."
+  },
+  {
+    "phase": "4",
+    "month_range": "9–12",
+    "task_id": "4.3",
+    "title": "Pilot early veterinary partnerships",
+    "description": "Approach a small group of vets or nutrition-focused clinics with a clear story: this is not a therapeutic diet, but it is a structured way to offer safer homemade-style feeding. Offer them discounted trial access, co-branded feeding reports, and clear materials explaining how meals and treats fit into weight and health management plans."
+  },
+  {
+    "phase": "4",
+    "month_range": "9–12",
+    "task_id": "4.4",
+    "title": "Prepare to end Year 1 with stable small-scale production",
+    "description": "By month 12, aim to have a few thousand active customers in one or more regions, with reliable production, shipping, and customer support in place. Document all core processes—formulation changes, label updates, quality checks, and incident response. Use the full year’s data to decide what to double down on in Year 2 and which SKUs or marketing angles to drop."
+  }
+]

@@ -43,8 +43,15 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-display: var(--font-sans);
 
-  /* Layout + spacing */
-  --container-max: 72rem;
+  /* Layout containers */
+  --container-sm: 38rem;   /* forms, narrow prose */
+  --container-md: 52rem;   /* spec docs, results */
+  --container-lg: 72rem;   /* card grids, tables, wide layouts */
+  --container-max: var(--container-lg);
+
+  /* Responsive gutter — tightens on mobile */
+  --gutter: clamp(1rem, 0.5rem + 2vw, 1.5rem);
+
   --radius-sm: 4px;
   --radius-1: 0.5rem;
   --radius-2: 1rem;

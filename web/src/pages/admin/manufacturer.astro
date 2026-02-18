@@ -19,7 +19,7 @@ type ManufacturerDb = {
   candidates: ManufacturerCandidate[];
 };
 
-const jsonPath = path.resolve(process.cwd(), "..", "specs", "app", "manufacturer", "manufacturer.json");
+const jsonPath = path.resolve(process.cwd(), "..", "data", "app", "manufacturer", "manufacturer.json");
 const raw = await readFile(jsonPath, "utf-8");
 const db = JSON.parse(raw) as ManufacturerDb;
 
@@ -27,9 +27,9 @@ const candidates = [...(db.candidates ?? [])].sort((a, b) => (a.rank ?? 0) - (b.
 ---
 
 <BaseLayout title="Admin — Manufacturer">
-  <div class="prose" style="max-width: 100%;">
+  <div class="prose">
     <h1>Manufacturer candidates</h1>
-    <p class="small">Source: specs/app/manufacturer/manufacturer.json</p>
+    <p class="small">Source: data/app/manufacturer/manufacturer.json</p>
 
     <table>
       <thead>

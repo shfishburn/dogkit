@@ -18,7 +18,7 @@ export const GET: APIRoute = async () => {
     parts.push('---');
     parts.push('');
     parts.push(`## ${title}`);
-    parts.push(`Source: specs/${entry.id}`);
+    parts.push(`Source: src/content/specs/${entry.id}`);
     parts.push('');
     parts.push(entry.body ?? '');
     parts.push('');

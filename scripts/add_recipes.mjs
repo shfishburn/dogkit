@@ -4,7 +4,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DIR = dirname(fileURLToPath(import.meta.url));
-const FILE = resolve(DIR, '..', 'specs', 'recipes', 'weekly_meal_plan.json');
+const FILE = resolve(DIR, '..', 'data', 'recipes', 'weekly_meal_plan.json');
 
 const newRecipes = [
   {

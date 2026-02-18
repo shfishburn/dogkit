@@ -1,13 +1,66 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+type PlanItem = {
+  phase: string;
+  month_range: string;
+  task_id: string;
+  title: string;
+  description: string;
+};
+
+const planPath = path.resolve(process.cwd(), "..", "plan", "plan.json");
+const planRaw = await readFile(planPath, "utf-8");
+const plan = JSON.parse(planRaw) as PlanItem[];
+
+// Group by phase (keep natural order by numeric-ish phase)
+const byPhase = new Map<string, PlanItem[]>();
+for (const item of plan) {
+  const arr = byPhase.get(item.phase) ?? [];
+  arr.push(item);
+  byPhase.set(item.phase, arr);
+}
+const phases = Array.from(byPhase.keys()).sort((a, b) => Number(a) - Number(b));
 ---
 
-<BaseLayout title="Admin">
+<BaseLayout title="Admin" container="sm">
   <div class="prose">
     <h1>Admin</h1>
     <ul>
       <li><a href="/admin/business">Business documents</a></li>
       <li><a href="/admin/manufacturer">Manufacturer candidates</a></li>
     </ul>
+
+    <h2>Project plan checklist</h2>
+    <p class="small">Source: <code>plan/plan.json</code></p>
+
+    <div class="plan-checklist">
+      {phases.map((phase) => (
+        <details class="plan-phase" open>
+          <summary class="plan-phase__summary">
+            <strong>Phase {phase}</strong>
+          </summary>
+          <ul class="plan-phase__list">
+            {byPhase.get(phase)!.map((t) => (
+              <li class="plan-task">
+                <label class="plan-task__label">
+                  <input type="checkbox" class="plan-task__checkbox" name={`task-${t.task_id}`} />
+                  <span class="plan-task__body">
+                    <span class="plan-task__top">
+                      <span class="plan-task__id">{t.task_id}</span>
+                      <span class="plan-task__title">{t.title}</span>
+                      <span class="plan-task__time">{t.month_range}</span>
+                    </span>
+                    <span class="plan-task__desc">{t.description}</span>
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))}
+    </div>
   </div>
 </BaseLayout>

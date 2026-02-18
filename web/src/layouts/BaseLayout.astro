@@ -1,16 +1,24 @@
 ---
 import "@fontsource-variable/inter";
 import "../styles/global.css";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
+
+type ContainerSize = "sm" | "md" | "lg" | "full" | false;
 
 type Props = {
   title?: string;
   description?: string;
   ogImage?: string;
-  fullBleed?: boolean;
+  /** Container width: "sm" (38rem), "md" (52rem), "lg" (72rem, default), "full" (no max), false (no container — full bleed) */
+  container?: ContainerSize;
 };
 
-const { title, description, ogImage, fullBleed } = Astro.props;
+const { title, description, ogImage, container: containerProp } = Astro.props;
+
+const container: ContainerSize = containerProp ?? "lg";
+const containerClass = container
+  ? `container${container === "lg" ? "" : ` container--${container}`}`
+  : undefined;
 
 const defaultDescription = "Science-built cook-at-home dog food kits with AAFCO-aligned nutrition, transparent MER modeling, and weekly ingredient delivery.";
 const pageTitle = title ? `${title} | Dogology` : "Dogology — Science-Built Food for More Good Years";
@@ -72,7 +80,7 @@ if (segments.length > 1) {
     <meta name="twitter:description" content={pageDescription} />
     <meta name="twitter:image" content={ogImageUrl.href} />
 
-    <ViewTransitions />
+    <ClientRouter />
   </head>
   <body>
     <header class="site-header" transition:persist>
@@ -82,14 +90,20 @@ if (segments.length > 1) {
           <span class="site-logo__name">Dogology</span>
         </a>
         <nav class="site-nav" aria-label="Primary">
+          <a href="/plan" class:list={["site-nav__link", { "site-nav__link--active": pathname.startsWith("/plan") }]}>Plan</a>
           <a href="/recipes" class:list={["site-nav__link", { "site-nav__link--active": pathname.startsWith("/recipes") }]}>Recipes</a>
-          <a href="/library" class:list={["site-nav__link", { "site-nav__link--active": pathname.startsWith("/library") || pathname.startsWith("/specs") || pathname.startsWith("/ingredients") }]}>Library</a>
+          <a href="/ingredients" class:list={["site-nav__link", { "site-nav__link--active": pathname.startsWith("/ingredients") }]}>Ingredients</a>
+          <a href="/library" class:list={["site-nav__link", { "site-nav__link--active": pathname.startsWith("/library") || pathname.startsWith("/specs") }]}>Library</a>
         </nav>
+
+        <div class="site-header__actions">
+          <a class="button site-header__cta" href="/plan">Build my dog's plan</a>
+        </div>
       </div>
     </header>
 
-    <main class:list={["", { "full-bleed": fullBleed }]}>
-      <div class={fullBleed ? undefined : "container"}>
+    <main class:list={["", { "full-bleed": !container }]}>
+      <div class={containerClass}>
         {crumbs.length > 0 && (
           <nav class="breadcrumb" aria-label="Breadcrumb">
             <a href="/">Home</a>
@@ -109,7 +123,42 @@ if (segments.length > 1) {
     </main>
 
     <footer class="site-footer">
-      <div class="container">Dogology</div>
+      <div class="container">
+        <div class="site-footer__grid">
+          <div class="site-footer__brand">
+            <a href="/" class="site-footer__logo">
+              <span class="site-logo__mark" aria-hidden="true">●</span>
+              <span>Dogology</span>
+            </a>
+            <p class="site-footer__tagline">Science-built cook-at-home dog food kits with transparent nutrition modeling.</p>
+          </div>
+
+          <nav class="site-footer__nav" aria-label="Footer">
+            <div class="site-footer__col">
+              <div class="site-footer__title">Product</div>
+              <a class="site-footer__link" href="/plan">Plan</a>
+              <a class="site-footer__link" href="/recipes">Recipes</a>
+            </div>
+            <div class="site-footer__col">
+              <div class="site-footer__title">Resources</div>
+              <a class="site-footer__link" href="/ingredients">Ingredients</a>
+              <a class="site-footer__link" href="/specs/overview">Specs overview</a>
+            </div>
+            <div class="site-footer__col">
+              <div class="site-footer__title">Library</div>
+              <a class="site-footer__link" href="/library">All tools</a>
+              <a class="site-footer__link" href="/specs">All specs</a>
+            </div>
+          </nav>
+        </div>
+
+        <div class="site-footer__bottom">
+          <p class="site-footer__disclaimer">
+            Educational content only. Not veterinary advice. Consult a qualified veterinary professional for medical decisions.
+          </p>
+          <p class="site-footer__copyright">© {new Date().getFullYear()} Dogology</p>
+        </div>
+      </div>
     </footer>
 
     <script>
@@ -148,6 +197,7 @@ if (segments.length > 1) {
       async function initMermaid() {
         const codeBlocks = document.querySelectorAll("pre code.language-mermaid");
         if (codeBlocks.length > 0) {
+          // @ts-expect-error — CDN dynamic import has no type declarations
           const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");
           mermaid.initialize({ startOnLoad: false, theme: "neutral" });
           for (const code of codeBlocks) {
@@ -162,7 +212,7 @@ if (segments.length > 1) {
               definition
             );
             div.innerHTML = svg;
-            pre.replaceWith(div);
+            pre?.replaceWith(div);
           }
         }
       }

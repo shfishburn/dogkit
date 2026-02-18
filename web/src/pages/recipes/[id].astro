@@ -2,8 +2,9 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { supabaseRenderImageUrl, supabaseSrcSetWH } from "../../lib/supabaseImages";
 
-const jsonPath = path.resolve(process.cwd(), "..", "specs", "recipes", "weekly_meal_plan.json");
+const jsonPath = path.resolve(process.cwd(), "..", "data", "recipes", "weekly_meal_plan.json");
 const raw = await readFile(jsonPath, "utf-8");
 const plan = JSON.parse(raw);
 
@@ -29,6 +30,31 @@ const tier = recipe.tags?.tier ?? "";
 const prep = recipe.tags?.prep_time_min ?? 0;
 const nutrients = recipe.per_1000kcal_estimate ?? {};
 
+const heroImageUrl = recipe.image_url as string | undefined;
+const heroSrc = heroImageUrl
+  ? supabaseRenderImageUrl(heroImageUrl, {
+      width: 960,
+      height: 600,
+      resize: "cover",
+      quality: 75,
+    })
+  : null;
+const heroSrcSet = heroImageUrl
+  ? supabaseSrcSetWH(
+      heroImageUrl,
+      [
+        { width: 480, height: 300 },
+        { width: 640, height: 400 },
+        { width: 960, height: 600 },
+        { width: 1280, height: 800 },
+      ],
+      {
+        resize: "cover",
+        quality: 75,
+      }
+    )
+  : null;
+
 const appearances: { day: number; label: string; meal: string }[] = [];
 for (const day of weeklyPlan.days ?? []) {
   if (day.am?.recipe_id === id) appearances.push({ day: day.day, label: day.label, meal: "AM" });
@@ -36,23 +62,27 @@ for (const day of weeklyPlan.days ?? []) {
 }
 
 export async function getStaticPaths() {
-  const jsonPath = path.resolve(process.cwd(), "..", "specs", "recipes", "weekly_meal_plan.json");
+  const jsonPath = path.resolve(process.cwd(), "..", "data", "recipes", "weekly_meal_plan.json");
   const raw = await readFile(jsonPath, "utf-8");
   const plan = JSON.parse(raw);
   return (plan.recipes ?? []).map((r: any) => ({ params: { id: r.id } }));
 }
 ---
 
-<BaseLayout title={recipe.name} description={recipe.overview}>
+<BaseLayout title={recipe.name} description={recipe.overview} container="sm">
   <article class="rd">
 
     {/* Hero image */}
-    {recipe.image_url && (
+    {heroImageUrl && heroSrc && heroSrcSet && (
       <figure class="rd__hero">
         <img
           class="rd__hero-img"
-          src={recipe.image_url}
+          src={heroSrc}
+          srcset={heroSrcSet}
+          sizes="(max-width: 42rem) 100vw, 42rem"
           alt={recipe.name}
+          width="960"
+          height="600"
           loading="eager"
           decoding="async"
         />
@@ -220,7 +250,7 @@ export async function getStaticPaths() {
     const title = document.querySelector(".rd__title")?.textContent ?? "Recipe";
     const url = window.location.href;
     if (navigator.share) {
-      try { await navigator.share({ title, url }); } catch (_) {}
+      try { await navigator.share({ title, url }); } catch {}
     } else {
       await navigator.clipboard.writeText(url);
       const label = shareBtn.querySelector("span");

@@ -2,8 +2,9 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { supabaseRenderImageUrl, supabaseSrcSetWH } from "../../lib/supabaseImages";
 
-const jsonPath = path.resolve(process.cwd(), "..", "specs", "recipes", "weekly_meal_plan.json");
+const jsonPath = path.resolve(process.cwd(), "..", "data", "recipes", "weekly_meal_plan.json");
 const raw = await readFile(jsonPath, "utf-8");
 const plan = JSON.parse(raw);
 
@@ -83,6 +84,31 @@ function labelify(s: string): string {
       const tier = r.tags?.tier ?? "";
       const carb = r.tags?.primary_carb ?? "";
       const veggie = r.tags?.primary_veggie ?? "";
+
+      const imageUrl = r.image_url as string | undefined;
+      const cardImgSrc = imageUrl
+        ? supabaseRenderImageUrl(imageUrl, {
+            width: 480,
+            height: 480,
+            resize: "cover",
+            quality: 70,
+          })
+        : null;
+      const cardImgSrcSet = imageUrl
+        ? supabaseSrcSetWH(
+            imageUrl,
+            [
+              { width: 240, height: 240 },
+              { width: 360, height: 360 },
+              { width: 480, height: 480 },
+              { width: 720, height: 720 },
+            ],
+            {
+            resize: "cover",
+            quality: 70,
+          }
+          )
+        : null;
       return (
         <a
           href={`/recipes/${r.id}`}
@@ -91,12 +117,16 @@ function labelify(s: string): string {
           data-tier={tier}
           data-prep={prep}
         >
-          {r.image_url && (
+          {imageUrl && cardImgSrc && cardImgSrcSet && (
             <div class="recipe-list-card__media">
               <img
                 class="recipe-list-card__img"
-                src={r.image_url}
+                src={cardImgSrc}
+                srcset={cardImgSrcSet}
+                sizes="(max-width: 40rem) 100vw, 360px"
                 alt={r.name}
+                width="360"
+                height="360"
                 loading="lazy"
                 decoding="async"
               />

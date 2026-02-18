@@ -34,7 +34,7 @@ function stableSort<T>(items: T[], toKey: (x: T) => string): T[] {
   return [...items].sort((a, b) => toKey(a).localeCompare(toKey(b)));
 }
 
-const jsonPath = path.resolve(process.cwd(), "..", "specs", "ingredients", "ingredients.json");
+const jsonPath = path.resolve(process.cwd(), "..", "data", "ingredients", "ingredients.json");
 const raw = await readFile(jsonPath, "utf-8");
 const db = JSON.parse(raw) as IngredientDb;
 

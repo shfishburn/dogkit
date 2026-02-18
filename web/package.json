@@ -5,12 +5,13 @@
   "scripts": {
     "sync:specs": "node scripts/sync-specs.mjs",
     "gen:ingredients-db": "node ../scripts/generate_ingredients_db.mjs",
-    "gen:ingredients": "../.venv/bin/python ../scripts/extract_median_nutrients.py --input ../specs/kyokon-synthetic-ingredients.json --format json --output src/data/ingredients_medians.json",
+    "gen:ingredients": "../.venv/bin/python ../scripts/extract_median_nutrients.py --input ../data/kyokon-synthetic-ingredients.json --format json --output src/data/ingredients_medians.json",
     "predev": "npm run gen:ingredients-db && npm run sync:specs && npm run gen:ingredients",
     "dev": "astro dev",
     "prebuild": "npm run gen:ingredients-db && npm run sync:specs",
     "build": "astro build",
     "preview": "astro preview",
+    "lint": "eslint . && astro check",
     "astro": "astro"
   },
   "dependencies": {
@@ -18,5 +19,13 @@
     "@fontsource-variable/inter": "^5.2.8",
     "astro": "^5.17.1",
     "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "@typescript-eslint/parser": "^8.56.0",
+    "eslint": "^10.0.0",
+    "eslint-plugin-astro": "^1.6.0",
+    "typescript": "^5.9.3"
   }
 }

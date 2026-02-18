@@ -3,20 +3,16 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-const jsonPath = path.resolve(process.cwd(), "..", "specs", "recipes", "weekly_meal_plan.json");
+const jsonPath = path.resolve(process.cwd(), "..", "data", "recipes", "weekly_meal_plan.json");
 const raw = await readFile(jsonPath, "utf-8");
 const data = JSON.parse(raw);
 
 const recipes: any[] = data.recipes ?? [];
 const weeklyPlan: any = data.weekly_plan ?? {};
 const sizing: Record<string, any> = data.metadata?.size_scaling ?? {};
-
-function labelify(s: string): string {
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
 ---
 
-<BaseLayout title="Your Nutrition Plan" description="Personalized daily energy and feeding recommendations for your dog.">
+<BaseLayout title="Your Nutrition Plan" description="Personalized daily energy and feeding recommendations for your dog." container="md">
 
   <div class="pr" id="results-root">
 
@@ -124,6 +120,20 @@ function labelify(s: string): string {
     return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
+  function thumbUrl(publicUrl) {
+    if (!publicUrl) return "";
+    try {
+      const u = new URL(publicUrl);
+      const marker = "/storage/v1/object/public/";
+      const idx = u.pathname.indexOf(marker);
+      if (idx < 0) return publicUrl;
+      const rest = u.pathname.slice(idx + marker.length);
+      u.pathname = u.pathname.slice(0, idx) + "/storage/v1/render/image/public/" + rest;
+      u.search = "width=240&height=160&resize=cover&quality=60&format=webp";
+      return u.toString();
+    } catch { return publicUrl; }
+  }
+
   function sizeCategory(dailyKcal) {
     if (dailyKcal <= 750) return "small";
     if (dailyKcal <= 1200) return "medium";
@@ -223,13 +233,15 @@ function labelify(s: string): string {
         html += `<div class="week-cell">`;
         html += `<div class="week-cell__day">${day.label}</div>`;
         if (am) {
+          const amImg = am.image_url ? `<img class="week-cell__thumb" src="${thumbUrl(am.image_url)}" alt="" loading="lazy" />` : "";
           html += `<a class="week-cell__meal week-cell__meal--am" href="/recipes/${am.id}">
-            <span class="week-meal-time">AM</span>${am.name}
+            ${amImg}<span class="week-meal-time">AM</span>${am.name}
           </a>`;
         }
         if (pm) {
+          const pmImg = pm.image_url ? `<img class="week-cell__thumb" src="${thumbUrl(pm.image_url)}" alt="" loading="lazy" />` : "";
           html += `<a class="week-cell__meal week-cell__meal--pm" href="/recipes/${pm.id}">
-            <span class="week-meal-time">PM</span>${pm.name}
+            ${pmImg}<span class="week-meal-time">PM</span>${pm.name}
           </a>`;
         }
         html += `</div>`;

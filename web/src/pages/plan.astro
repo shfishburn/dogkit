@@ -1,56 +1,71 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-
-const breeds = [
-  "French Bulldog", "Labrador Retriever", "Golden Retriever", "German Shepherd",
-  "Poodle", "Dachshund", "Bulldog", "Beagle", "Rottweiler", "German Shorthaired Pointer",
-  "Yorkshire Terrier", "Boxer", "Cavalier King Charles Spaniel", "Doberman Pinscher",
-  "Australian Shepherd", "Miniature Schnauzer", "Shih Tzu", "Bernese Mountain Dog",
-  "Pembroke Welsh Corgi", "Siberian Husky", "Mixed Breed", "Other",
-];
+import { BREEDS } from "../lib/breeds";
 ---
 
-<BaseLayout title="Build a plan" description="Calculate your dog's daily energy needs with our MER-based plan builder. Enter weight, age, and activity level to get a personalized feeding guide.">
+<BaseLayout title="Build a plan" description="Calculate your dog's daily energy needs with our MER-based plan builder. Enter weight, age, and activity level to get a personalized feeding guide." container="sm">
 
   <div class="page-header reveal">
     <p class="section-label">MER Calculator</p>
     <h1 class="section-headline" style="font-size:var(--text-3xl);">Build my dog's plan</h1>
-    <p class="page-sub">Enter your dog's profile to calculate daily energy needs and a personalized feeding guide. Quick estimate &mdash; not veterinary advice.</p>
+    <p class="page-sub">Answer a few questions to calculate daily energy needs and a personalized feeding guide.</p>
   </div>
 
-  <form id="plan-form" class="card plan-form reveal">
-    <div class="form-grid">
+  <!-- Progress bar -->
+  <div class="wiz-progress reveal" aria-hidden="true">
+    <button type="button" class="wiz-dot wiz-dot--active" data-go="0"><span>1</span> Your dog</button>
+    <div class="wiz-line"></div>
+    <button type="button" class="wiz-dot" data-go="1"><span>2</span> Body &amp; lifestyle</button>
+    <div class="wiz-line"></div>
+    <button type="button" class="wiz-dot" data-go="2"><span>3</span> Goal</button>
+  </div>
 
-      <label>
-        <span>Breed</span>
-        <small class="field-hint">Helps determine life stage thresholds. Giant breeds age faster than small breeds.</small>
+  <form id="plan-form" novalidate>
+
+    <!-- Step 1: Your dog -->
+    <fieldset class="wiz-step card" data-step="0">
+      <legend class="wiz-step__title">About your dog</legend>
+
+      <label class="wiz-field">
+        <span class="wiz-field__label">Breed</span>
+        <small class="field-hint">Giant breeds age faster than small breeds.</small>
         <select name="breed">
-          {breeds.map((b) => (
+          {BREEDS.map((b) => (
             <option value={b} selected={b === "Mixed Breed"}>{b}</option>
           ))}
         </select>
       </label>
 
-      <label>
-        <span>Weight (kg)</span>
+      <label class="wiz-field">
+        <span class="wiz-field__label">Weight (kg)</span>
         <small class="field-hint">Current weight. We'll adjust for body condition internally.</small>
         <input name="weight_kg" type="number" min="0.5" step="0.1" value="10" required />
       </label>
 
-      <label>
-        <span>Age (months)</span>
+      <label class="wiz-field">
+        <span class="wiz-field__label">Age (months)</span>
         <small class="field-hint">Puppies under 12 months have higher energy needs.</small>
         <input name="age_months" type="number" min="1" step="1" value="24" required />
       </label>
 
-      <label>
-        <span>Body condition score (1–9)</span>
-        <small class="field-hint">BCS 5 is ideal — ribs easily felt, visible waist. Each point above/below ≈ 10% over/under ideal weight.</small>
+      <div class="wiz-nav">
+        <span></span>
+        <button type="button" class="button button--primary wiz-next">Next &rarr;</button>
+      </div>
+    </fieldset>
+
+    <!-- Step 2: Body & lifestyle -->
+    <fieldset class="wiz-step card" data-step="1" hidden>
+      <legend class="wiz-step__title">Body &amp; lifestyle</legend>
+
+      <label class="wiz-field">
+        <span class="wiz-field__label">Body condition score (1–9)</span>
+        <small class="field-hint">BCS 5 is ideal — ribs easily felt, visible waist. Each point above or below 5 represents roughly 10% over or under ideal weight.</small>
         <input name="bcs" type="number" min="1" max="9" step="1" value="5" required />
       </label>
 
-      <label>
-        <span>Neuter status</span>
+      <label class="wiz-field">
+        <span class="wiz-field__label">Neuter status</span>
         <small class="field-hint">Neutered dogs need ~10% fewer calories due to metabolic changes.</small>
         <select name="neuter_status">
           <option value="neutered" selected>Neutered</option>
@@ -58,9 +73,9 @@ const breeds = [
         </select>
       </label>
 
-      <label>
-        <span>Activity level</span>
-        <small class="field-hint">Sedentary: &lt;30 min/day. Moderate: 30–60 min walks. Active: 1–3 hr vigorous. Working: 3+ hr sustained.</small>
+      <label class="wiz-field">
+        <span class="wiz-field__label">Activity level</span>
+        <small class="field-hint">Sedentary: &lt;30 min/day indoors. Moderate: 30–60 min walks. Active: 1–3 hr vigorous. Working: 3+ hr sustained.</small>
         <select name="activity_level">
           <option value="sedentary">Sedentary</option>
           <option value="moderate" selected>Moderate</option>
@@ -69,39 +84,101 @@ const breeds = [
         </select>
       </label>
 
-      <label>
-        <span>Goal</span>
-        <small class="field-hint">Maintain = baseline calories. Lose = 10–20% deficit. Gain = 10% surplus.</small>
+      <div class="wiz-nav">
+        <button type="button" class="button wiz-prev">&larr; Back</button>
+        <button type="button" class="button button--primary wiz-next">Next &rarr;</button>
+      </div>
+    </fieldset>
+
+    <!-- Step 3: Goal -->
+    <fieldset class="wiz-step card" data-step="2" hidden>
+      <legend class="wiz-step__title">Your goal</legend>
+
+      <label class="wiz-field">
+        <span class="wiz-field__label">Weight goal</span>
+        <small class="field-hint">Maintain = baseline calories. Lose = 10–20% caloric deficit. Gain = 10% surplus.</small>
         <select name="weight_goal">
-          <option value="maintain" selected>Maintain</option>
-          <option value="lose">Lose</option>
-          <option value="gain">Gain</option>
+          <option value="maintain" selected>Maintain weight</option>
+          <option value="lose">Lose weight</option>
+          <option value="gain">Gain weight</option>
         </select>
       </label>
 
-    </div>
+      <div class="wiz-nav">
+        <button type="button" class="button wiz-prev">&larr; Back</button>
+        <button type="submit" class="button button--primary">Calculate plan</button>
+      </div>
+    </fieldset>
 
-    <div class="plan-form__actions">
-      <button class="button button--primary" type="submit">Calculate plan</button>
-    </div>
   </form>
 
   <script>
-    const form = document.getElementById('plan-form') as HTMLFormElement;
+    function initWizard() {
+      const form = document.getElementById('plan-form') as HTMLFormElement;
+      if (!form) return;
+      const steps = Array.from(form.querySelectorAll<HTMLElement>('.wiz-step'));
+      const dots = Array.from(document.querySelectorAll<HTMLElement>('.wiz-dot'));
+      let current = 0;
 
-    // Pre-fill from URL params (back-navigation from results page)
-    const params = new URLSearchParams(window.location.search);
-    for (const [key, val] of params) {
-      const el = form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement | null;
-      if (el) el.value = val;
+      // Pre-fill from URL params (back-navigation from results page)
+      const params = new URLSearchParams(window.location.search);
+      for (const [key, val] of params) {
+        const el = form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement | null;
+        if (el) el.value = val;
+      }
+
+      function go(idx: number) {
+        if (idx < 0 || idx >= steps.length) return;
+        steps.forEach((s, i) => { s.hidden = i !== idx; });
+        dots.forEach((d, i) => {
+          d.classList.toggle('wiz-dot--active', i <= idx);
+          d.classList.toggle('wiz-dot--done', i < idx);
+        });
+        current = idx;
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function validateStep(): boolean {
+        const currentStep = steps[current];
+        const inputs = currentStep.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select');
+        for (const input of inputs) {
+          if (!input.reportValidity()) return false;
+        }
+        return true;
+      }
+
+      form.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest('.wiz-next, .wiz-prev') as HTMLElement | null;
+        if (!btn) return;
+        if (btn.classList.contains('wiz-next')) {
+          if (validateStep()) go(current + 1);
+        } else {
+          go(current - 1);
+        }
+      });
+
+      for (const dot of dots) {
+        dot.addEventListener('click', () => {
+          const target = Number(dot.dataset.go);
+          if (target <= current) go(target);
+          else if (target === current + 1 && validateStep()) go(target);
+        });
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- FormData→URLSearchParams cast
+        const qs = new URLSearchParams(fd as any).toString();
+        window.location.href = `/plan/results?${qs}`;
+      });
+
+      // If coming back from results, jump to last step
+      if (params.has('weight_kg')) go(steps.length - 1);
     }
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const fd = new FormData(form);
-      const qs = new URLSearchParams(fd as any).toString();
-      window.location.href = `/plan/results?${qs}`;
-    });
+    initWizard();
+    document.addEventListener('astro:page-load', initWizard);
   </script>
 
 </BaseLayout>
