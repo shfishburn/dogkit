@@ -1576,18 +1576,9 @@ main.full-bleed {
 .plan-chip--am { background: var(--color-meal-am); }
 .plan-chip--pm { background: var(--color-meal-pm); }
 
-/* ─── Plan page layout ──────────────────────────────────────── */
-.plan-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-8);
-  align-items: start;
-  margin-bottom: var(--space-16);
-}
-@media (max-width: 48rem) {
-  .plan-layout { grid-template-columns: 1fr; }
-}
+/* ─── Plan page ──────────────────────────────────────── */
 .plan-form {
+  max-width: 38rem;
   padding: var(--space-6);
 }
 .plan-form__actions {
@@ -1598,31 +1589,100 @@ main.full-bleed {
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border);
 }
-.plan-results {
-  padding: var(--space-6);
+.field-hint {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  font-weight: 400;
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-2);
+  line-height: 1.45;
 }
-.plan-results__title {
-  font-size: var(--text-lg);
-  font-weight: 700;
-  margin: 0 0 var(--space-3);
+
+/* ─── Plan results page ──────────────────────────────── */
+.pr {
+  max-width: 48rem;
 }
-.plan-results__explain {
+.pr__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-muted);
-  margin-bottom: var(--space-4);
-  line-height: 1.55;
+  text-decoration: none;
+  margin-bottom: var(--space-6);
 }
-.plan-results__json {
-  background: var(--color-code-surface);
+.pr__back:hover { color: var(--color-accent); }
+.pr__section {
+  margin-bottom: var(--space-8);
+}
+.pr__section-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  margin: 0 0 var(--space-4);
+  letter-spacing: -0.01em;
+}
+.pr__profile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.pr__profile-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  background: var(--color-surface-alt);
+}
+.pr__profile-tag strong {
+  font-weight: 600;
+}
+.pr__energy-card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-1);
-  padding: var(--space-4);
-  overflow-x: auto;
-  font-size: var(--text-sm);
-  line-height: 1.6;
+  overflow: hidden;
 }
-.plan-results__json code {
-  font-family: var(--font-mono);
+.pr__energy-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+}
+.pr__energy-row:not(:last-child) {
+  border-bottom: 1px solid var(--color-border);
+}
+.pr__energy-row--total {
+  background: var(--color-accent-surface);
+  font-weight: 600;
+}
+.pr__energy-label {
+  color: var(--color-muted);
+}
+.pr__energy-val {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.pr__size-banner {
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-1);
+  background: var(--color-accent-surface);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+.pr__size-banner strong {
+  font-weight: 700;
+}
+.pr__disclaimer {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: 1.55;
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+  margin-top: var(--space-8);
 }
 
 /* ─── Ingredients page ──────────────────────────────────────── */
