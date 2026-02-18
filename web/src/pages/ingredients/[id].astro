@@ -1,0 +1,296 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { loadIngredientDb } from "../../lib/loaders";
+import { loadFdcNutrientById } from "../../lib/supabaseFdc";
+
+/* ── Static paths for all ingredients with FDC data ────── */
+
+export async function getStaticPaths() {
+  const { loadIngredientDb: loadDb } = await import("../../lib/loaders");
+  const { loadFdcNutrients } = await import("../../lib/supabaseFdc");
+
+  const db = await loadDb();
+  const fdcRows = await loadFdcNutrients();
+  const fdcMap = new Map(fdcRows.map((r) => [r.ingredient_id, r]));
+
+  return db.ingredients
+    .filter((ing) => fdcMap.has(ing.id))
+    .map((ing) => ({
+      params: { id: ing.id },
+      props: { ingredient: ing, fdc: fdcMap.get(ing.id)! },
+    }));
+}
+
+/* ── Props ─────────────────────────────────────────────── */
+
+const { ingredient: ing, fdc } = Astro.props;
+
+function fmt(v: number | null | undefined, decimals = 1): string {
+  if (v == null) return "—";
+  return v.toFixed(decimals);
+}
+
+function titleCase(s: string): string {
+  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const caPhRatio =
+  fdc.calcium_mg != null && fdc.phosphorus_mg != null && fdc.phosphorus_mg > 0
+    ? (fdc.calcium_mg / fdc.phosphorus_mg).toFixed(2)
+    : null;
+
+/* ── Nutrient table sections ───────────────────────────── */
+
+type NRow = { label: string; value: string; unit: string };
+
+const macros: NRow[] = [
+  { label: "Energy", value: fmt(fdc.energy_kcal, 0), unit: "kcal" },
+  { label: "Water", value: fmt(fdc.water_g), unit: "g" },
+  { label: "Protein", value: fmt(fdc.protein_g), unit: "g" },
+  { label: "Total Fat", value: fmt(fdc.fat_g), unit: "g" },
+  { label: "Carbohydrate", value: fmt(fdc.carbohydrate_g), unit: "g" },
+  { label: "Fiber", value: fmt(fdc.fiber_g), unit: "g" },
+  { label: "Sugars", value: fmt(fdc.sugars_g), unit: "g" },
+  { label: "Ash", value: fmt(fdc.ash_g), unit: "g" },
+];
+
+const minerals: NRow[] = [
+  { label: "Calcium (Ca)", value: fmt(fdc.calcium_mg), unit: "mg" },
+  { label: "Phosphorus (P)", value: fmt(fdc.phosphorus_mg), unit: "mg" },
+  ...(caPhRatio ? [{ label: "Ca:P Ratio", value: `${caPhRatio}:1`, unit: "" }] : []),
+  { label: "Iron (Fe)", value: fmt(fdc.iron_mg), unit: "mg" },
+  { label: "Zinc (Zn)", value: fmt(fdc.zinc_mg), unit: "mg" },
+  { label: "Copper (Cu)", value: fmt(fdc.copper_mg, 2), unit: "mg" },
+  { label: "Manganese (Mn)", value: fmt(fdc.manganese_mg, 2), unit: "mg" },
+  { label: "Selenium (Se)", value: fmt(fdc.selenium_ug), unit: "µg" },
+  { label: "Magnesium (Mg)", value: fmt(fdc.magnesium_mg), unit: "mg" },
+  { label: "Potassium (K)", value: fmt(fdc.potassium_mg), unit: "mg" },
+  { label: "Sodium (Na)", value: fmt(fdc.sodium_mg), unit: "mg" },
+];
+
+const vitamins: NRow[] = [
+  { label: "Vitamin A (RAE)", value: fmt(fdc.vitamin_a_rae_ug), unit: "µg" },
+  { label: "Vitamin A (IU)", value: fmt(fdc.vitamin_a_iu, 0), unit: "IU" },
+  { label: "Vitamin D", value: fmt(fdc.vitamin_d_ug), unit: "µg" },
+  { label: "Vitamin E", value: fmt(fdc.vitamin_e_mg), unit: "mg" },
+  { label: "Vitamin K", value: fmt(fdc.vitamin_k_ug), unit: "µg" },
+  { label: "Vitamin C", value: fmt(fdc.vitamin_c_mg), unit: "mg" },
+  { label: "Thiamin (B1)", value: fmt(fdc.thiamin_mg, 3), unit: "mg" },
+  { label: "Riboflavin (B2)", value: fmt(fdc.riboflavin_mg, 3), unit: "mg" },
+  { label: "Niacin (B3)", value: fmt(fdc.niacin_mg), unit: "mg" },
+  { label: "Vitamin B6", value: fmt(fdc.vitamin_b6_mg, 3), unit: "mg" },
+  { label: "Vitamin B12", value: fmt(fdc.vitamin_b12_ug, 2), unit: "µg" },
+  { label: "Folate", value: fmt(fdc.folate_ug), unit: "µg" },
+  { label: "Choline", value: fmt(fdc.choline_mg), unit: "mg" },
+];
+
+const lipids: NRow[] = [
+  { label: "Saturated Fat", value: fmt(fdc.saturated_fat_g), unit: "g" },
+  { label: "Monounsaturated Fat", value: fmt(fdc.monounsat_fat_g), unit: "g" },
+  { label: "Polyunsaturated Fat", value: fmt(fdc.polyunsat_fat_g), unit: "g" },
+  { label: "Cholesterol", value: fmt(fdc.cholesterol_mg), unit: "mg" },
+  { label: "EPA (20:5 n-3)", value: fmt(fdc.epa_g, 3), unit: "g" },
+  { label: "DHA (22:6 n-3)", value: fmt(fdc.dha_g, 3), unit: "g" },
+];
+
+const sections = [
+  { title: "Macronutrients", rows: macros },
+  { title: "Minerals", rows: minerals },
+  { title: "Vitamins", rows: vitamins },
+  { title: "Lipid Profile", rows: lipids },
+];
+---
+
+<BaseLayout title={`${ing.name} — Nutrient Profile`} container="md">
+
+  <nav class="breadcrumb">
+    <a href="/ingredients">Ingredients</a>
+    <span class="sep">/</span>
+    <span>{titleCase(ing.category)}</span>
+    <span class="sep">/</span>
+    <span>{ing.name}</span>
+  </nav>
+
+  <header class="detail-header">
+    <h1>{ing.name}</h1>
+    <div class="detail-meta">
+      <span class="tier-badge">{ing.tier}</span>
+      <span class="detail-cat">{titleCase(ing.category)}</span>
+      <span class="detail-dtype">{fdc.data_type}</span>
+    </div>
+    {ing.notes && <p class="detail-notes">{ing.notes}</p>}
+    <p class="detail-fdc">
+      FDC #{fdc.fdc_id} &mdash;
+      <a href={`https://fdc.nal.usda.gov/food-details/${fdc.fdc_id}/nutrients`}
+         target="_blank" rel="noopener">
+        {fdc.fdc_description}
+      </a>
+    </p>
+  </header>
+
+  <p class="detail-basis">All values per <strong>100 g</strong> edible portion.</p>
+
+  <div class="nutrient-grid">
+    {sections.map((section) => (
+      <div class="nutrient-card">
+        <h2 class="nutrient-card__title">{section.title}</h2>
+        <table class="nutrient-table">
+          <tbody>
+            {section.rows.map((row) => (
+              <tr class={row.value === "—" ? "null-row" : ""}>
+                <td class="nl">{row.label}</td>
+                <td class="nv">{row.value}</td>
+                <td class="nu">{row.unit}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ))}
+  </div>
+
+  {(fdc.atwater_protein != null || fdc.protein_factor != null) && (
+    <details class="atwater-section">
+      <summary>Conversion Factors (Foundation)</summary>
+      <table class="nutrient-table" style="max-width: 24rem;">
+        <tbody>
+          {fdc.atwater_protein != null && <tr><td class="nl">Atwater — Protein</td><td class="nv">{fdc.atwater_protein}</td><td class="nu">kcal/g</td></tr>}
+          {fdc.atwater_fat != null && <tr><td class="nl">Atwater — Fat</td><td class="nv">{fdc.atwater_fat}</td><td class="nu">kcal/g</td></tr>}
+          {fdc.atwater_carb != null && <tr><td class="nl">Atwater — Carb</td><td class="nv">{fdc.atwater_carb}</td><td class="nu">kcal/g</td></tr>}
+          {fdc.protein_factor != null && <tr><td class="nl">N-to-Protein Factor</td><td class="nv">{fdc.protein_factor}</td><td class="nu"></td></tr>}
+        </tbody>
+      </table>
+    </details>
+  )}
+
+  <p class="detail-timestamp">
+    Data fetched {new Date(fdc.fetched_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+    &middot; Energy source: nutrient {fdc.energy_source}
+  </p>
+
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-bottom: var(--space-4);
+  }
+  .breadcrumb a { color: var(--color-link); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb .sep { margin-inline: 0.4em; }
+
+  .detail-header {
+    margin-bottom: var(--space-6);
+  }
+  .detail-header h1 {
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    margin: 0 0 var(--space-2);
+  }
+  .detail-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-2);
+  }
+  .detail-cat {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+  .detail-dtype {
+    font-size: var(--text-micro);
+    font-weight: 600;
+    padding: 0.15em 0.5em;
+    border-radius: var(--radius-sm);
+    background: var(--color-code-surface);
+    color: var(--color-muted);
+  }
+  .detail-notes {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin: var(--space-1) 0 0;
+  }
+  .detail-fdc {
+    font-size: var(--text-sm);
+    margin-top: var(--space-2);
+  }
+  .detail-fdc a { color: var(--color-link); }
+
+  .detail-basis {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-bottom: var(--space-6);
+  }
+
+  .nutrient-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+  }
+
+  .nutrient-card {
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-2);
+    overflow: hidden;
+  }
+  .nutrient-card__title {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: var(--space-3) var(--space-4);
+    margin: 0;
+    background: var(--color-code-surface);
+    border-bottom: 1.5px solid var(--color-border);
+    color: var(--color-muted);
+  }
+
+  .nutrient-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+  .nutrient-table td {
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    line-height: 1.4;
+  }
+  .nutrient-table tr:last-child td { border-bottom: none; }
+  .nutrient-table tr:hover { background: var(--color-code-surface); }
+  .null-row { opacity: 0.4; }
+
+  .nl { font-weight: 500; }
+  .nv {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .nu {
+    text-align: left;
+    color: var(--color-muted);
+    font-size: var(--text-micro);
+    width: 3rem;
+  }
+
+  .atwater-section {
+    margin-bottom: var(--space-8);
+  }
+  .atwater-section summary {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: var(--space-3);
+  }
+
+  .detail-timestamp {
+    font-size: var(--text-micro);
+    color: var(--color-muted);
+    margin-top: var(--space-8);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+</style>
