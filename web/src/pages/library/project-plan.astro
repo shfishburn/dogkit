@@ -1,0 +1,48 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { loadPlanItems } from "../../lib/loaders";
+import type { PlanItem } from "../../lib/schemas";
+
+const plan = await loadPlanItems();
+const byPhase = new Map<string, PlanItem[]>();
+for (const item of plan) {
+  const arr = byPhase.get(item.phase) ?? [];
+  arr.push(item);
+  byPhase.set(item.phase, arr);
+}
+const phases = Array.from(byPhase.keys()).sort((a, b) => Number(a) - Number(b));
+---
+
+<BaseLayout title="Project Plan" container="md">
+  <div class="prose">
+    <h1>Project Plan</h1>
+    <p class="small">Source: <code>plan/plan.json</code></p>
+
+    <div class="plan-checklist">
+      {phases.map((phase) => (
+        <details class="plan-phase" open>
+          <summary class="plan-phase__summary">
+            <strong>Phase {phase}</strong>
+          </summary>
+          <ul class="plan-phase__list">
+            {byPhase.get(phase)!.map((t) => (
+              <li class="plan-task">
+                <label class="plan-task__label">
+                  <input type="checkbox" class="plan-task__checkbox" name={`task-${t.task_id}`} />
+                  <span class="plan-task__body">
+                    <span class="plan-task__top">
+                      <span class="plan-task__id">{t.task_id}</span>
+                      <span class="plan-task__title">{t.title}</span>
+                      <span class="plan-task__time">{t.month_range}</span>
+                    </span>
+                    <span class="plan-task__desc">{t.description}</span>
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

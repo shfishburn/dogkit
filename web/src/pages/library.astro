@@ -1,35 +1,24 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import { loadPlanItems } from "../lib/loaders";
-import type { PlanItem } from "../lib/schemas";
-
-const plan = await loadPlanItems();
-const byPhase = new Map<string, PlanItem[]>();
-for (const item of plan) {
-  const arr = byPhase.get(item.phase) ?? [];
-  arr.push(item);
-  byPhase.set(item.phase, arr);
-}
-const phases = Array.from(byPhase.keys()).sort((a, b) => Number(a) - Number(b));
 
 const adminTools = [
   {
-    href: "/admin/business",
+    href: "/library/business",
     icon: "📋",
     title: "Business Documents",
     description: "Business plan, financial model, and operational documents.",
     label: "Business",
   },
   {
-    href: "/admin/manufacturer",
+    href: "/library/manufacturer",
     icon: "🏭",
     title: "Manufacturer Candidates",
     description: "Co-manufacturer evaluation and candidate tracking.",
     label: "Mfg",
   },
   {
-    href: "#project-plan",
+    href: "/library/project-plan",
     icon: "✅",
     title: "Project Plan",
     description: "Phased project checklist with task tracking and milestones.",
@@ -117,38 +106,6 @@ const sortedCategories = [...docsByCategory.keys()].sort(
           </div>
           <span class="lib-card__arrow" aria-hidden="true">→</span>
         </a>
-      ))}
-    </div>
-  </section>
-
-  <!-- ── Project Plan ── -->
-  <section class="lib-section" id="project-plan">
-    <h2 class="lib-section__title">Project Plan</h2>
-    <p class="small" style="margin-bottom: var(--space-4);">Source: <code>plan/plan.json</code></p>
-    <div class="plan-checklist">
-      {phases.map((phase) => (
-        <details class="plan-phase" open>
-          <summary class="plan-phase__summary">
-            <strong>Phase {phase}</strong>
-          </summary>
-          <ul class="plan-phase__list">
-            {byPhase.get(phase)!.map((t) => (
-              <li class="plan-task">
-                <label class="plan-task__label">
-                  <input type="checkbox" class="plan-task__checkbox" name={`task-${t.task_id}`} />
-                  <span class="plan-task__body">
-                    <span class="plan-task__top">
-                      <span class="plan-task__id">{t.task_id}</span>
-                      <span class="plan-task__title">{t.title}</span>
-                      <span class="plan-task__time">{t.month_range}</span>
-                    </span>
-                    <span class="plan-task__desc">{t.description}</span>
-                  </span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </details>
       ))}
     </div>
   </section>

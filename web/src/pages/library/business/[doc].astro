@@ -17,10 +17,10 @@ const { Content } = await entry.render();
 const pageTitle = entry.data.title ?? entry.id.replace(/^business\//, "").replace(/\.md$/i, "");
 ---
 
-<BaseLayout title={`Admin — ${pageTitle}`} container="md">
+<BaseLayout title={pageTitle} container="md">
   <article class="prose">
     <div class="small" style="margin-bottom: var(--space-4);">
-      <a href="/admin/business">&larr; Business documents</a>
+      <a href="/library/business">&larr; Business documents</a>
       &middot; Source: src/content/specs/{entry.id}
     </div>
     <Content />
