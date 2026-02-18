@@ -138,6 +138,11 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
       <input type="text" id="fdc-search-input" placeholder="Search FoodData Central..." />
       <button class="button" id="fdc-do-search" type="button">Search</button>
     </div>
+    <div class="fdc-dialog-divider"><span>or enter FDC ID directly</span></div>
+    <div class="fdc-dialog-row">
+      <input type="number" id="fdc-id-input" placeholder="e.g. 170567" min="1" step="1" />
+      <button class="button" id="fdc-do-lookup" type="button">Look up</button>
+    </div>
     <div id="fdc-search-results"></div>
     <div style="margin-top: var(--space-4); text-align: right;">
       <button class="button" id="fdc-dialog-close" type="button">Close</button>
@@ -175,6 +180,30 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
   }
   .fdc-mapped:hover {
     text-decoration: underline;
+  }
+  .fdc-dialog-divider {
+    text-align: center;
+    margin: var(--space-3) 0;
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .fdc-dialog-divider::before,
+  .fdc-dialog-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+  }
+  #fdc-id-input {
+    max-width: 10em;
+    font-variant-numeric: tabular-nums;
+  }
+  .fdc-result--highlight {
+    border: 2px solid var(--color-link);
+    border-radius: var(--radius-md);
   }
 </style>
 
@@ -301,6 +330,8 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
     if (e.target === dialog) dialog.close();
   });
 
+  const idInput = document.getElementById("fdc-id-input") as HTMLInputElement;
+
   // Enter key in search input
   searchInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -309,8 +340,77 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
     }
   });
 
+  // Enter key in ID input
+  idInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      doLookup();
+    }
+  });
+
   // Search button
   document.getElementById("fdc-do-search")!.addEventListener("click", doSearch);
+
+  // Lookup button
+  document.getElementById("fdc-do-lookup")!.addEventListener("click", doLookup);
+
+  async function doLookup() {
+    const key = getApiKey();
+    if (!key) {
+      alert("Enter your FDC API key first.");
+      return;
+    }
+    const fdcId = parseInt(idInput.value.trim(), 10);
+    if (!fdcId || fdcId < 1) {
+      alert("Enter a valid FDC ID (positive integer).");
+      return;
+    }
+
+    resultsEl.innerHTML = "<p>Looking up FDC ID " + fdcId + "...</p>";
+
+    try {
+      const url = `https://api.nal.usda.gov/fdc/v1/food/${fdcId}?api_key=${key}`;
+      const res = await fetch(url);
+      if (res.status === 404) {
+        resultsEl.innerHTML = "<p>No food found with FDC ID " + fdcId + ".</p>";
+        return;
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const f = await res.json();
+
+      const desc = f.description ?? "Unknown";
+      const dataType = f.dataType ?? "";
+      const category = f.foodCategory?.description ?? f.foodCategory ?? "";
+
+      resultsEl.innerHTML = `
+        <div class="fdc-result fdc-result--highlight">
+          <div class="fdc-result-info">
+            <div class="fdc-result-desc">${escapeHtml(desc)}</div>
+            <div class="fdc-result-meta">FDC ${fdcId} · ${escapeHtml(dataType)}${category ? ` · ${escapeHtml(category)}` : ""}</div>
+          </div>
+          <button class="fdc-assign-btn"
+                  data-fdc-id="${fdcId}"
+                  data-fdc-desc="${escapeAttr(desc)}"
+                  data-fdc-type="${escapeAttr(dataType)}">
+            Assign
+          </button>
+        </div>
+      `;
+
+      resultsEl.querySelector<HTMLButtonElement>(".fdc-assign-btn")!.addEventListener("click", (e) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        assignMapping(activeIngredientId, {
+          fdc_id: Number(btn.dataset.fdcId),
+          fdc_description: btn.dataset.fdcDesc!,
+          data_type: btn.dataset.fdcType!,
+          mapped_at: new Date().toISOString(),
+        });
+        dialog.close();
+      });
+    } catch (err) {
+      resultsEl.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
+    }
+  }
 
   async function doSearch() {
     const key = getApiKey();
