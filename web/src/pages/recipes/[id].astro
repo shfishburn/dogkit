@@ -1,19 +1,15 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { loadWeeklyMealPlan } from "../../lib/loaders";
 import { supabaseRenderImageUrl, supabaseSrcSetWH } from "../../lib/supabaseImages";
 
-const jsonPath = path.resolve(process.cwd(), "..", "data", "recipes", "weekly_meal_plan.json");
-const raw = await readFile(jsonPath, "utf-8");
-const plan = JSON.parse(raw);
-
-const recipes: any[] = plan.recipes ?? [];
-const sizing: Record<string, any> = plan.metadata?.size_scaling ?? {};
-const weeklyPlan: any = plan.weekly_plan ?? {};
+const mealPlan = await loadWeeklyMealPlan();
+const recipes = mealPlan.recipes;
+const sizing = mealPlan.metadata.size_scaling;
+const weeklyPlan = mealPlan.weekly_plan;
 
 const { id } = Astro.params;
-const recipe = recipes.find((r: any) => r.id === id);
+const recipe = recipes.find((r) => r.id === id);
 
 if (!recipe) {
   return Astro.redirect("/recipes");
@@ -30,7 +26,7 @@ const tier = recipe.tags?.tier ?? "";
 const prep = recipe.tags?.prep_time_min ?? 0;
 const nutrients = recipe.per_1000kcal_estimate ?? {};
 
-const heroImageUrl = recipe.image_url as string | undefined;
+const heroImageUrl = recipe.image_url;
 const heroSrc = heroImageUrl
   ? supabaseRenderImageUrl(heroImageUrl, {
       width: 960,
@@ -62,10 +58,8 @@ for (const day of weeklyPlan.days ?? []) {
 }
 
 export async function getStaticPaths() {
-  const jsonPath = path.resolve(process.cwd(), "..", "data", "recipes", "weekly_meal_plan.json");
-  const raw = await readFile(jsonPath, "utf-8");
-  const plan = JSON.parse(raw);
-  return (plan.recipes ?? []).map((r: any) => ({ params: { id: r.id } }));
+  const plan = await loadWeeklyMealPlan();
+  return plan.recipes.map((r) => ({ params: { id: r.id } }));
 }
 ---
 
@@ -116,7 +110,9 @@ export async function getStaticPaths() {
     <section class="rd__section no-print reveal">
       <h2 class="rd__section-title">Dog size</h2>
       <div class="pill-row" id="size-picker">
-        {Object.entries(sizing).map(([key, val]: [string, any]) => (
+        {(["small", "medium", "large"] as const).map((key) => {
+          const val = sizing[key];
+          return (
           <button
             type="button"
             class:list={["pill", { "pill--active": key === "medium" }]}
@@ -125,7 +121,8 @@ export async function getStaticPaths() {
             {key.charAt(0).toUpperCase() + key.slice(1)}
             <span class="pill-sub">{val.weight_kg} kg · {val.approx_mer_kcal} kcal</span>
           </button>
-        ))}
+        );
+        })}
       </div>
     </section>
 
@@ -133,7 +130,7 @@ export async function getStaticPaths() {
     <section class="rd__section reveal">
       <h2 class="rd__section-title">Ingredients</h2>
       <div class="rd__ing-card">
-        {recipe.ingredients.map((ing: any) => (
+        {recipe.ingredients.map((ing) => (
           <div class="rd__ing">
             <div class="rd__ing-left">
               <span class="rd__ing-name">{ing.name}</span>
@@ -216,10 +213,21 @@ export async function getStaticPaths() {
         </div>
       </section>
     )}
+
+    {/* Copy JSON */}
+    <section class="rd__section no-print reveal">
+      <h2 class="rd__section-title">Recipe data</h2>
+      <div class="rd__actions">
+        <button type="button" class="action-btn" id="copy-json-btn" title="Copy recipe JSON">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span>Copy recipe JSON</span>
+        </button>
+      </div>
+    </section>
   </article>
 </BaseLayout>
 
-<script define:vars={{ sizing }}>
+<script define:vars={{ sizing, RECIPE: recipe }}>
   let activeSize = "medium";
   const sizePicker = document.getElementById("size-picker");
 
@@ -261,4 +269,16 @@ export async function getStaticPaths() {
   });
 
   document.getElementById("print-btn").addEventListener("click", () => window.print());
+
+  const copyJsonBtn = document.getElementById('copy-json-btn');
+  copyJsonBtn?.addEventListener('click', async () => {
+    if (!navigator.clipboard) return;
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(RECIPE, null, 2));
+      const label = copyJsonBtn.querySelector('span');
+      const prev = label.textContent;
+      label.textContent = 'Copied!';
+      setTimeout(() => { label.textContent = prev; }, 2000);
+    } catch {}
+  });
 </script>

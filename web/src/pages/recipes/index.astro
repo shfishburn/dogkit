@@ -1,19 +1,15 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { loadWeeklyMealPlan } from "../../lib/loaders";
 import { supabaseRenderImageUrl, supabaseSrcSetWH } from "../../lib/supabaseImages";
 
-const jsonPath = path.resolve(process.cwd(), "..", "data", "recipes", "weekly_meal_plan.json");
-const raw = await readFile(jsonPath, "utf-8");
-const plan = JSON.parse(raw);
-
-const recipes: any[] = plan.recipes ?? [];
-const weeklyPlan: any = plan.weekly_plan ?? {};
+const mealPlan = await loadWeeklyMealPlan();
+const recipes = mealPlan.recipes;
+const weeklyPlan = mealPlan.weekly_plan;
 
 // Collect unique filter values
-const proteins = [...new Set(recipes.map((r: any) => r.tags?.protein_type).filter(Boolean))].sort();
-const tiers = [...new Set(recipes.map((r: any) => r.tags?.tier).filter(Boolean))].sort();
+const proteins = [...new Set(recipes.map((r) => r.tags?.protein_type).filter(Boolean))].sort();
+const tiers = [...new Set(recipes.map((r) => r.tags?.tier).filter(Boolean))].sort();
 
 function labelify(s: string): string {
   return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -40,7 +36,7 @@ function labelify(s: string): string {
       <legend class="filter-label">Protein</legend>
       <div class="pill-row" id="protein-picker">
         <button type="button" class="pill pill--active" data-protein="all">All</button>
-        {proteins.map((p: any) => (
+        {proteins.map((p) => (
           <button type="button" class="pill" data-protein={p}>
             {labelify(p)}
           </button>
@@ -53,7 +49,7 @@ function labelify(s: string): string {
       <legend class="filter-label">Tier</legend>
       <div class="pill-row" id="tier-picker">
         <button type="button" class="pill pill--active" data-tier="all">All</button>
-        {tiers.map((t: any) => (
+        {tiers.map((t) => (
           <button type="button" class="pill" data-tier={t}>
             {t === "T2" ? "T2 · Specialty" : "T1 · Standard"}
           </button>
@@ -78,7 +74,7 @@ function labelify(s: string): string {
 
   <!-- ── Recipe grid ── -->
   <div class="recipe-grid" id="recipe-grid">
-    {recipes.map((r: any) => {
+    {recipes.map((r) => {
       const prep = r.tags?.prep_time_min ?? 0;
       const protein = r.tags?.protein_type ?? "";
       const tier = r.tags?.tier ?? "";
@@ -163,13 +159,13 @@ function labelify(s: string): string {
       { label: "Week 1", days: weeklyPlan.days?.slice(0, 7) },
       { label: "Week 2", days: weeklyPlan.days?.slice(7, 14) },
       { label: "Week 3", days: weeklyPlan.days?.slice(14, 21) },
-    ].map((week: any) => week.days?.length > 0 && (
+    ].map((week) => week.days?.length > 0 && (
       <div class="week-block">
         <h3 class="week-block__label">{week.label}</h3>
         <div class="week-grid">
-          {week.days.map((day: any) => {
-            const am = recipes.find((r: any) => r.id === day.am?.recipe_id);
-            const pm = recipes.find((r: any) => r.id === day.pm?.recipe_id);
+          {week.days.map((day) => {
+            const am = recipes.find((r) => r.id === day.am?.recipe_id);
+            const pm = recipes.find((r) => r.id === day.pm?.recipe_id);
             return (
               <div class="week-cell">
                 <div class="week-cell__day">{day.label}</div>

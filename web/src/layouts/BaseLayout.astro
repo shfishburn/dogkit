@@ -199,7 +199,39 @@ if (segments.length > 1) {
         if (codeBlocks.length > 0) {
           // @ts-expect-error — CDN dynamic import has no type declarations
           const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");
-          mermaid.initialize({ startOnLoad: false, theme: "neutral" });
+
+          const cs = getComputedStyle(document.documentElement);
+          const surface = cs.getPropertyValue('--color-surface').trim() || '#fff';
+          const surfaceAlt = cs.getPropertyValue('--color-surface-alt').trim() || '#f6f6f6';
+          const text = cs.getPropertyValue('--color-text').trim() || '#111';
+          const muted = cs.getPropertyValue('--color-muted').trim() || '#666';
+          const border = cs.getPropertyValue('--color-border').trim() || '#ddd';
+
+          mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+              // Keep diagrams readable in both light + dark by matching our tokens.
+              background: surface,
+              primaryColor: surfaceAlt,
+              secondaryColor: surfaceAlt,
+              tertiaryColor: surfaceAlt,
+              primaryTextColor: text,
+              secondaryTextColor: text,
+              tertiaryTextColor: text,
+              lineColor: border,
+              textColor: text,
+              labelTextColor: text,
+              noteTextColor: text,
+              noteBkgColor: surfaceAlt,
+              nodeBorder: border,
+              clusterBkg: surfaceAlt,
+              clusterBorder: border,
+              titleColor: muted,
+              fontFamily: cs.getPropertyValue('--font-sans').trim() || 'system-ui',
+              fontSize: '14px',
+            },
+          });
           for (const code of codeBlocks) {
             const pre = code.parentElement;
             const definition = code.textContent ?? "";

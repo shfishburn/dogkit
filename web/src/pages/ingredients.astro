@@ -1,26 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-
-type Ingredient = {
-  id: string;
-  name: string;
-  category: string;
-  tier: string;
-  usda_fdc_id?: number;
-  default_unit?: string;
-  notes?: string;
-  dimensions?: Record<string, string>;
-};
-
-type IngredientDb = {
-  metadata?: {
-    dimensions?: Record<string, string>;
-    availability_tiers?: Record<string, string>;
-  };
-  ingredients: Ingredient[];
-};
+import { loadIngredientDb } from "../lib/loaders";
+import type { Ingredient } from "../lib/schemas";
 
 function titleCaseCategory(category: string): string {
   return category
@@ -34,9 +15,7 @@ function stableSort<T>(items: T[], toKey: (x: T) => string): T[] {
   return [...items].sort((a, b) => toKey(a).localeCompare(toKey(b)));
 }
 
-const jsonPath = path.resolve(process.cwd(), "..", "data", "ingredients", "ingredients.json");
-const raw = await readFile(jsonPath, "utf-8");
-const db = JSON.parse(raw) as IngredientDb;
+const db = await loadIngredientDb();
 
 const dimensionLabels = db.metadata?.dimensions ?? {};
 const tierLabels = db.metadata?.availability_tiers ?? {};
@@ -100,7 +79,7 @@ const categorySections = categories.map((c) => ({
                 <tr>
                   <td>
                     <strong class="ing-name">{ing.name}</strong>
-                    {ing.usda_fdc_id && <div class="ing-meta">USDA FDC {ing.usda_fdc_id}{ing.default_unit ? ` · ${ing.default_unit}` : ""}</div>}
+                    {ing.default_unit && <div class="ing-meta">{ing.default_unit}</div>}
                   </td>
                   <td><span class="tier-badge">{tierText}</span></td>
                   <td class="ing-notes">{ing.notes ?? ""}</td>

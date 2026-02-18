@@ -1,27 +1,8 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { loadManufacturerDb } from "../../lib/loaders";
 
-type ManufacturerCandidate = {
-  rank: number;
-  name: string;
-  website?: string;
-  location?: string;
-  type?: string;
-  ideal_stage?: string;
-  description?: string;
-  fit_notes?: string[];
-  risks?: string[];
-};
-
-type ManufacturerDb = {
-  candidates: ManufacturerCandidate[];
-};
-
-const jsonPath = path.resolve(process.cwd(), "..", "data", "app", "manufacturer", "manufacturer.json");
-const raw = await readFile(jsonPath, "utf-8");
-const db = JSON.parse(raw) as ManufacturerDb;
+const db = await loadManufacturerDb();
 
 const candidates = [...(db.candidates ?? [])].sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
 ---
@@ -91,6 +72,6 @@ const candidates = [...(db.candidates ?? [])].sort((a, b) => (a.rank ?? 0) - (b.
     ))}
 
     <h2>Raw JSON</h2>
-    <pre><code>{raw}</code></pre>
+    <pre><code>{JSON.stringify(db, null, 2)}</code></pre>
   </div>
 </BaseLayout>

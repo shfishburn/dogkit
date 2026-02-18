@@ -1,19 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { loadPlanItems } from "../../lib/loaders";
+import type { PlanItem } from "../../lib/schemas";
 
-type PlanItem = {
-  phase: string;
-  month_range: string;
-  task_id: string;
-  title: string;
-  description: string;
-};
-
-const planPath = path.resolve(process.cwd(), "..", "plan", "plan.json");
-const planRaw = await readFile(planPath, "utf-8");
-const plan = JSON.parse(planRaw) as PlanItem[];
+const plan = await loadPlanItems();
 
 // Group by phase (keep natural order by numeric-ish phase)
 const byPhase = new Map<string, PlanItem[]>();

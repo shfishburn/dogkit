@@ -1,15 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { loadWeeklyMealPlan } from "../../lib/loaders";
 
-const jsonPath = path.resolve(process.cwd(), "..", "data", "recipes", "weekly_meal_plan.json");
-const raw = await readFile(jsonPath, "utf-8");
-const data = JSON.parse(raw);
-
-const recipes: any[] = data.recipes ?? [];
-const weeklyPlan: any = data.weekly_plan ?? {};
-const sizing: Record<string, any> = data.metadata?.size_scaling ?? {};
+const mealPlan = await loadWeeklyMealPlan();
+const recipes = mealPlan.recipes;
+const weeklyPlan = mealPlan.weekly_plan;
+const sizing = mealPlan.metadata.size_scaling;
 ---
 
 <BaseLayout title="Your Nutrition Plan" description="Personalized daily energy and feeding recommendations for your dog." container="md">
@@ -30,26 +26,26 @@ const sizing: Record<string, any> = data.metadata?.size_scaling ?? {};
     <!-- Dog profile summary -->
     <section class="pr__section reveal">
       <h2 class="pr__section-title">Dog profile</h2>
-      <div class="pr__profile" id="profile-tags"></div>
+      <div id="dogs-profile"></div>
     </section>
 
     <!-- Energy breakdown -->
     <section class="pr__section reveal">
       <h2 class="pr__section-title">Energy calculation</h2>
-      <div class="pr__energy-card" id="energy-card"></div>
+      <div id="dogs-energy"></div>
     </section>
 
     <!-- Size category -->
     <section class="pr__section reveal">
       <h2 class="pr__section-title">Feeding guide</h2>
-      <div class="pr__size-banner" id="size-banner"></div>
+      <div id="dogs-guide"></div>
     </section>
 
     <!-- Recommended meal plan -->
     <section class="pr__section reveal">
       <h2 class="pr__section-title">Recommended weekly meal plan</h2>
       <p class="page-sub" style="margin-bottom:var(--space-4);">A 7-day sample from the 21-day rotation, with recipes scaled for your dog's size category.</p>
-      <div id="meal-plan-container"></div>
+      <div id="dogs-mealplans"></div>
       <p style="margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-muted);">
         This is week 1 of a 21-day rotation. <a href="/recipes">View all recipes and the full rotation &rarr;</a>
       </p>
@@ -72,6 +68,26 @@ const sizing: Record<string, any> = data.metadata?.size_scaling ?? {};
 </BaseLayout>
 
 <script define:vars={{ recipes, weeklyPlan, sizing }}>
+  const LB_PER_KG = 2.2046226218;
+
+  function kgToLb(kg) {
+    return kg * LB_PER_KG;
+  }
+
+  function formatWeight(weightKg, units) {
+    if (typeof weightKg !== 'number' || isNaN(weightKg)) return '—';
+    if (units === 'imperial') return `${(Math.round(kgToLb(weightKg) * 10) / 10)} lb`;
+    // keep kg fairly clean
+    const rounded = Math.round(weightKg * 10) / 10;
+    return `${rounded} kg`;
+  }
+
+  function formatRerWeight(weightKg, units) {
+    const kg = Math.round(weightKg * 10) / 10;
+    if (units !== 'imperial') return `${kg}`;
+    const lb = Math.round(kgToLb(weightKg) * 10) / 10;
+    return `${kg} <span style="color:var(--color-muted);">(≈ ${lb} lb)</span>`;
+  }
   // ── MER calculation (same proven logic from plan form) ──
   function computeRER(weightKg) {
     return 70 * Math.pow(weightKg, 0.75);
@@ -129,7 +145,7 @@ const sizing: Record<string, any> = data.metadata?.size_scaling ?? {};
       if (idx < 0) return publicUrl;
       const rest = u.pathname.slice(idx + marker.length);
       u.pathname = u.pathname.slice(0, idx) + "/storage/v1/render/image/public/" + rest;
-      u.search = "width=240&height=160&resize=cover&quality=60&format=webp";
+      u.search = "width=240&height=160&resize=cover&quality=60";
       return u.toString();
     } catch { return publicUrl; }
   }
@@ -141,115 +157,236 @@ const sizing: Record<string, any> = data.metadata?.size_scaling ?? {};
   }
 
   // ── Read URL params ──
-  const params = new URLSearchParams(window.location.search);
-  const weightKg = parseFloat(params.get("weight_kg") || "");
-  const ageMonths = parseInt(params.get("age_months") || "", 10);
-  const bcs = parseInt(params.get("bcs") || "", 10);
-  const neuterStatus = params.get("neuter_status") || "neutered";
-  const activityLevel = params.get("activity_level") || "moderate";
-  const weightGoal = params.get("weight_goal") || "maintain";
-  const breed = params.get("breed") || "Mixed Breed";
+  const rawParams = new URLSearchParams(window.location.search);
+
+  function normalizeParams(p) {
+    // If this URL already uses dog_0_* fields, keep as-is.
+    for (const k of p.keys()) {
+      if (/^dog_\d+_/.test(k)) return p;
+    }
+
+    // Legacy single-dog support (old links): weight_kg, age_months, etc.
+    const hasLegacy = p.has("weight_kg") || p.has("age_months") || p.has("activity_level") || p.has("neuter_status");
+    if (!hasLegacy) return p;
+
+    const n = new URLSearchParams(p);
+    const legacyKeys = [
+      "name",
+      "breed",
+      "weight_kg",
+      "age_months",
+      "bcs",
+      "neuter_status",
+      "activity_level",
+      "weight_goal",
+    ];
+    for (const key of legacyKeys) {
+      const v = n.get(key);
+      if (v != null && v !== "") n.set(`dog_0_${key}`, v);
+    }
+    if (!n.get("dog_count")) n.set("dog_count", "1");
+    return n;
+  }
+
+  const params = normalizeParams(rawParams);
+  const units = params.get('units') === 'imperial' ? 'imperial' : 'metric';
+
+  function readDogsFromParams() {
+    const countFromParam = Number(params.get("dog_count")) || 0;
+
+    let maxIdx = -1;
+    for (const k of params.keys()) {
+      const m = k.match(/^dog_(\d+)_/);
+      if (m) maxIdx = Math.max(maxIdx, Number(m[1]));
+    }
+
+    const count = Math.max(1, countFromParam, maxIdx + 1);
+    const dogs = [];
+
+    for (let i = 0; i < count; i++) {
+      const weightKg = parseFloat(params.get(`dog_${i}_weight_kg`) || "");
+      const ageMonths = parseInt(params.get(`dog_${i}_age_months`) || "", 10);
+      const bcs = parseInt(params.get(`dog_${i}_bcs`) || "5", 10);
+      const neuterStatus = params.get(`dog_${i}_neuter_status`) || "neutered";
+      const activityLevel = params.get(`dog_${i}_activity_level`) || "moderate";
+      const weightGoal = params.get(`dog_${i}_weight_goal`) || "maintain";
+      const breed = params.get(`dog_${i}_breed`) || "Mixed Breed";
+      const name = (params.get(`dog_${i}_name`) || "").trim();
+
+      dogs.push({ idx: i, name, breed, weightKg, ageMonths, bcs, neuterStatus, activityLevel, weightGoal });
+    }
+
+    return dogs.filter((d) => !isNaN(d.weightKg) && !isNaN(d.ageMonths));
+  }
+
+  const dogs = readDogsFromParams();
 
   const root = document.getElementById("results-root");
   const noParams = document.getElementById("no-params");
 
-  if (isNaN(weightKg) || isNaN(ageMonths)) {
+  if (dogs.length === 0) {
     // No valid params — show fallback
     for (const el of root.querySelectorAll(".page-header, .pr__section, .pr__back, .pr__disclaimer")) {
       el.style.display = "none";
     }
     noParams.style.display = "block";
   } else {
-    // ── Compute ──
-    const rer = computeRER(weightKg);
-    const { mult, reason } = merMultiplier({ ageMonths, neuterStatus, activityLevel, weightGoal, bcs });
-    const dailyKcal = rer * mult;
-    const meals = mealsPerDay(ageMonths);
-    const perMeal = dailyKcal / meals;
-    const size = sizeCategory(dailyKcal);
-    const sizeInfo = sizing[size] || {};
-
     // ── Edit link with params ──
     document.getElementById("edit-link").href = `/plan?${params.toString()}`;
 
-    // ── Profile tags ──
-    const profileEl = document.getElementById("profile-tags");
-    const tags = [
-      { label: "Breed", value: breed },
-      { label: "Weight", value: `${weightKg} kg` },
-      { label: "Age", value: ageMonths < 12 ? `${ageMonths} months` : `${(ageMonths / 12).toFixed(1)} years` },
-      { label: "BCS", value: `${bcs} / 9` },
-      { label: "Status", value: labelify(neuterStatus) },
-      { label: "Activity", value: labelify(activityLevel) },
-      { label: "Goal", value: labelify(weightGoal) },
-    ];
-    profileEl.innerHTML = tags
-      .map((t) => `<span class="pr__profile-tag"><strong>${t.label}:</strong>&nbsp;${t.value}</span>`)
-      .join("");
+    const profileHost = document.getElementById("dogs-profile");
+    const energyHost = document.getElementById("dogs-energy");
+    const guideHost = document.getElementById("dogs-guide");
+    const mealHost = document.getElementById("dogs-mealplans");
 
-    // ── Energy breakdown ──
-    const energyEl = document.getElementById("energy-card");
-    energyEl.innerHTML = `
-      <div class="pr__energy-row">
-        <span class="pr__energy-label">Resting Energy (RER)</span>
-        <span class="pr__energy-val">70 × ${weightKg}<sup>0.75</sup> = ${Math.round(rer)} kcal</span>
-      </div>
-      <div class="pr__energy-row">
-        <span class="pr__energy-label">Multiplier</span>
-        <span class="pr__energy-val">× ${mult.toFixed(2)} &mdash; ${reason}</span>
-      </div>
-      <div class="pr__energy-row pr__energy-row--total">
-        <span class="pr__energy-label">Daily target</span>
-        <span class="pr__energy-val">${Math.round(dailyKcal)} kcal / day</span>
-      </div>
-      <div class="pr__energy-row">
-        <span class="pr__energy-label">Meals per day</span>
-        <span class="pr__energy-val">${meals}</span>
-      </div>
-      <div class="pr__energy-row">
-        <span class="pr__energy-label">Per meal</span>
-        <span class="pr__energy-val">~${Math.round(perMeal)} kcal</span>
-      </div>
-    `;
+    profileHost.innerHTML = "";
+    energyHost.innerHTML = "";
+    guideHost.innerHTML = "";
+    mealHost.innerHTML = "";
 
-    // ── Size banner ──
-    const sizeEl = document.getElementById("size-banner");
-    sizeEl.innerHTML = `
-      Based on <strong>${Math.round(dailyKcal)} kcal/day</strong>, your dog falls in the
-      <strong>${size.charAt(0).toUpperCase() + size.slice(1)}</strong> category
-      (${sizeInfo.weight_kg ?? "—"} kg reference, factor ${sizeInfo.factor ?? "—"}).
-      Ingredient amounts in recipes are scaled for this size.
-    `;
-
-    // ── Meal plan (week 1) ──
-    const planContainer = document.getElementById("meal-plan-container");
     const week1 = (weeklyPlan.days || []).slice(0, 7);
 
-    if (week1.length > 0) {
-      let html = '<div class="week-grid">';
-      for (const day of week1) {
-        const am = recipes.find((r) => r.id === day.am?.recipe_id);
-        const pm = recipes.find((r) => r.id === day.pm?.recipe_id);
-        html += `<div class="week-cell">`;
-        html += `<div class="week-cell__day">${day.label}</div>`;
-        if (am) {
-          const amImg = am.image_url ? `<img class="week-cell__thumb" src="${thumbUrl(am.image_url)}" alt="" loading="lazy" />` : "";
-          html += `<a class="week-cell__meal week-cell__meal--am" href="/recipes/${am.id}">
-            ${amImg}<span class="week-meal-time">AM</span>${am.name}
-          </a>`;
+    for (const dog of dogs) {
+      const rer = computeRER(dog.weightKg);
+      const { mult, reason } = merMultiplier({
+        ageMonths: dog.ageMonths,
+        neuterStatus: dog.neuterStatus,
+        activityLevel: dog.activityLevel,
+        weightGoal: dog.weightGoal,
+        bcs: dog.bcs,
+      });
+      const dailyKcal = rer * mult;
+      const meals = mealsPerDay(dog.ageMonths);
+      const perMeal = dailyKcal / meals;
+      const size = sizeCategory(dailyKcal);
+      const sizeInfo = sizing[size] || {};
+
+      const dogLabel = dog.name ? dog.name : `Dog ${dog.idx + 1}`;
+
+      const tags = [
+        { label: "Name", value: dogLabel },
+        { label: "Breed", value: dog.breed },
+        { label: "Weight", value: formatWeight(dog.weightKg, units) },
+        { label: "Age", value: dog.ageMonths < 12 ? `${dog.ageMonths} months` : `${(dog.ageMonths / 12).toFixed(1)} years` },
+        { label: "BCS", value: `${dog.bcs} / 9` },
+        { label: "Status", value: labelify(dog.neuterStatus) },
+        { label: "Activity", value: labelify(dog.activityLevel) },
+        { label: "Goal", value: labelify(dog.weightGoal) },
+      ];
+
+      profileHost.insertAdjacentHTML(
+        "beforeend",
+        `<div class="pr__dog-block">
+          <h3 class="pr__dog-title">${dogLabel}</h3>
+          <div class="pr__profile">
+            ${tags.map((t) => `<span class="pr__profile-tag"><strong>${t.label}:</strong>&nbsp;${t.value}</span>`).join("")}
+          </div>
+        </div>`
+      );
+
+      energyHost.insertAdjacentHTML(
+        "beforeend",
+        `<div class="pr__dog-block">
+          <h3 class="pr__dog-title">${dogLabel}</h3>
+          <div class="pr__energy-card">
+            <div class="pr__energy-row">
+              <span class="pr__energy-label">Resting Energy (RER)</span>
+              <span class="pr__energy-val">70 × ${formatRerWeight(dog.weightKg, units)}<sup>0.75</sup> = ${Math.round(rer)} kcal</span>
+            </div>
+            <div class="pr__energy-row">
+              <span class="pr__energy-label">Multiplier</span>
+              <span class="pr__energy-val">× ${mult.toFixed(2)} &mdash; ${reason}</span>
+            </div>
+            <div class="pr__energy-row pr__energy-row--total">
+              <span class="pr__energy-label">Daily target</span>
+              <span class="pr__energy-val">${Math.round(dailyKcal)} kcal / day</span>
+            </div>
+            <div class="pr__energy-row">
+              <span class="pr__energy-label">Meals per day</span>
+              <span class="pr__energy-val">${meals}</span>
+            </div>
+            <div class="pr__energy-row">
+              <span class="pr__energy-label">Per meal</span>
+              <span class="pr__energy-val">~${Math.round(perMeal)} kcal</span>
+            </div>
+          </div>
+        </div>`
+      );
+
+      guideHost.insertAdjacentHTML(
+        "beforeend",
+        `<div class="pr__dog-block">
+          <h3 class="pr__dog-title">${dogLabel}</h3>
+          <div class="pr__size-banner">
+            Based on <strong>${Math.round(dailyKcal)} kcal/day</strong>, your dog falls in the
+            <strong>${size.charAt(0).toUpperCase() + size.slice(1)}</strong> category
+            (${typeof sizeInfo.weight_kg === 'number' ? formatWeight(sizeInfo.weight_kg, units) : "—"} reference, factor ${sizeInfo.factor ?? "—"}).
+            Ingredient amounts in recipes are scaled for this size.
+          </div>
+        </div>`
+      );
+
+      if (week1.length > 0) {
+        let html = `<div class="pr__dog-block">`;
+        html += `<h3 class="pr__dog-title">${dogLabel}</h3>`;
+        html += '<div class="week-grid">';
+        for (const day of week1) {
+          const am = recipes.find((r) => r.id === day.am?.recipe_id);
+          const pm = recipes.find((r) => r.id === day.pm?.recipe_id);
+          html += `<div class="week-cell">`;
+          html += `<div class="week-cell__day">${day.label}</div>`;
+          if (am) {
+            const amImg = am.image_url ? `<img class="week-cell__thumb" src="${thumbUrl(am.image_url)}" alt="" loading="lazy" decoding="async" />` : "";
+            html += `<a class="week-cell__meal week-cell__meal--am" href="/recipes/${am.id}">
+              ${amImg}<span class="week-meal-time">AM</span>${am.name}
+            </a>`;
+          }
+          if (pm) {
+            const pmImg = pm.image_url ? `<img class="week-cell__thumb" src="${thumbUrl(pm.image_url)}" alt="" loading="lazy" decoding="async" />` : "";
+            html += `<a class="week-cell__meal week-cell__meal--pm" href="/recipes/${pm.id}">
+              ${pmImg}<span class="week-meal-time">PM</span>${pm.name}
+            </a>`;
+          }
+          html += `</div>`;
         }
-        if (pm) {
-          const pmImg = pm.image_url ? `<img class="week-cell__thumb" src="${thumbUrl(pm.image_url)}" alt="" loading="lazy" />` : "";
-          html += `<a class="week-cell__meal week-cell__meal--pm" href="/recipes/${pm.id}">
-            ${pmImg}<span class="week-meal-time">PM</span>${pm.name}
-          </a>`;
-        }
-        html += `</div>`;
+        html += "</div></div>";
+        mealHost.insertAdjacentHTML("beforeend", html);
       }
-      html += "</div>";
-      planContainer.innerHTML = html;
-    } else {
-      planContainer.innerHTML = '<p style="color:var(--color-muted);font-size:var(--text-sm);">No meal plan data available.</p>';
+    }
+
+    if (week1.length === 0) {
+      mealHost.innerHTML = '<p style="color:var(--color-muted);font-size:var(--text-sm);">No meal plan data available.</p>';
     }
   }
+</script>
+
+<script>
+  import { setProfileFromParams } from "../../stores/dogProfile";
+
+  /** Persist first dog's profile to localStorage for form pre-fill on return */
+  function syncProfileToStore() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("dog_0_weight_kg")) return;
+
+    // Remap dog_0_* params to flat store keys
+    const fieldMap: Record<string, string> = {
+      weight_kg: "dog_0_weight_kg",
+      age_months: "dog_0_age_months",
+      bcs: "dog_0_bcs",
+      neuter_status: "dog_0_neuter_status",
+      activity_level: "dog_0_activity_level",
+      weight_goal: "dog_0_weight_goal",
+      breed: "dog_0_breed",
+    };
+
+    const flat = new URLSearchParams();
+    for (const [storeKey, formKey] of Object.entries(fieldMap)) {
+      const val = params.get(formKey);
+      if (val !== null) flat.set(storeKey, val);
+    }
+    setProfileFromParams(flat);
+  }
+
+  syncProfileToStore();
+  document.addEventListener("astro:page-load", syncProfileToStore);
 </script>

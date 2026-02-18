@@ -1,0 +1,22 @@
+{
+  "name": "dogkit-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dogkit repo maintenance and data pipelines (Supabase loaders, image generation, ingredient DB generation).",
+  "bin": {
+    "dogkit-generate-ingredients-db": "./generate_ingredients_db.mjs",
+    "dogkit-load-recipes": "./load_recipes_to_supabase.mjs",
+    "dogkit-generate-recipe-images": "./generate_recipe_images.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.96.0"
+  },
+  "files": [
+    "*.mjs",
+    "*.py",
+    "prompts/**",
+    "package.json",
+    "README.md"
+  ]
+}

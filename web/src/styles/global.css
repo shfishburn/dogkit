@@ -406,6 +406,18 @@ main.full-bleed {
   border: 1px solid var(--color-border);
 }
 
+/* Mermaid diagrams (rendered client-side from ```mermaid``` blocks) */
+.mermaid-diagram {
+  background: var(--color-code-surface);
+  padding: var(--space-4);
+  border-radius: var(--radius-1);
+  border: 1px solid var(--color-border);
+}
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
 .prose table {
   width: 100%;
   border-collapse: collapse;
@@ -1777,6 +1789,47 @@ main.full-bleed {
   line-height: 1.45;
 }
 
+.dog-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.dog-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-1);
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+
+.dog-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.dog-card__title {
+  font-size: var(--text-sm);
+}
+
+.dog-card__remove {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-1);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.dog-card__remove:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+
 /* Progress dots */
 .wiz-progress {
   display: flex;
@@ -1838,23 +1891,114 @@ main.full-bleed {
   padding: var(--space-6);
 }
 .wiz-step__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: var(--text-lg);
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: var(--space-5);
   padding: 0;
+}
+
+.wiz-step__icon {
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+.wiz-intro {
+  margin: calc(var(--space-5) * -0.5) 0 var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: 1.55;
 }
 
 /* Fields */
 .wiz-field {
   display: block;
   margin-bottom: var(--space-5);
+  position: relative;
+}
+.wiz-field__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-1);
 }
 .wiz-field__label {
   display: block;
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text);
-  margin-bottom: var(--space-1);
+  margin-bottom: 0;
+}
+
+.field-info-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dog-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dog-card__icon {
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+.field-info-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.field-help {
+  display: none;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: 1.55;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-1);
+  padding: var(--space-3) var(--space-4);
+}
+
+/* Desktop tooltip behavior */
+@media (hover: hover) and (pointer: fine) {
+  .wiz-field.is-help-hover .field-help {
+    display: block;
+    position: absolute;
+    z-index: 50;
+    right: 0;
+    top: 0;
+    transform: translateY(2.05rem);
+    max-width: 46ch;
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--color-text) 8%, transparent);
+  }
+}
+
+/* Mobile: inline expander */
+@media (hover: none), (pointer: coarse) {
+  .wiz-field.is-help-open .field-help {
+    display: block;
+    position: static;
+    margin-top: var(--space-2);
+    max-width: none;
+    box-shadow: none;
+  }
 }
 .wiz-field :is(input, select) {
   width: 100%;
@@ -1883,6 +2027,16 @@ main.full-bleed {
 }
 
 /* ─── Plan results page ──────────────────────────────── */
+.pr__dog-block {
+  margin-bottom: var(--space-6);
+}
+
+.pr__dog-title {
+  font-size: var(--text-base);
+  font-weight: 800;
+  margin: 0 0 var(--space-3);
+}
+
 .pr__back {
   display: inline-flex;
   align-items: center;

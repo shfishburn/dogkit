@@ -4,6 +4,10 @@
 # Dependencies
 node_modules/
 
+# Scripts package artifacts
+scripts/*.tgz
+scripts/node_modules/
+
 # macOS
 .DS_Store
 

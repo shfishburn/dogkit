@@ -22,31 +22,142 @@ import { BREEDS } from "../lib/breeds";
 
   <form id="plan-form" novalidate>
 
+    <input type="hidden" name="dog_count" id="dog-count" value="1" />
+
     <!-- Step 1: Your dog -->
     <fieldset class="wiz-step card" data-step="0">
-      <legend class="wiz-step__title">About your dog</legend>
+      <legend class="wiz-step__title">
+        <svg class="wiz-step__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
+        About your dog
+      </legend>
+
+      <p class="wiz-intro">Add one dog or multiple dogs — each dog gets a separate set of results.</p>
 
       <label class="wiz-field">
-        <span class="wiz-field__label">Breed</span>
-        <small class="field-hint">Giant breeds age faster than small breeds.</small>
-        <select name="breed">
-          {BREEDS.map((b) => (
-            <option value={b} selected={b === "Mixed Breed"}>{b}</option>
-          ))}
+        <span class="wiz-field__label-row">
+          <span class="wiz-field__label">Units</span>
+          <button type="button" class="field-info-btn" data-help="units" aria-label="What are these units?" aria-expanded="false">?</button>
+        </span>
+        <small class="field-hint">Pick kg or lb. We do the math in kg and show results in your choice.</small>
+        <div class="field-help" aria-hidden="true"></div>
+        <select name="units" id="units">
+          <option value="metric" selected>Metric (kg)</option>
+          <option value="imperial">Imperial (lb)</option>
         </select>
       </label>
 
-      <label class="wiz-field">
-        <span class="wiz-field__label">Weight (kg)</span>
-        <small class="field-hint">Current weight. We'll adjust for body condition internally.</small>
-        <input name="weight_kg" type="number" min="0.5" step="0.1" value="10" required />
-      </label>
+      <div class="dog-stack" id="dogs-step1">
+        <section class="dog-card" data-dog="0">
+          <div class="dog-card__header">
+            <strong class="dog-card__title">
+              <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
+              Dog 1
+            </strong>
+          </div>
 
-      <label class="wiz-field">
-        <span class="wiz-field__label">Age (months)</span>
-        <small class="field-hint">Puppies under 12 months have higher energy needs.</small>
-        <input name="age_months" type="number" min="1" step="1" value="24" required />
-      </label>
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Dog name</span>
+              <button type="button" class="field-info-btn" data-help="name" aria-label="Why ask for a dog name?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Optional — shown in your results.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <input name="dog_0_name" type="text" autocomplete="nickname" placeholder="e.g. Luna" />
+          </label>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Breed</span>
+              <button type="button" class="field-info-btn" data-help="breed" aria-label="How is breed used?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Helps with puppy vs. adult life-stage thresholds. Mixed Breed is totally fine.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <select name="dog_0_breed">
+              {BREEDS.map((b) => (
+                <option value={b} selected={b === "Mixed Breed"}>{b}</option>
+              ))}
+            </select>
+          </label>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label" data-weight-label>Weight (kg)</span>
+              <button type="button" class="field-info-btn" data-help="weight" aria-label="How is weight used?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Your dog's current weight. If you're unsure, a close estimate is OK.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <input name="dog_0_weight_kg" type="number" min="0.5" step="0.1" value="10" required />
+          </label>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Age (months)</span>
+              <button type="button" class="field-info-btn" data-help="age" aria-label="Why ask for age?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Puppies need more calories. If you're unsure: 1 year = 12 months.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <input name="dog_0_age_months" type="number" min="1" step="1" value="24" required />
+          </label>
+        </section>
+      </div>
+
+      <template id="dog-step1-template">
+        <section class="dog-card" data-dog="__IDX__">
+          <div class="dog-card__header">
+            <strong class="dog-card__title">
+              <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
+              Dog __N__
+            </strong>
+            <button type="button" class="dog-card__remove" data-remove="__IDX__" aria-label="Remove dog">Remove</button>
+          </div>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Dog name</span>
+              <button type="button" class="field-info-btn" data-help="name" aria-label="Why ask for a dog name?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Optional — shown in your results.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <input name="dog___IDX___name" type="text" autocomplete="nickname" placeholder="e.g. Luna" />
+          </label>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Breed</span>
+              <button type="button" class="field-info-btn" data-help="breed" aria-label="How is breed used?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Helps with puppy vs. adult life-stage thresholds. Mixed Breed is totally fine.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <select name="dog___IDX___breed">
+              {BREEDS.map((b) => (
+                <option value={b}>{b}</option>
+              ))}
+            </select>
+          </label>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label" data-weight-label>Weight (kg)</span>
+              <button type="button" class="field-info-btn" data-help="weight" aria-label="How is weight used?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Your dog's current weight. If you're unsure, a close estimate is OK.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <input name="dog___IDX___weight_kg" type="number" min="0.5" step="0.1" required />
+          </label>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Age (months)</span>
+              <button type="button" class="field-info-btn" data-help="age" aria-label="Why ask for age?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Puppies need more calories. If you're unsure: 1 year = 12 months.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <input name="dog___IDX___age_months" type="number" min="1" step="1" required />
+          </label>
+        </section>
+      </template>
+
+      <button type="button" class="button" id="add-dog">+ Add another dog</button>
 
       <div class="wiz-nav">
         <span></span>
@@ -56,33 +167,108 @@ import { BREEDS } from "../lib/breeds";
 
     <!-- Step 2: Body & lifestyle -->
     <fieldset class="wiz-step card" data-step="1" hidden>
-      <legend class="wiz-step__title">Body &amp; lifestyle</legend>
+      <legend class="wiz-step__title">
+        <svg class="wiz-step__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 8.6a9 9 0 1 1-17.6 0"/><path d="M12 2v10"/><path d="M8 6h8"/></svg>
+        Body &amp; lifestyle
+      </legend>
 
-      <label class="wiz-field">
-        <span class="wiz-field__label">Body condition score (1–9)</span>
-        <small class="field-hint">BCS 5 is ideal — ribs easily felt, visible waist. Each point above or below 5 represents roughly 10% over or under ideal weight.</small>
-        <input name="bcs" type="number" min="1" max="9" step="1" value="5" required />
-      </label>
+      <div class="dog-stack" id="dogs-step2">
+        <section class="dog-card" data-dog="0">
+          <div class="dog-card__header">
+            <strong class="dog-card__title">
+              <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
+              Dog 1
+            </strong>
+          </div>
 
-      <label class="wiz-field">
-        <span class="wiz-field__label">Neuter status</span>
-        <small class="field-hint">Neutered dogs need ~10% fewer calories due to metabolic changes.</small>
-        <select name="neuter_status">
-          <option value="neutered" selected>Neutered</option>
-          <option value="intact">Intact</option>
-        </select>
-      </label>
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Body condition score (1–9)</span>
+              <button type="button" class="field-info-btn" data-help="bcs" aria-label="What is body condition score?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">How lean or heavy does your dog look? 5 = ideal. 1–3 underweight, 6–9 overweight. If you're not sure, pick 5.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <input name="dog_0_bcs" type="number" min="1" max="9" step="1" value="5" required />
+          </label>
 
-      <label class="wiz-field">
-        <span class="wiz-field__label">Activity level</span>
-        <small class="field-hint">Sedentary: &lt;30 min/day indoors. Moderate: 30–60 min walks. Active: 1–3 hr vigorous. Working: 3+ hr sustained.</small>
-        <select name="activity_level">
-          <option value="sedentary">Sedentary</option>
-          <option value="moderate" selected>Moderate</option>
-          <option value="active">Active</option>
-          <option value="working">Working</option>
-        </select>
-      </label>
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Neuter status</span>
+              <button type="button" class="field-info-btn" data-help="neuter" aria-label="How does neuter status affect calories?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Spayed/neutered dogs often need a bit fewer calories.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <select name="dog_0_neuter_status">
+              <option value="neutered" selected>Neutered</option>
+              <option value="intact">Intact</option>
+            </select>
+          </label>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Activity level</span>
+              <button type="button" class="field-info-btn" data-help="activity" aria-label="How is activity level used?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Most pets are Moderate. Sedentary = mostly indoors. Active/Working = lots of running, hiking, or a job.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <select name="dog_0_activity_level">
+              <option value="sedentary">Sedentary</option>
+              <option value="moderate" selected>Moderate</option>
+              <option value="active">Active</option>
+              <option value="working">Working</option>
+            </select>
+          </label>
+        </section>
+      </div>
+
+      <template id="dog-step2-template">
+        <section class="dog-card" data-dog="__IDX__">
+          <div class="dog-card__header">
+            <strong class="dog-card__title">
+              <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
+              Dog __N__
+            </strong>
+          </div>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Body condition score (1–9)</span>
+              <button type="button" class="field-info-btn" data-help="bcs" aria-label="What is body condition score?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">How lean or heavy does your dog look? 5 = ideal. 1–3 underweight, 6–9 overweight. If you're not sure, pick 5.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <input name="dog___IDX___bcs" type="number" min="1" max="9" step="1" value="5" required />
+          </label>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Neuter status</span>
+              <button type="button" class="field-info-btn" data-help="neuter" aria-label="How does neuter status affect calories?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Spayed/neutered dogs often need a bit fewer calories.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <select name="dog___IDX___neuter_status">
+              <option value="neutered" selected>Neutered</option>
+              <option value="intact">Intact</option>
+            </select>
+          </label>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Activity level</span>
+              <button type="button" class="field-info-btn" data-help="activity" aria-label="How is activity level used?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Most pets are Moderate. Sedentary = mostly indoors. Active/Working = lots of running, hiking, or a job.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <select name="dog___IDX___activity_level">
+              <option value="sedentary">Sedentary</option>
+              <option value="moderate" selected>Moderate</option>
+              <option value="active">Active</option>
+              <option value="working">Working</option>
+            </select>
+          </label>
+        </section>
+      </template>
 
       <div class="wiz-nav">
         <button type="button" class="button wiz-prev">&larr; Back</button>
@@ -92,17 +278,60 @@ import { BREEDS } from "../lib/breeds";
 
     <!-- Step 3: Goal -->
     <fieldset class="wiz-step card" data-step="2" hidden>
-      <legend class="wiz-step__title">Your goal</legend>
+      <legend class="wiz-step__title">
+        <svg class="wiz-step__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        Your goal
+      </legend>
 
-      <label class="wiz-field">
-        <span class="wiz-field__label">Weight goal</span>
-        <small class="field-hint">Maintain = baseline calories. Lose = 10–20% caloric deficit. Gain = 10% surplus.</small>
-        <select name="weight_goal">
-          <option value="maintain" selected>Maintain weight</option>
-          <option value="lose">Lose weight</option>
-          <option value="gain">Gain weight</option>
-        </select>
-      </label>
+      <div class="dog-stack" id="dogs-step3">
+        <section class="dog-card" data-dog="0">
+          <div class="dog-card__header">
+            <strong class="dog-card__title">
+              <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
+              Dog 1
+            </strong>
+          </div>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Weight goal</span>
+              <button type="button" class="field-info-btn" data-help="goal" aria-label="How does weight goal affect calories?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Maintain is the default. Lose/Gain adjusts calories up or down.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <select name="dog_0_weight_goal">
+              <option value="maintain" selected>Maintain weight</option>
+              <option value="lose">Lose weight</option>
+              <option value="gain">Gain weight</option>
+            </select>
+          </label>
+        </section>
+      </div>
+
+      <template id="dog-step3-template">
+        <section class="dog-card" data-dog="__IDX__">
+          <div class="dog-card__header">
+            <strong class="dog-card__title">
+              <svg class="dog-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6.65-7 11-7 11z"/></svg>
+              Dog __N__
+            </strong>
+          </div>
+
+          <label class="wiz-field">
+            <span class="wiz-field__label-row">
+              <span class="wiz-field__label">Weight goal</span>
+              <button type="button" class="field-info-btn" data-help="goal" aria-label="How does weight goal affect calories?" aria-expanded="false">?</button>
+            </span>
+            <small class="field-hint">Maintain is the default. Lose/Gain adjusts calories up or down.</small>
+            <div class="field-help" aria-hidden="true"></div>
+            <select name="dog___IDX___weight_goal">
+              <option value="maintain" selected>Maintain weight</option>
+              <option value="lose">Lose weight</option>
+              <option value="gain">Gain weight</option>
+            </select>
+          </label>
+        </section>
+      </template>
 
       <div class="wiz-nav">
         <button type="button" class="button wiz-prev">&larr; Back</button>
@@ -120,12 +349,284 @@ import { BREEDS } from "../lib/breeds";
       const dots = Array.from(document.querySelectorAll<HTMLElement>('.wiz-dot'));
       let current = 0;
 
+      const dogCountEl = document.getElementById('dog-count') as HTMLInputElement;
+      const unitsEl = document.getElementById('units') as HTMLSelectElement | null;
+      const step1Host = document.getElementById('dogs-step1');
+      const step2Host = document.getElementById('dogs-step2');
+      const step3Host = document.getElementById('dogs-step3');
+      const tpl1 = document.getElementById('dog-step1-template') as HTMLTemplateElement;
+      const tpl2 = document.getElementById('dog-step2-template') as HTMLTemplateElement;
+      const tpl3 = document.getElementById('dog-step3-template') as HTMLTemplateElement;
+
+      const LB_PER_KG = 2.2046226218;
+
+      function getUnits(): 'metric' | 'imperial' {
+        return unitsEl?.value === 'imperial' ? 'imperial' : 'metric';
+      }
+
+      function kgToLb(kg: number) {
+        return kg * LB_PER_KG;
+      }
+
+      function lbToKg(lb: number) {
+        return lb / LB_PER_KG;
+      }
+
+      function weightInputs(): HTMLInputElement[] {
+        return Array.from(form.querySelectorAll<HTMLInputElement>('input[name$="_weight_kg"]'));
+      }
+
+      function updateWeightLabels() {
+        const text = getUnits() === 'imperial' ? 'Weight (lb)' : 'Weight (kg)';
+        for (const el of Array.from(form.querySelectorAll<HTMLElement>('[data-weight-label]'))) {
+          el.textContent = text;
+        }
+      }
+
+      function convertVisibleWeights(to: 'metric' | 'imperial') {
+        for (const input of weightInputs()) {
+          if (input.disabled) continue;
+          const v = parseFloat(input.value);
+          if (isNaN(v)) continue;
+          if (to === 'imperial') input.value = String(Math.round(kgToLb(v) * 10) / 10);
+          else input.value = String(Math.round(lbToKg(v) * 100) / 100);
+        }
+      }
+
+      function dogTitle(idx: number) {
+        return `Dog ${idx + 1}`;
+      }
+
+      function hydrateDogTemplate(fragment: DocumentFragment, idx: number) {
+        for (const el of Array.from(fragment.querySelectorAll<HTMLElement>('[data-dog]'))) {
+          el.dataset.dog = String(idx);
+        }
+        for (const title of Array.from(fragment.querySelectorAll<HTMLElement>('.dog-card__title'))) {
+          title.textContent = dogTitle(idx);
+        }
+        // Replace name attributes like dog___IDX___weight_kg → dog_1_weight_kg
+        for (const input of Array.from(fragment.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input[name], select[name]'))) {
+          input.name = input.name.replace(/dog___IDX___/g, `dog_${idx}_`);
+        }
+        // Wire remove buttons
+        for (const btn of Array.from(fragment.querySelectorAll<HTMLButtonElement>('[data-remove]'))) {
+          btn.dataset.remove = String(idx);
+        }
+      }
+
+      function currentDogCount(): number {
+        return Math.max(1, Number(dogCountEl?.value ?? 1) || 1);
+      }
+
+      function setDogCount(n: number) {
+        if (dogCountEl) dogCountEl.value = String(n);
+      }
+
+      function ensureDogCount(n: number) {
+        if (!step1Host || !step2Host || !step3Host) return;
+        const existing = step1Host.querySelectorAll('.dog-card').length;
+        if (existing >= n) {
+          setDogCount(existing);
+          return;
+        }
+
+        for (let i = existing; i < n; i++) {
+          const f1 = tpl1.content.cloneNode(true) as DocumentFragment;
+          const f2 = tpl2.content.cloneNode(true) as DocumentFragment;
+          const f3 = tpl3.content.cloneNode(true) as DocumentFragment;
+          hydrateDogTemplate(f1, i);
+          hydrateDogTemplate(f2, i);
+          hydrateDogTemplate(f3, i);
+          step1Host.appendChild(f1);
+          step2Host.appendChild(f2);
+          step3Host.appendChild(f3);
+        }
+
+        setDogCount(n);
+        updateWeightLabels();
+      }
+
+      function initFieldHelp() {
+        const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+        const HELP = {
+          units: `Choose how you want to enter and view weight. <strong>We calculate using kilograms</strong> (kg) internally because the standard RER/MER formulas use metric units. If you pick lb, we convert lb → kg before calculating.`,
+          name: `Optional label used to personalize your results. It does not affect the calorie math.`,
+          breed: `Breed is used to help interpret life stage (especially for puppies). Giant breeds typically mature and age differently than small breeds. If you’re unsure, Mixed Breed is fine.`,
+          weight: `Weight is the main input to the resting energy formula: <strong>RER = 70 × kg<sup>0.75</sup></strong>. This means energy scales with “metabolic body weight” (kg<sup>0.75</sup>), not linearly with kg.`,
+          age: `Age changes the multiplier for puppies (higher calorie needs). We treat <strong>&lt;4 months</strong> and <strong>4–12 months</strong> differently from adults.`,
+          bcs: `Body Condition Score (BCS) is a 1–9 visual/tactile scale of leanness. <strong>5/9 is ideal</strong> (ribs easy to feel, visible waist).
+            <br/><br/>
+            Rough guide: 1–2 = very thin, 3–4 = under-ideal, 5 = ideal, 6–7 = overweight, 8–9 = obese.
+            <br/><br/>
+            In this calculator, very high BCS slightly reduces calories; very low BCS slightly increases calories.`,
+          neuter: `Spayed/neutered dogs often have lower energy needs. In this calculator, neutered adults use a lower baseline multiplier than intact adults.`,
+          activity: `Activity changes the MER multiplier. Sedentary = mostly indoors/low exercise. Moderate = typical daily walks. Active = frequent vigorous exercise. Working = sustained, high-output activity.`,
+          goal: `Goal adjusts calories after the baseline multiplier. <strong>Lose</strong> applies a more conservative target (calorie deficit). <strong>Gain</strong> applies a higher target (surplus).`,
+        };
+
+        function setHelp(btn: HTMLButtonElement) {
+          const key = btn.dataset.help as keyof typeof HELP;
+          const field = btn.closest<HTMLElement>('.wiz-field');
+          const panel = field?.querySelector<HTMLElement>('.field-help');
+          if (!field || !panel) return;
+          panel.innerHTML = HELP[key] ?? '';
+        }
+
+        // Fill help panels (including dynamically added dog blocks).
+        for (const btn of Array.from(form.querySelectorAll<HTMLButtonElement>('.field-info-btn'))) {
+          setHelp(btn);
+        }
+
+        function closeAll(except?: HTMLElement | null) {
+          for (const field of Array.from(form.querySelectorAll<HTMLElement>('.wiz-field.is-help-open, .wiz-field.is-help-hover'))) {
+            if (except && field === except) continue;
+            field.classList.remove('is-help-open');
+            field.classList.remove('is-help-hover');
+            const b = field.querySelector<HTMLButtonElement>('.field-info-btn');
+            if (b) b.setAttribute('aria-expanded', 'false');
+          }
+        }
+
+        form.addEventListener('click', (e) => {
+          const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.field-info-btn');
+          if (!btn) {
+            if (!isDesktop) closeAll(null);
+            return;
+          }
+
+          setHelp(btn);
+          const field = btn.closest<HTMLElement>('.wiz-field');
+          if (!field) return;
+
+          if (isDesktop) return; // desktop uses hover/focus tooltip
+
+          const next = !field.classList.contains('is-help-open');
+          closeAll(field);
+          field.classList.toggle('is-help-open', next);
+          btn.setAttribute('aria-expanded', next ? 'true' : 'false');
+          e.preventDefault();
+        });
+
+        if (isDesktop) {
+          form.addEventListener('mouseover', (e) => {
+            const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.field-info-btn');
+            if (!btn) return;
+            setHelp(btn);
+            const field = btn.closest<HTMLElement>('.wiz-field');
+            if (!field) return;
+            field.classList.add('is-help-hover');
+            btn.setAttribute('aria-expanded', 'true');
+          });
+          form.addEventListener('mouseout', (e) => {
+            const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.field-info-btn');
+            if (!btn) return;
+            const field = btn.closest<HTMLElement>('.wiz-field');
+            if (!field) return;
+            field.classList.remove('is-help-hover');
+            btn.setAttribute('aria-expanded', 'false');
+          });
+          form.addEventListener('focusin', (e) => {
+            const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.field-info-btn');
+            if (!btn) return;
+            setHelp(btn);
+            const field = btn.closest<HTMLElement>('.wiz-field');
+            if (!field) return;
+            field.classList.add('is-help-hover');
+            btn.setAttribute('aria-expanded', 'true');
+          });
+          form.addEventListener('focusout', (e) => {
+            const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.field-info-btn');
+            if (!btn) return;
+            const field = btn.closest<HTMLElement>('.wiz-field');
+            if (!field) return;
+            field.classList.remove('is-help-hover');
+            btn.setAttribute('aria-expanded', 'false');
+          });
+        }
+
+        // When adding dogs, new buttons appear — populate their help.
+        const observer = new MutationObserver((mutations) => {
+          for (const m of mutations) {
+            for (const node of Array.from(m.addedNodes)) {
+              if (!(node instanceof HTMLElement)) continue;
+              for (const btn of Array.from(node.querySelectorAll?.('.field-info-btn') ?? [])) {
+                setHelp(btn as HTMLButtonElement);
+              }
+            }
+          }
+        });
+        observer.observe(form, { childList: true, subtree: true });
+      }
+
       // Pre-fill from URL params (back-navigation from results page)
       const params = new URLSearchParams(window.location.search);
+
+      if (unitsEl) {
+        const incomingUnits = params.get('units');
+        if (incomingUnits === 'imperial' || incomingUnits === 'metric') unitsEl.value = incomingUnits;
+      }
+
+      // Ensure we render enough dog blocks to match incoming params.
+      let maxIdx = -1;
+      for (const key of params.keys()) {
+        const m = key.match(/^dog_(\d+)_/);
+        if (m) maxIdx = Math.max(maxIdx, Number(m[1]));
+      }
+      ensureDogCount(Math.max(1, maxIdx + 1));
+
       for (const [key, val] of params) {
         const el = form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement | null;
-        if (el) el.value = val;
+        if (!el) continue;
+
+        // If the URL stores kg but the UI is imperial, display pounds.
+        if (getUnits() === 'imperial' && /^dog_\d+_weight_kg$/.test(key)) {
+          const kg = parseFloat(val);
+          if (!isNaN(kg)) {
+            (el as HTMLInputElement).value = String(Math.round(kgToLb(kg) * 10) / 10);
+            continue;
+          }
+        }
+
+        el.value = val;
       }
+
+      updateWeightLabels();
+
+      // Units toggle
+      let prevUnits: 'metric' | 'imperial' = getUnits();
+      unitsEl?.addEventListener('change', () => {
+        const next = getUnits();
+        if (next !== prevUnits) {
+          convertVisibleWeights(next);
+          updateWeightLabels();
+          prevUnits = next;
+        }
+      });
+
+      // Add dog button
+      const addDogBtn = document.getElementById('add-dog');
+      addDogBtn?.addEventListener('click', () => {
+        const next = currentDogCount() + 1;
+        ensureDogCount(next);
+      });
+
+      // Remove dog (step 1 only; keeps indices stable by just hiding)
+      step1Host?.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest('button[data-remove]') as HTMLButtonElement | null;
+        if (!btn) return;
+        const idx = Number(btn.dataset.remove);
+        // Hide cards across steps but keep inputs for back-nav stability.
+        for (const host of [step1Host, step2Host, step3Host]) {
+          const card = host?.querySelector(`.dog-card[data-dog="${idx}"]`) as HTMLElement | null;
+          if (!card) continue;
+          card.style.display = 'none';
+          card.dataset.removed = 'true';
+          for (const field of Array.from(card.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select'))) {
+            field.disabled = true;
+          }
+        }
+      });
 
       function go(idx: number) {
         if (idx < 0 || idx >= steps.length) return;
@@ -142,6 +643,9 @@ import { BREEDS } from "../lib/breeds";
         const currentStep = steps[current];
         const inputs = currentStep.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select');
         for (const input of inputs) {
+          if (input.disabled) continue;
+          const card = input.closest<HTMLElement>('.dog-card');
+          if (card?.dataset.removed === 'true') continue;
           if (!input.reportValidity()) return false;
         }
         return true;
@@ -169,16 +673,111 @@ import { BREEDS } from "../lib/breeds";
         e.preventDefault();
         const fd = new FormData(form);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- FormData→URLSearchParams cast
-        const qs = new URLSearchParams(fd as any).toString();
-        window.location.href = `/plan/results?${qs}`;
+        const out = new URLSearchParams(fd as any);
+
+        // Convert displayed pounds back into kg for calculation.
+        if (getUnits() === 'imperial') {
+          for (const key of Array.from(out.keys())) {
+            if (!/^dog_\d+_weight_kg$/.test(key)) continue;
+            const lb = parseFloat(out.get(key) || '');
+            if (isNaN(lb)) continue;
+            out.set(key, String(Math.round(lbToKg(lb) * 1000) / 1000));
+          }
+        }
+
+        window.location.href = `/plan/results?${out.toString()}`;
       });
 
       // If coming back from results, jump to last step
-      if (params.has('weight_kg')) go(steps.length - 1);
+      if (params.has('dog_0_weight_kg')) go(steps.length - 1);
+
+      initFieldHelp();
     }
 
     initWizard();
     document.addEventListener('astro:page-load', initWizard);
+  </script>
+
+  <script>
+    import { $dogProfile, setProfileFromParams } from "../stores/dogProfile";
+
+    /** Sync first dog's profile between localStorage and the form */
+    function initProfileSync() {
+      const form = document.getElementById("plan-form") as HTMLFormElement | null;
+      if (!form) return;
+
+      const params = new URLSearchParams(window.location.search);
+
+      // Field mapping: store key → form field name (multi-dog uses dog_0_ prefix)
+      const fieldMap: Record<string, string> = {
+        weight_kg: "dog_0_weight_kg",
+        age_months: "dog_0_age_months",
+        bcs: "dog_0_bcs",
+        neuter_status: "dog_0_neuter_status",
+        activity_level: "dog_0_activity_level",
+        weight_goal: "dog_0_weight_goal",
+        breed: "dog_0_breed",
+      };
+
+      const unitsEl = form.elements.namedItem('units') as HTMLSelectElement | null;
+      const units = unitsEl?.value === 'imperial' ? 'imperial' : 'metric';
+      const LB_PER_KG = 2.2046226218;
+      const kgToLb = (kg: number) => kg * LB_PER_KG;
+      const lbToKg = (lb: number) => lb / LB_PER_KG;
+
+      if (params.has("dog_0_weight_kg")) {
+        // Coming from results — remap dog_0_* params to flat keys for store
+        const flat = new URLSearchParams();
+        for (const [storeKey, formKey] of Object.entries(fieldMap)) {
+          const val = params.get(formKey);
+          if (val !== null) flat.set(storeKey, val);
+        }
+        setProfileFromParams(flat);
+      } else if (!params.has("weight_kg")) {
+        // No URL params — restore form from store (returning user)
+        const stored = $dogProfile.get();
+        for (const [storeKey, formKey] of Object.entries(fieldMap)) {
+          const el = form.elements.namedItem(formKey) as HTMLInputElement | HTMLSelectElement | null;
+          const storedVal = stored[storeKey as keyof typeof stored];
+          if (!el || !storedVal) continue;
+
+          // Store persists weight_kg in kg. If UI is imperial, display in lb.
+          if (units === 'imperial' && storeKey === 'weight_kg') {
+            const kg = parseFloat(storedVal);
+            if (!isNaN(kg)) {
+              (el as HTMLInputElement).value = String(Math.round(kgToLb(kg) * 10) / 10);
+              continue;
+            }
+          }
+
+          el.value = storedVal;
+        }
+      }
+
+      // On submit — persist first dog to store
+      form.addEventListener("submit", () => {
+        const flat = new URLSearchParams();
+        for (const [storeKey, formKey] of Object.entries(fieldMap)) {
+          const el = form.elements.namedItem(formKey) as HTMLInputElement | HTMLSelectElement | null;
+          if (!el) continue;
+
+          // If UI is imperial, the weight field is displayed in lb — convert back to kg for storage.
+          if (units === 'imperial' && storeKey === 'weight_kg') {
+            const lb = parseFloat(el.value);
+            if (!isNaN(lb)) {
+              flat.set(storeKey, String(Math.round(lbToKg(lb) * 1000) / 1000));
+              continue;
+            }
+          }
+
+          flat.set(storeKey, el.value);
+        }
+        setProfileFromParams(flat);
+      });
+    }
+
+    initProfileSync();
+    document.addEventListener("astro:page-load", initProfileSync);
   </script>
 
 </BaseLayout>

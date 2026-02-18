@@ -5,7 +5,8 @@
     "dev": "npm --prefix web run dev",
     "build": "npm --prefix web run build",
     "preview": "npm --prefix web run preview",
-    "gen:ingredients": "npm --prefix web run gen:ingredients"
+    "gen:ingredients": "npm --prefix web run gen:ingredients",
+    "prepare": "husky"
   },
   "version": "1.0.0",
   "description": "",
@@ -26,9 +27,7 @@
     "@supabase/supabase-js": "^2.96.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.56.0",
-    "@typescript-eslint/parser": "^8.56.0",
-    "eslint": "^10.0.0",
-    "eslint-plugin-astro": "^1.6.0"
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
   }
 }
