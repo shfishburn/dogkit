@@ -1,38 +1,17 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
+import { loadPlanItems } from "../lib/loaders";
+import type { PlanItem } from "../lib/schemas";
 
-// ── Tools ──────────────────────────────────────────────────────
-const tools = [
-  {
-    href: "/plan",
-    icon: "📐",
-    title: "Build a plan",
-    description: "Calculate daily energy needs and get a personalized feeding guide based on your dog's profile.",
-    label: "Plan",
-  },
-  {
-    href: "/ingredients",
-    icon: "🧪",
-    title: "Ingredient Database",
-    description: "76 ingredients with nutrient dimensions, availability tiers, and USDA FoodData Central references.",
-    label: "Database",
-  },
-  {
-    href: "/recipes",
-    icon: "🍲",
-    title: "Meal Recipes",
-    description: "34 recipes with size-scaled ingredient amounts, 21-day rotation plan, and per-1000 kcal nutrient estimates.",
-    label: "Recipes",
-  },
-  {
-    href: "/recipe",
-    icon: "⚗️",
-    title: "Recipe Builder",
-    description: "Interactive tool to compose a custom meal from the ingredient database and check nutrient coverage.",
-    label: "Tool",
-  },
-];
+const plan = await loadPlanItems();
+const byPhase = new Map<string, PlanItem[]>();
+for (const item of plan) {
+  const arr = byPhase.get(item.phase) ?? [];
+  arr.push(item);
+  byPhase.set(item.phase, arr);
+}
+const phases = Array.from(byPhase.keys()).sort((a, b) => Number(a) - Number(b));
 
 const adminTools = [
   {
@@ -50,7 +29,7 @@ const adminTools = [
     label: "Mfg",
   },
   {
-    href: "/admin",
+    href: "#project-plan",
     icon: "✅",
     title: "Project Plan",
     description: "Phased project checklist with task tracking and milestones.",
@@ -121,26 +100,8 @@ const sortedCategories = [...docsByCategory.keys()].sort(
       <button class="button no-print" type="button" onclick="window.print()">Print</button>
     </div>
     <h1 class="lib-hero__headline">Library</h1>
-    <p class="lib-hero__sub">Tools, databases, and research documents behind every Dogology meal.</p>
+    <p class="lib-hero__sub">Admin tools, research documents, and specs behind every Dogology meal.</p>
   </div>
-
-  <!-- ── Tools ── -->
-  <section class="lib-section">
-    <h2 class="lib-section__title">Tools</h2>
-    <div class="lib-grid lib-grid--tools">
-      {tools.map((t) => (
-        <a href={t.href} class="lib-card lib-card--tool">
-          <div class="lib-card__icon">{t.icon}</div>
-          <div class="lib-card__body">
-            <span class="lib-badge">{t.label}</span>
-            <h3 class="lib-card__title">{t.title}</h3>
-            <p class="lib-card__desc">{t.description}</p>
-          </div>
-          <span class="lib-card__arrow" aria-hidden="true">→</span>
-        </a>
-      ))}
-    </div>
-  </section>
 
   <!-- ── Admin ── -->
   <section class="lib-section">
@@ -156,6 +117,38 @@ const sortedCategories = [...docsByCategory.keys()].sort(
           </div>
           <span class="lib-card__arrow" aria-hidden="true">→</span>
         </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- ── Project Plan ── -->
+  <section class="lib-section" id="project-plan">
+    <h2 class="lib-section__title">Project Plan</h2>
+    <p class="small" style="margin-bottom: var(--space-4);">Source: <code>plan/plan.json</code></p>
+    <div class="plan-checklist">
+      {phases.map((phase) => (
+        <details class="plan-phase" open>
+          <summary class="plan-phase__summary">
+            <strong>Phase {phase}</strong>
+          </summary>
+          <ul class="plan-phase__list">
+            {byPhase.get(phase)!.map((t) => (
+              <li class="plan-task">
+                <label class="plan-task__label">
+                  <input type="checkbox" class="plan-task__checkbox" name={`task-${t.task_id}`} />
+                  <span class="plan-task__body">
+                    <span class="plan-task__top">
+                      <span class="plan-task__id">{t.task_id}</span>
+                      <span class="plan-task__title">{t.title}</span>
+                      <span class="plan-task__time">{t.month_range}</span>
+                    </span>
+                    <span class="plan-task__desc">{t.description}</span>
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </details>
       ))}
     </div>
   </section>
