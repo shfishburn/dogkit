@@ -154,7 +154,7 @@ for (const day of weeklyPlan.days ?? []) {
                 data-base-g={ing.base_g}
                 data-unit={ing.unit}
               >
-                {Math.round(ing.base_g * 0.95)} {ing.unit}
+                {Math.round(ing.base_g * sizing.medium.factor)} {ing.unit}
               </span>
             )}
           </div>
@@ -179,26 +179,32 @@ for (const day of weeklyPlan.days ?? []) {
     <section class="rd__section reveal">
       <h2 class="rd__section-title">
         Nutrition
-        <span class="rd__section-note">per 1,000 kcal base</span>
+        <span class="rd__section-note">{hasFdcData ? "FDC-computed · 1× base recipe" : "per 1,000 kcal estimate"}</span>
       </h2>
 
       {/* Top-level glanceable stats */}
       <div class="rd__stat-grid">
         <div class="rd__stat">
-          <span class="rd__stat-val" data-base-val={hasFdcData ? nutrientTotals.protein_g : ""} data-decimals="0">
-            {hasFdcData ? fmtNutrient(nutrientTotals.protein_g, 0) : staticNutrients.protein_g}<small>g</small>
+          <span class="rd__stat-val">
+            <span data-base-val={hasFdcData ? nutrientTotals.protein_g : ""} data-decimals="0">
+              {hasFdcData ? fmtNutrient(nutrientTotals.protein_g, 0) : staticNutrients.protein_g}
+            </span><small>g</small>
           </span>
           <span class="rd__stat-lbl">Protein</span>
         </div>
         <div class="rd__stat">
-          <span class="rd__stat-val" data-base-val={hasFdcData ? nutrientTotals.fat_g : ""} data-decimals="0">
-            {hasFdcData ? fmtNutrient(nutrientTotals.fat_g, 0) : staticNutrients.fat_g}<small>g</small>
+          <span class="rd__stat-val">
+            <span data-base-val={hasFdcData ? nutrientTotals.fat_g : ""} data-decimals="0">
+              {hasFdcData ? fmtNutrient(nutrientTotals.fat_g, 0) : staticNutrients.fat_g}
+            </span><small>g</small>
           </span>
           <span class="rd__stat-lbl">Fat</span>
         </div>
         <div class="rd__stat">
-          <span class="rd__stat-val" data-base-val={hasFdcData ? nutrientTotals.fiber_g : ""} data-decimals="0">
-            {hasFdcData ? fmtNutrient(nutrientTotals.fiber_g, 0) : staticNutrients.fiber_g}<small>g</small>
+          <span class="rd__stat-val">
+            <span data-base-val={hasFdcData ? nutrientTotals.fiber_g : ""} data-decimals="0">
+              {hasFdcData ? fmtNutrient(nutrientTotals.fiber_g, 0) : staticNutrients.fiber_g}
+            </span><small>g</small>
           </span>
           <span class="rd__stat-lbl">Fiber</span>
         </div>
@@ -209,8 +215,10 @@ for (const day of weeklyPlan.days ?? []) {
           <span class="rd__stat-lbl">Ca:P</span>
         </div>
         <div class="rd__stat">
-          <span class="rd__stat-val" data-base-val={hasFdcData ? nutrientTotals.calcium_mg : ""} data-decimals="0">
-            {hasFdcData ? fmtNutrient(nutrientTotals.calcium_mg, 0) : staticNutrients.calcium_mg}<small>mg</small>
+          <span class="rd__stat-val">
+            <span data-base-val={hasFdcData ? nutrientTotals.calcium_mg : ""} data-decimals="0">
+              {hasFdcData ? fmtNutrient(nutrientTotals.calcium_mg, 0) : staticNutrients.calcium_mg}
+            </span><small>mg</small>
           </span>
           <span class="rd__stat-lbl">Calcium</span>
         </div>
