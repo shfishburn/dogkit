@@ -5,6 +5,9 @@ import remarkGfm from 'remark-gfm';
 
 // https://astro.build/config
 export default defineConfig({
+	vite: {
+		envDir: '..',
+	},
 	site: 'https://dogkit.vercel.app',
 	redirects: {
 		'/sitemap.xml': '/sitemap-index.xml',

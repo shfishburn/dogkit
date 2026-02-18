@@ -33,6 +33,8 @@ const mapped = rows.filter((r) => r.fdc_id !== null).length;
 
 // Group by category for section headers
 const categories = [...new Set(rows.map((r) => r.category))];
+
+const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
 ---
 
 <BaseLayout title="Admin — FDC Mapping" container="lg">
@@ -43,7 +45,7 @@ const categories = [...new Set(rows.map((r) => r.category))];
     <div class="fdc-toolbar">
       <label>
         FDC API Key
-        <input type="password" id="fdc-api-key" placeholder="Enter your FDC API key" autocomplete="off" />
+        <input type="password" id="fdc-api-key" placeholder="Enter your FDC API key" autocomplete="off" data-default-key={buildTimeKey} />
       </label>
       <button class="button" id="fdc-import-btn" type="button">Import JSON</button>
       <button class="button" id="fdc-export-btn" type="button">Export JSON</button>
@@ -175,13 +177,17 @@ const categories = [...new Set(rows.map((r) => r.category))];
   // --- API Key ---
   const KEY_STORAGE = "dogology:fdc_api_key";
   const keyInput = document.getElementById("fdc-api-key") as HTMLInputElement;
-  keyInput.value = localStorage.getItem(KEY_STORAGE) ?? "";
+  const defaultKey = keyInput.dataset.defaultKey ?? "";
+  keyInput.value = localStorage.getItem(KEY_STORAGE) || defaultKey;
+  if (!localStorage.getItem(KEY_STORAGE) && defaultKey) {
+    localStorage.setItem(KEY_STORAGE, defaultKey);
+  }
   keyInput.addEventListener("input", () => {
     localStorage.setItem(KEY_STORAGE, keyInput.value.trim());
   });
 
   function getApiKey(): string {
-    return localStorage.getItem(KEY_STORAGE)?.trim() ?? "";
+    return localStorage.getItem(KEY_STORAGE)?.trim() || defaultKey;
   }
 
   // --- Search dialog ---
