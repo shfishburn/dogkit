@@ -1,66 +1,48 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { loadWeeklyMealPlan } from "../../lib/loaders";
-import { supabaseRenderImageUrl, supabaseSrcSetWH } from "../../lib/supabaseImages";
-import { labelify } from "../../lib/utils";
-
-const mealPlan = await loadWeeklyMealPlan();
-const recipes = mealPlan.recipes;
-const weeklyPlan = mealPlan.weekly_plan;
-
-// Collect unique filter values
-const proteins = [...new Set(recipes.map((r) => r.tags?.protein_type).filter(Boolean))].sort();
-const tiers = [...new Set(recipes.map((r) => r.tags?.tier).filter(Boolean))].sort();
 ---
 
-<BaseLayout
-  title="Recipes"
-  description={`${recipes.length} complete canine meal recipes with size-scaled ingredient amounts, a 21-day rotation plan, and per-1000 kcal nutrient estimates.`}
->
+<BaseLayout title="Recipes" description="AI-generated canine recipes.">
   <div class="page-header reveal">
     <div class="page-header__top">
       <p class="section-label">Meal Library</p>
-      <button class="button no-print" type="button" onclick="window.print()">Print</button>
+      <a class="button" href="/admin/recipes/new">+ Generate Recipe</a>
     </div>
     <h1 class="section-headline">Recipes</h1>
-    <p class="page-sub">{recipes.length} recipes across {proteins.length} protein sources — select any recipe for full details, ingredients, and instructions.</p>
+    <p class="page-sub">Generated recipes pulled from the live database.</p>
   </div>
 
-  <!-- ── Filter bar ── -->
-  <div class="filter-bar" id="filter-bar">
-    <!-- Protein type -->
-    <fieldset class="filter-group">
-      <legend class="filter-label">Protein</legend>
-    <fieldset class="filter-group">
-      <legend class="filter-label">Tier</legend>
-      <div class="pill-row" id="tier-picker">
-        <button type="button" class="pill pill--active" data-tier="all">All</button>
-      description="AI-generated canine recipes."
-          <button type="button" class="pill" data-tier={t}>
-            {t === "T2" ? "T2 · Specialty" : "T1 · Standard"}
-          </button>
-        ))}
-          <a class="button" href="/admin/recipes/new">+ Generate Recipe</a>
-    </fieldset>
+  <div id="recipe-list">
+    <!-- React island hydrates here -->
+  </div>
+</BaseLayout>
 
-        <p class="page-sub">Generated recipes pulled from the live database.</p>
-    <fieldset class="filter-group">
+<script>
+  import { createElement } from "react";
+  import { createRoot } from "react-dom/client";
+  import { RecipeListWithBase } from "../../components/RecipeList";
 
-      <div id="recipe-list">
-        <!-- React island hydrates here -->
-      </div>
-  const proteinPicker = document.getElementById("protein-picker")!;
+  const container = document.getElementById("recipe-list");
+  if (container) {
+    const root = createRoot(container);
+    root.render(createElement(RecipeListWithBase, { detailHrefBase: "/recipes" }));
+    window.addEventListener("astro:before-swap", () => root.unmount(), { once: true });
+  }
+</script>
 
-    <script>
-      import { createElement } from "react";
-      import { createRoot } from "react-dom/client";
-      import { RecipeListWithBase } from "../../components/RecipeList";
-
-      const container = document.getElementById("recipe-list");
-      if (container) {
-        const root = createRoot(container);
-        root.render(createElement(RecipeListWithBase, { detailHrefBase: "/recipes" }));
-        window.addEventListener("astro:before-swap", () => root.unmount(), { once: true });
-      }
-    </script>
-    </fieldset>
+<style>
+  :global(.recipe-list__loading),
+  :global(.recipe-list__error),
+  :global(.recipe-list__empty) {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--color-muted);
+  }
+  :global(.recipe-list__empty .button) {
+    margin-top: var(--space-4);
+    display: inline-block;
+  }
+  :global(.recipe-list-card__media--skeleton) {
+    min-height: 0;
+  }
+</style>
