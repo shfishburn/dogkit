@@ -21,7 +21,7 @@ const BREED_SIZES = [
   { value: "giant", label: "Giant (> 45 kg)" },
 ];
 
-type GeneratorState = "idle" | "streaming" | "done" | "error";
+type GeneratorState = "idle" | "streaming" | "saving" | "done" | "error";
 
 export default function RecipeGenerator() {
   const [userRequest, setUserRequest] = useState("");
@@ -34,8 +34,6 @@ export default function RecipeGenerator() {
   const [streamedText, setStreamedText] = useState("");
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -44,7 +42,6 @@ export default function RecipeGenerator() {
     setStreamedText("");
     setRecipe(null);
     setError("");
-    setSaved(false);
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -113,7 +110,36 @@ export default function RecipeGenerator() {
 
       const parsed = JSON.parse(jsonStr) as Recipe;
       setRecipe(parsed);
-      setState("done");
+      setState("saving");
+
+      // Auto-save to DB
+      const saveRes = await fetch("/api/recipes/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipe: parsed, user_prompt: userRequest }),
+      });
+      if (!saveRes.ok) {
+        const errJson = await saveRes.json().catch(() => ({}));
+        throw new Error(errJson.error || `Save failed: HTTP ${saveRes.status}`);
+      }
+
+      // Fire async image generation (best-effort)
+      fetch("/api/recipes/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipe_id: parsed.id,
+          name: parsed.name,
+          protein: parsed.tags?.protein_type ?? "",
+          carb: parsed.tags?.primary_carb ?? "",
+          veggie: parsed.tags?.primary_veggie ?? "",
+          cook_method: parsed.tags?.cook_method ?? "stovetop",
+          ingredient_names: parsed.ingredients?.map((i) => i.name) ?? [],
+        }),
+      }).catch(() => {});
+
+      // Navigate to recipe detail
+      window.location.href = `/recipes/${parsed.id}`;
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         setState("idle");
@@ -123,49 +149,6 @@ export default function RecipeGenerator() {
       setState("error");
     }
   }, [userRequest, lifeStage, breedSize, weightKg, allergies]);
-
-  const saveRecipe = useCallback(async () => {
-    if (!recipe) return;
-    setSaving(true);
-    try {
-      const res = await fetch("/api/recipes/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          recipe,
-          user_prompt: userRequest,
-        }),
-      });
-
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || `HTTP ${res.status}`);
-      }
-
-      setSaved(true);
-
-      // Fire async image generation (don't await)
-      fetch("/api/recipes/generate-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          recipe_id: recipe.id,
-          name: recipe.name,
-          protein: recipe.tags?.protein_type ?? "",
-          carb: recipe.tags?.primary_carb ?? "",
-          veggie: recipe.tags?.primary_veggie ?? "",
-          cook_method: recipe.tags?.cook_method ?? "stovetop",
-          ingredient_names: recipe.ingredients?.map((i) => i.name) ?? [],
-        }),
-      }).catch(() => {
-        // Image generation is best-effort
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed");
-    } finally {
-      setSaving(false);
-    }
-  }, [recipe, userRequest]);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
@@ -183,7 +166,7 @@ export default function RecipeGenerator() {
             placeholder="e.g., A chicken and sweet potato recipe for a medium adult dog, stovetop-friendly, under 30 minutes"
             value={userRequest}
             onChange={(e) => setUserRequest(e.target.value)}
-            disabled={state === "streaming"}
+            disabled={state === "streaming" || state === "saving"}
           />
         </div>
 
@@ -193,7 +176,7 @@ export default function RecipeGenerator() {
             id="life-stage"
             value={lifeStage}
             onChange={(e) => setLifeStage(e.target.value)}
-            disabled={state === "streaming"}
+            disabled={state === "streaming" || state === "saving"}
           >
             {LIFE_STAGES.map((ls) => (
               <option key={ls.value} value={ls.value}>
@@ -209,7 +192,7 @@ export default function RecipeGenerator() {
             id="breed-size"
             value={breedSize}
             onChange={(e) => setBreedSize(e.target.value)}
-            disabled={state === "streaming"}
+            disabled={state === "streaming" || state === "saving"}
           >
             {BREED_SIZES.map((bs) => (
               <option key={bs.value} value={bs.value}>
@@ -228,7 +211,7 @@ export default function RecipeGenerator() {
             max={100}
             value={weightKg}
             onChange={(e) => setWeightKg(Number(e.target.value))}
-            disabled={state === "streaming"}
+            disabled={state === "streaming" || state === "saving"}
           />
         </div>
 
@@ -240,7 +223,7 @@ export default function RecipeGenerator() {
             placeholder="none, or: beef, dairy, ..."
             value={allergies}
             onChange={(e) => setAllergies(e.target.value)}
-            disabled={state === "streaming"}
+            disabled={state === "streaming" || state === "saving"}
           />
         </div>
 
@@ -270,121 +253,13 @@ export default function RecipeGenerator() {
       )}
 
       {/* ── Streaming output ── */}
-      {state === "streaming" && (
+      {(state === "streaming" || state === "saving") && (
         <div className="recipe-gen__stream">
           <div className="recipe-gen__stream-header">
             <span className="recipe-gen__spinner" />
-            <span>Generating recipe...</span>
+            <span>{state === "saving" ? "Saving recipe..." : "Generating recipe..."}</span>
           </div>
           <pre className="recipe-gen__raw">{streamedText}</pre>
-        </div>
-      )}
-
-      {/* ── Parsed recipe preview ── */}
-      {recipe && state === "done" && (
-        <div className="recipe-gen__preview">
-          <div className="recipe-gen__preview-header">
-            <h2>{recipe.name}</h2>
-            <div className="recipe-gen__preview-actions">
-              {saved ? (
-                <span className="recipe-gen__saved">
-                  Saved <a href={`/admin/recipes/${recipe.id}`}>View →</a>
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  className="button button--primary"
-                  onClick={saveRecipe}
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : "Save to DB"}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {recipe.description && (
-            <p className="recipe-gen__description">{recipe.description}</p>
-          )}
-
-          <p className="recipe-gen__overview">{recipe.overview}</p>
-
-          <div className="recipe-gen__tags">
-            <span className="tag">{recipe.tags?.protein_type}</span>
-            <span className="tag">{recipe.tags?.primary_carb?.replace(/_/g, " ")}</span>
-            <span className="tag">{recipe.tags?.primary_veggie?.replace(/_/g, " ")}</span>
-            <span className="badge">{recipe.tags?.tier}</span>
-            <span className="badge">⏱ {recipe.tags?.prep_time_min} min</span>
-            <span className="badge">{recipe.tags?.target_life_stage}</span>
-          </div>
-
-          <h3>Ingredients ({recipe.ingredients?.length})</h3>
-          <div className="recipe-gen__ingredients">
-            {recipe.ingredients?.map((ing, i) => (
-              <div key={i} className="recipe-gen__ing">
-                <span className="recipe-gen__ing-name">{ing.name}</span>
-                <span className="recipe-gen__ing-amount">
-                  {ing.base_g != null ? `${ing.base_g} ${ing.unit}` : ing.unit}
-                </span>
-                <span className="recipe-gen__ing-prep">{ing.prep}</span>
-              </div>
-            ))}
-          </div>
-
-          <h3>Instructions ({recipe.instructions?.length})</h3>
-          <ol className="recipe-gen__instructions">
-            {recipe.instructions?.map((inst, i) => (
-              <li key={i} className="recipe-gen__step">
-                <span className="recipe-gen__step-cat">{inst.category}</span>
-                <span
-                  className="recipe-gen__step-text"
-                  dangerouslySetInnerHTML={{
-                    __html: inst.instruction
-                      .replaceAll("&", "&amp;")
-                      .replaceAll("<", "&lt;")
-                      .replaceAll(">", "&gt;")
-                      .replaceAll('"', "&quot;")
-                      .replaceAll("'", "&#39;")
-                      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                      .replace(/\*(.*?)\*/g, "<em>$1</em>"),
-                  }}
-                />
-                {inst.time_minutes && (
-                  <span className="recipe-gen__step-time">{inst.time_minutes} min</span>
-                )}
-              </li>
-            ))}
-          </ol>
-
-          {recipe.notes?.length > 0 && (
-            <>
-              <h3>Notes</h3>
-              <ul>
-                {recipe.notes.map((n, i) => (
-                  <li key={i}>{n}</li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {recipe.disclaimers?.length > 0 && (
-            <>
-              <h3>Disclaimers</h3>
-              <ul className="recipe-gen__disclaimers">
-                {recipe.disclaimers.map((d, i) => (
-                  <li key={i}>{d}</li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {/* Raw JSON toggle */}
-          <details className="recipe-gen__json-toggle">
-            <summary>Raw JSON</summary>
-            <pre className="recipe-gen__raw">
-              {JSON.stringify(recipe, null, 2)}
-            </pre>
-          </details>
         </div>
       )}
     </div>
