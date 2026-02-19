@@ -35,7 +35,7 @@ function RecipeListInner({ detailHrefBase }: { detailHrefBase: string }) {
     return (
       <div className="recipe-list__empty">
         <p>No recipes yet.</p>
-        <a href="/admin/recipes/new" className="button button--primary">
+        <a href="/recipes/new" className="button button--primary">
           Generate your first recipe →
         </a>
       </div>
@@ -104,7 +104,7 @@ function RecipeListInner({ detailHrefBase }: { detailHrefBase: string }) {
 export default function RecipeList() {
   return (
     <QueryProvider>
-      <RecipeListInner detailHrefBase="/admin/recipes" />
+      <RecipeListInner detailHrefBase="/recipes" />
     </QueryProvider>
   );
 }

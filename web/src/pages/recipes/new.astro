@@ -1,12 +1,12 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="Generate Recipe" description="Generate a new canine recipe using AI.">
   <div class="page-header reveal">
     <div class="page-header__top">
-      <p class="section-label">Admin · Recipes</p>
-      <a href="/admin/recipes" class="button">← Back to list</a>
+      <p class="section-label">Recipes</p>
+      <a href="/recipes" class="button">← Back to recipes</a>
     </div>
     <h1 class="section-headline">Generate Recipe</h1>
     <p class="page-sub">
@@ -23,7 +23,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 <script>
   import { createElement } from "react";
   import { createRoot } from "react-dom/client";
-  import RecipeGenerator from "../../../components/RecipeGenerator";
+  import RecipeGenerator from "../../components/RecipeGenerator";
 
   const container = document.getElementById("recipe-generator");
   if (container) {
