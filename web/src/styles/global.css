@@ -1935,7 +1935,7 @@ main.full-bleed {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: var(--space-1);
 }
 .rd__ing-amount-main {
   white-space: nowrap;
@@ -2007,7 +2007,7 @@ main.full-bleed {
   color: var(--color-accent);
   background: var(--color-surface-alt);
   border-radius: var(--radius-sm);
-  padding: 0.1em 0.5em;
+  padding: var(--space-1) var(--space-2);
 }
 .rd__step-time,
 .rd__step-equip {
