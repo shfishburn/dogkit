@@ -1,5 +1,5 @@
 {
   "framework": "astro",
   "installCommand": "cd web && npm install",
-  "buildCommand": "cd web && npm run build"
+  "buildCommand": "cd web && npm run build && rm -rf ../.vercel/output && mkdir -p ../.vercel && mv .vercel/output ../.vercel/output"
 }
