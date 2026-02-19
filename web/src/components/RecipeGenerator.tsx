@@ -27,7 +27,7 @@ const COOKING_DEVICES = [
   { value: "instant_pot", label: "Pressure cooker" },
 ] as const;
 
-type GeneratorState = "idle" | "streaming" | "saving" | "done" | "error";
+type GeneratorState = "idle" | "streaming" | "saving" | "error";
 
 export default function RecipeGenerator() {
   const [userRequest, setUserRequest] = useState("");
@@ -156,7 +156,7 @@ export default function RecipeGenerator() {
       setError(err instanceof Error ? err.message : "Generation failed");
       setState("error");
     }
-  }, [userRequest, lifeStage, breedSize, weightKg, allergies]);
+  }, [userRequest, lifeStage, breedSize, weightKg, allergies, cookMethod]);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
@@ -235,21 +235,21 @@ export default function RecipeGenerator() {
           />
         </div>
 
-          <div className="recipe-gen__field">
-            <label htmlFor="cook-method">Cooking device</label>
-            <select
-              id="cook-method"
-              value={cookMethod ?? "stovetop"}
-              onChange={(e) => setCookMethod(e.target.value as GenerateRecipeRequest["cook_method"])}
-              disabled={state === "streaming" || state === "saving"}
-            >
-              {COOKING_DEVICES.map((d) => (
-                <option key={d.value} value={d.value}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="recipe-gen__field">
+          <label htmlFor="cook-method">Cooking device</label>
+          <select
+            id="cook-method"
+            value={cookMethod ?? "stovetop"}
+            onChange={(e) => setCookMethod(e.target.value as GenerateRecipeRequest["cook_method"])}
+            disabled={state === "streaming" || state === "saving"}
+          >
+            {COOKING_DEVICES.map((d) => (
+              <option key={d.value} value={d.value}>
+                {d.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="recipe-gen__actions">
           {state === "streaming" ? (

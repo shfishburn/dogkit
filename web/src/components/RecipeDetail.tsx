@@ -28,6 +28,49 @@ function currentUrl(): string {
   return window.location.href;
 }
 
+function roundUp(value: number, increment: number): number {
+  if (!Number.isFinite(value) || !Number.isFinite(increment) || increment <= 0) return value;
+  return Math.ceil(value / increment) * increment;
+}
+
+function roundUpQuarter(value: number): number {
+  if (!Number.isFinite(value)) return value;
+  return Math.ceil(value * 4) / 4;
+}
+
+function formatDisplayQuantity(
+  ing: Pick<RecipeIngredient, "base_g" | "unit" | "display_quantity">,
+  multiplier: number,
+): string {
+  if (ing.unit === "IU") {
+    if (typeof ing.base_g === "number" && Number.isFinite(ing.base_g)) {
+      const scaled = Math.ceil(ing.base_g * multiplier);
+      return `${scaled} IU`;
+    }
+    return ing.display_quantity ?? "";
+  }
+
+  if (typeof ing.base_g !== "number" || !Number.isFinite(ing.base_g)) {
+    return ing.display_quantity ?? "";
+  }
+
+  if (ing.unit === "g") {
+    const g = roundUp(ing.base_g * multiplier, 5);
+    const oz = roundUpQuarter(g / 28.349523125);
+    const ozStr = Number.isFinite(oz) ? oz.toFixed(oz % 1 === 0 ? 0 : 2).replace(/0+$/, "").replace(/\.$/, "") : "";
+    return `${ozStr} oz (${g} g)`;
+  }
+
+  if (ing.unit === "ml") {
+    const ml = roundUp(ing.base_g * multiplier, 1);
+    const floz = roundUpQuarter(ml / 29.5735295625);
+    const flozStr = Number.isFinite(floz) ? floz.toFixed(floz % 1 === 0 ? 0 : 2).replace(/0+$/, "").replace(/\.$/, "") : "";
+    return `${flozStr} fl oz (${ml} ml)`;
+  }
+
+  return ing.display_quantity ?? "";
+}
+
 function RecipePrintShare({ title }: { title: string }) {
   async function onShare() {
     const url = currentUrl();
@@ -70,7 +113,10 @@ function RecipePrintShare({ title }: { title: string }) {
 
 function RecipeDetailInner({ recipeId }: { recipeId: string }) {
   const doneKey = useMemo(() => `dogology:recipe:${recipeId}:doneIngredients`, [recipeId]);
+  const doneStepsKey = useMemo(() => `dogology:recipe:${recipeId}:doneSteps`, [recipeId]);
   const [doneIngredientIds, setDoneIngredientIds] = useState<string[]>([]);
+  const [doneSteps, setDoneSteps] = useState<number[]>([]);
+  const [scale, setScale] = useState<1 | 2 | 3>(1);
 
   useEffect(() => {
     try {
@@ -88,19 +134,97 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
 
   useEffect(() => {
     try {
+      const raw = localStorage.getItem(doneStepsKey);
+      if (!raw) {
+        setDoneSteps([]);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      setDoneSteps(
+        Array.isArray(parsed)
+          ? parsed.filter((x) => typeof x === "number" && Number.isFinite(x))
+          : [],
+      );
+    } catch {
+      setDoneSteps([]);
+    }
+  }, [doneStepsKey]);
+
+  useEffect(() => {
+    try {
       localStorage.setItem(doneKey, JSON.stringify(doneIngredientIds));
     } catch {
       // ignore
     }
   }, [doneKey, doneIngredientIds]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(doneStepsKey, JSON.stringify(doneSteps));
+    } catch {
+      // ignore
+    }
+  }, [doneStepsKey, doneSteps]);
+
   const doneSet = useMemo(() => new Set(doneIngredientIds), [doneIngredientIds]);
+  const doneStepsSet = useMemo(() => new Set(doneSteps), [doneSteps]);
 
   function toggleIngredientDone(ingredientId: string) {
     setDoneIngredientIds((prev) => {
       if (prev.includes(ingredientId)) return prev.filter((id) => id !== ingredientId);
       return [...prev, ingredientId];
     });
+  }
+
+  function toggleStepDone(stepNum: number) {
+    setDoneSteps((prev) => {
+      if (prev.includes(stepNum)) return prev.filter((n) => n !== stepNum);
+      return [...prev, stepNum];
+    });
+  }
+
+  async function copyIngredients() {
+    const lines = ingredients
+      .map((ing) => {
+        const qty = formatDisplayQuantity(ing, scale);
+        const prep = ing.prep ? ` — ${ing.prep}` : "";
+        return `${ing.name}${qty ? `: ${qty}` : ""}${prep}`;
+      })
+      .join("\n");
+    try {
+      await navigator.clipboard.writeText(lines);
+      alert("Ingredients copied");
+    } catch {
+      prompt("Copy ingredients:", lines);
+    }
+  }
+
+  async function copyInstructions() {
+    const lines = normalizedInstructions
+      .map((inst) => {
+        const num = typeof inst.step === "number" ? inst.step : 0;
+        const cat = inst.category ? ` [${inst.category}]` : "";
+        const time = inst.time_minutes ? ` (${inst.time_minutes} min)` : "";
+        return `${num}. ${inst.instruction}${cat}${time}`;
+      })
+      .join("\n\n");
+    try {
+      await navigator.clipboard.writeText(lines);
+      alert("Instructions copied");
+    } catch {
+      prompt("Copy instructions:", lines);
+    }
+  }
+
+  function resetChecklists() {
+    setDoneIngredientIds([]);
+    setDoneSteps([]);
+    try {
+      localStorage.removeItem(doneKey);
+      localStorage.removeItem(doneStepsKey);
+    } catch {
+      // ignore
+    }
   }
 
   const { data: recipe, isLoading, error } = useQuery<RecipeRow>({
@@ -171,6 +295,36 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
 
   return (
     <article className="rd">
+      <div className="rd__sticky no-print">
+        <div className="rd__sticky-inner">
+          <div className="rd__sticky-title">{recipe.name}</div>
+          <nav className="rd__sticky-nav" aria-label="Recipe sections">
+            <a href="#ingredients">Ingredients</a>
+            <a href="#instructions">Instructions</a>
+            {notes.length > 0 && <a href="#notes">Notes</a>}
+            {disclaimers.length > 0 && <a href="#disclaimers">Disclaimers</a>}
+          </nav>
+          <div className="rd__sticky-actions">
+            <label className="rd__scale">
+              <span className="rd__scale-label">Scale</span>
+              <select
+                className="rd__scale-select"
+                value={scale}
+                onChange={(e) => setScale(Number(e.target.value) as 1 | 2 | 3)}
+              >
+                <option value={1}>1×</option>
+                <option value={2}>2×</option>
+                <option value={3}>3×</option>
+              </select>
+            </label>
+            <button type="button" className="button button--sm" onClick={resetChecklists}>
+              Reset
+            </button>
+            <RecipePrintShare title={recipe.name} />
+          </div>
+        </div>
+      </div>
+
       {/* Hero */}
       {heroSrc ? (
         <figure className="rd__hero">
@@ -205,17 +359,29 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
             <span className="badge">{labelify(recipe.target_life_stage)}</span>
           )}
         </div>
-        <div className="rd__title-row">
-          <h1 className="rd__title">{recipe.name}</h1>
-          <RecipePrintShare title={recipe.name} />
-        </div>
-        {recipe.description && <p className="rd__description">{recipe.description}</p>}
-        <p className="rd__overview">{recipe.overview}</p>
+        <h1 className="rd__title">{recipe.name}</h1>
+        {recipe.description && (
+          <p
+            className="rd__description"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(recipe.description) }}
+          />
+        )}
+        <p
+          className="rd__overview"
+          dangerouslySetInnerHTML={{ __html: renderMarkdown(recipe.overview) }}
+        />
       </header>
 
       {/* Ingredients */}
-      <section className="rd__section">
-        <h2 className="rd__section-title">Ingredients</h2>
+      <section className="rd__section" id="ingredients">
+        <div className="rd__section-head">
+          <h2 className="rd__section-title">Ingredients</h2>
+          <div className="rd__section-actions no-print">
+            <button type="button" className="button button--sm" onClick={copyIngredients}>
+              Copy
+            </button>
+          </div>
+        </div>
         <div className="rd__ing-card">
           {ingredients.map((ing, i) => (
             <div
@@ -240,11 +406,14 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
                   )}
                 </div>
               </div>
-              <span className="rd__ing-amount">
-                {ing.display_quantity
-                  ? ing.display_quantity
-                  : (ing.base_g != null ? `${ing.base_g} ${ing.unit}` : "")}
-              </span>
+              <div className="rd__ing-amount">
+                <span className="rd__ing-amount-main">
+                  {formatDisplayQuantity(ing, scale)}
+                </span>
+                {scale !== 1 && (
+                  <span className="rd__ing-amount-sub">Base: {formatDisplayQuantity(ing, 1)}</span>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -252,26 +421,47 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
       </section>
 
       {/* Instructions */}
-      <section className="rd__section">
-        <h2 className="rd__section-title">Instructions</h2>
+      <section className="rd__section" id="instructions">
+        <div className="rd__section-head">
+          <h2 className="rd__section-title">Instructions</h2>
+          <div className="rd__section-actions no-print">
+            <button type="button" className="button button--sm" onClick={copyInstructions}>
+              Copy
+            </button>
+          </div>
+        </div>
         <ol className="rd__steps">
           {normalizedInstructions.map((inst, i) => (
-            <li key={i} className="rd__step">
-              <span className="rd__step-num">
-                {String(typeof inst.step === "number" ? inst.step : i + 1).padStart(2, "0")}
-              </span>
+            <li
+              key={i}
+              className={`rd__step ${doneStepsSet.has(inst.step) ? "rd__step--done" : ""}`}
+            >
+              <label className="rd__step-checkwrap">
+                <input
+                  className="rd__step-check"
+                  type="checkbox"
+                  checked={doneStepsSet.has(inst.step)}
+                  onChange={() => toggleStepDone(inst.step)}
+                  aria-label={`Mark step ${inst.step} as done`}
+                />
+                <span className="rd__step-num">
+                  {String(typeof inst.step === "number" ? inst.step : i + 1).padStart(2, "0")}
+                </span>
+              </label>
               <div className="rd__step-body">
-                <span className="rd__step-cat">{inst.category}</span>
+                <div className="rd__step-badges">
+                  <span className="rd__step-cat">{inst.category}</span>
+                  {inst.time_minutes && (
+                    <span className="rd__step-time">⏱ {inst.time_minutes} min</span>
+                  )}
+                  {inst.equipment && (
+                    <span className="rd__step-equip">🔧 {inst.equipment}</span>
+                  )}
+                </div>
                 <span
                   className="rd__step-text"
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(inst.instruction) }}
                 />
-                {inst.time_minutes && (
-                  <span className="rd__step-time">⏱ {inst.time_minutes} min</span>
-                )}
-                {inst.equipment && (
-                  <span className="rd__step-equip">🔧 {inst.equipment}</span>
-                )}
               </div>
             </li>
           ))}
@@ -280,7 +470,7 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
 
       {/* Notes */}
       {notes.length > 0 && (
-        <section className="rd__section">
+        <section className="rd__section" id="notes">
           <h2 className="rd__section-title">Notes</h2>
           <ul className="rd__disclaimers">
             {notes.map((n, idx) => (
@@ -292,7 +482,7 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
 
       {/* Disclaimers */}
       {disclaimers.length > 0 && (
-        <section className="rd__section">
+        <section className="rd__section" id="disclaimers">
           <h2 className="rd__section-title">Disclaimers</h2>
           <ul className="rd__disclaimers">
             {disclaimers.map((d, idx) => (

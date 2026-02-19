@@ -17,10 +17,6 @@ import imageUserTemplate from "@data/prompts/canine_recipe_image_user_v1.txt?raw
 
 export const prerender = false;
 
-function loadImagePrompts(): { system: string; userTemplate: string } {
-  return { system: imageSystemPrompt, userTemplate: imageUserTemplate };
-}
-
 type ExtractedImage =
   | { kind: "inline"; mimeType: string; base64: string }
   | { kind: "url"; url: string };
@@ -119,8 +115,6 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   try {
-    const { system, userTemplate } = loadImagePrompts();
-
     const reqBody = parsed.data;
 
     const ingredientNames = reqBody.ingredient_names;
@@ -128,7 +122,7 @@ export const POST: APIRoute = async ({ request }) => {
       .map((n) => `- ${n}`)
       .join("\n");
 
-    const userPrompt = userTemplate
+    const userPrompt = imageUserTemplate
       .replaceAll("{{name}}", reqBody.name)
       .replaceAll("{{protein}}", reqBody.protein)
       .replaceAll("{{carb}}", reqBody.carb)
@@ -140,7 +134,7 @@ export const POST: APIRoute = async ({ request }) => {
     const completion = await chatCompletionRaw(apiKey, {
       model: IMAGE_MODEL,
       messages: [
-        { role: "system", content: system },
+        { role: "system", content: imageSystemPrompt },
         { role: "user", content: userPrompt },
       ],
       temperature: 0.8,

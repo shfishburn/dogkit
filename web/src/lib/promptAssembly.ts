@@ -92,6 +92,10 @@ This is a USA app. You MUST include a human-friendly \`display_quantity\` field 
   - milliliters: round up to nearest 1 ml
   - oz/fl oz: round up to nearest 0.25
 
+Hard rules:
+- Do NOT use ranges (e.g., "6–8 oz"). Output a single value.
+- Do NOT use "to taste".
+
 Example ingredient object:
 { "ingredient_id": "muscle_meat_chicken_thigh_boneless", "name": "Chicken thigh, boneless", "base_g": 227, "unit": "g", "display_quantity": "8 oz (230 g)", "prep": "Raw weight, ..." }
 `;
@@ -110,6 +114,27 @@ Device mapping:
 - \`stovetop\` = pan/skillet + pot on stove
 - \`slow_cooker\` = crockpot-style low/slow cooking (longer times)
 - \`instant_pot\` = pressure cooker (shorter pressure times + include release guidance)
+`;
+
+  const outputQualityAddendum = `
+
+## Output Quality (REQUIRED)
+
+Instructions fields:
+- If a step describes a timed action, \`time_minutes\` MUST be a number (not null).
+- If \`category\` is \`cooking\`, \`equipment\` MUST be non-null.
+
+Prep time consistency:
+- \`tags.prep_time_min\` should be consistent with the selected cooking device and the sum of hands-on steps.
+
+Seasoning ban:
+- Do NOT mention salt, pepper, spice blends, seasoning, or "to taste" anywhere.
+
+Cooling + storage:
+- The FINAL instruction step MUST be category \`serving\` and include cooling guidance (*cool to touch*) plus safe storage (refrigerate/freeze) and reheating guidance.
+
+Bone-in fish safety:
+- If you include bone-in canned fish (e.g., sardines_with_bones or canned_salmon_with_bones), explicitly state that canned bones are soft AND to never add any other bones.
 `;
 
   // Fill user prompt template variables
@@ -136,7 +161,7 @@ Device mapping:
   userPrompt += `\n\n## Cooking Device\n- cook_method: ${cookMethod}\n- device: ${cookMethod === "stovetop" ? "pan" : cookMethod === "slow_cooker" ? "slow cooker" : "pressure cooker"}\n`;
 
   return {
-    system: template.system_prompt + usaDisplayUnitsAddendum + cookMethodAddendum,
+    system: template.system_prompt + usaDisplayUnitsAddendum + cookMethodAddendum + outputQualityAddendum,
     user: userPrompt,
   };
 }
