@@ -50,7 +50,7 @@ export const POST: APIRoute = async ({ request }) => {
         { role: "user", content: user },
       ],
       temperature: 0.7,
-      max_tokens: 4096,
+      max_tokens: 16384,
     });
 
     return new Response(stream, {
