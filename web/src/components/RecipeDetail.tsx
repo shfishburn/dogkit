@@ -388,30 +388,28 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
               key={ing.ingredient_id || i}
               className={`rd__ing ${doneSet.has(ing.ingredient_id) ? "rd__ing--done" : ""}`}
             >
-              <div className="rd__ing-main">
-                <input
-                  className="rd__ing-check"
-                  type="checkbox"
-                  checked={doneSet.has(ing.ingredient_id)}
-                  onChange={() => toggleIngredientDone(ing.ingredient_id)}
-                  aria-label={`Mark ${ing.name} as done`}
-                />
-                <div className="rd__ing-left">
-                  <span className="rd__ing-name">{ing.name}</span>
-                  {ing.prep && (
-                    <span
-                      className="rd__ing-prep"
-                      dangerouslySetInnerHTML={{ __html: renderMarkdown(ing.prep) }}
-                    />
-                  )}
-                </div>
-              </div>
-              <div className="rd__ing-amount">
-                <span className="rd__ing-amount-main">
+              <input
+                className="rd__ing-check"
+                type="checkbox"
+                checked={doneSet.has(ing.ingredient_id)}
+                onChange={() => toggleIngredientDone(ing.ingredient_id)}
+                aria-label={`Mark ${ing.name} as done`}
+              />
+              <div className="rd__ing-content">
+                <span className="rd__ing-name">{ing.name}</span>
+                <span className="rd__ing-amount">
                   {formatDisplayQuantity(ing, scale)}
+                  {scale !== 1 && (
+                    <span className="rd__ing-amount-sub">
+                      {" "}(base: {formatDisplayQuantity(ing, 1)})
+                    </span>
+                  )}
                 </span>
-                {scale !== 1 && (
-                  <span className="rd__ing-amount-sub">Base: {formatDisplayQuantity(ing, 1)}</span>
+                {ing.prep && (
+                  <span
+                    className="rd__ing-prep"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(ing.prep) }}
+                  />
                 )}
               </div>
             </div>
