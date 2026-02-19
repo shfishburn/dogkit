@@ -16,7 +16,7 @@
   --color-accent-hover: #c9710e;
   --color-accent-surface: color-mix(in oklab, #E0831A 12%, Canvas);
 
-  /* Tag palette (light-mode defaults, overridden in dark via @media below) */
+  /* Tag palette (light-mode defaults; dark overrides below) */
   --color-tag-protein-bg: #fef3c7;
   --color-tag-protein: #92400e;
   --color-tag-carb-bg: #dbeafe;
@@ -83,4 +83,20 @@
   --text-3xl: clamp(1.5rem, 1.33rem + 0.73vw, 1.875rem);
   --text-4xl: clamp(1.75rem, 1.41rem + 1.45vw, 2.5rem);
   --text-5xl: clamp(2.5rem, 1.59rem + 3.88vw, 4.5rem);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-tag-protein-bg: #451a03;
+    --color-tag-protein: #fcd34d;
+    --color-tag-carb-bg: #1e3a5f;
+    --color-tag-carb: #93c5fd;
+    --color-tag-veggie-bg: #064e3b;
+    --color-tag-veggie: #6ee7b7;
+
+    --color-badge-t2: #818cf8;
+
+    --color-meal-am: #1c1a11;
+    --color-meal-pm: #111827;
+  }
 }

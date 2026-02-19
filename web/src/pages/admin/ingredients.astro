@@ -28,11 +28,9 @@ const inRecipeCount = rows.filter((r) => r.inRecipes > 0).length;
 // Group by category for section headers
 const categories = [...new Set(rows.map((r) => r.category))];
 
-const buildTimeKey = import.meta.env.FDC_API_KEY ?? "";
-
 /* Supabase public credentials (anon key — safe for client, RLS-enforced) */
-const supabaseUrl = import.meta.env.SUPABASE_URL ?? "https://zrlplilzpwsxqxskeoqc.supabase.co";
-const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybHBsaWx6cHdzeHF4c2tlb3FjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNjkzNDYsImV4cCI6MjA4Njk0NTM0Nn0.NuwLsAdj1TKsPMWadJjhVd_F97gBuntcsiNCtwypbG0";
+const supabaseUrl = import.meta.env.SUPABASE_URL ?? "";
+const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "";
 ---
 
 <BaseLayout title="Admin — FDC Mapping" container="lg">
@@ -45,7 +43,7 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
     <div class="fdc-toolbar">
       <label>
         FDC API Key
-        <input type="password" id="fdc-api-key" placeholder="Enter your FDC API key" autocomplete="off" data-default-key={buildTimeKey} />
+        <input type="password" id="fdc-api-key" placeholder="Enter your FDC API key" autocomplete="off" />
       </label>
       <button class="button" id="fdc-import-btn" type="button">Import JSON</button>
       <button class="button" id="fdc-export-btn" type="button">Export JSON</button>
@@ -213,10 +211,12 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
   if (!root) return; // Not on admin ingredients page
 
   type MappingEntry = {
+    ingredient_id?: string;
     fdc_id: number;
     fdc_description: string;
     data_type: string;
     mapped_at: string;
+    updated_at?: string;
   };
 
   const mappings = new Map<string, MappingEntry>();
@@ -244,7 +244,7 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
       const rows: MappingEntry[] = await res.json();
 
       for (const m of rows) {
-        mappings.set((m as any).ingredient_id, {
+        mappings.set(m.ingredient_id!, {
           fdc_id: m.fdc_id,
           fdc_description: m.fdc_description,
           data_type: m.data_type,
@@ -278,17 +278,13 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
   // --- API Key ---
   const KEY_STORAGE = "dogology:fdc_api_key";
   const keyInput = document.getElementById("fdc-api-key") as HTMLInputElement;
-  const defaultKey = keyInput.dataset.defaultKey ?? "";
-  keyInput.value = localStorage.getItem(KEY_STORAGE) || defaultKey;
-  if (!localStorage.getItem(KEY_STORAGE) && defaultKey) {
-    localStorage.setItem(KEY_STORAGE, defaultKey);
-  }
+  keyInput.value = localStorage.getItem(KEY_STORAGE) ?? "";
   keyInput.addEventListener("input", () => {
     localStorage.setItem(KEY_STORAGE, keyInput.value.trim());
   });
 
   function getApiKey(): string {
-    return localStorage.getItem(KEY_STORAGE)?.trim() || defaultKey;
+    return localStorage.getItem(KEY_STORAGE)?.trim() ?? "";
   }
 
   // --- Search dialog ---
@@ -408,7 +404,7 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
         dialog.close();
       });
     } catch (err) {
-      resultsEl.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
+      resultsEl.innerHTML = `<p style="color:red;">Error: ${escapeHtml(String(err))}</p>`;
     }
   }
 
@@ -473,7 +469,7 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
           });
         });
     } catch (err) {
-      resultsEl.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
+      resultsEl.innerHTML = `<p style="color:red;">Error: ${escapeHtml(String(err))}</p>`;
     }
   }
 
@@ -486,17 +482,59 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1Ni
       });
     });
 
-  // --- Assign + re-render row ---
-  function assignMapping(ingredientId: string, entry: MappingEntry) {
+  // --- Assign + re-render row + persist to Supabase ---
+  async function assignMapping(ingredientId: string, entry: MappingEntry) {
     mappings.set(ingredientId, entry);
     rerenderRow(ingredientId, entry);
     updateStats();
+
+    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/fdc_mappings`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "resolution=merge-duplicates",
+          },
+          body: JSON.stringify({
+            ingredient_id: ingredientId,
+            fdc_id: entry.fdc_id,
+            fdc_description: entry.fdc_description,
+            data_type: entry.data_type,
+            mapped_at: entry.mapped_at,
+          }),
+        });
+        if (!res.ok) console.error("[fdc] Persist mapping failed:", res.status);
+      } catch (err) {
+        console.error("[fdc] Failed to persist mapping:", err);
+      }
+    }
   }
 
-  function clearMapping(ingredientId: string) {
+  async function clearMapping(ingredientId: string) {
     mappings.delete(ingredientId);
     rerenderRow(ingredientId, null);
     updateStats();
+
+    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/fdc_mappings?ingredient_id=eq.${encodeURIComponent(ingredientId)}`,
+          {
+            method: "DELETE",
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+          },
+        );
+        if (!res.ok) console.error("[fdc] Delete mapping failed:", res.status);
+      } catch (err) {
+        console.error("[fdc] Failed to delete mapping:", err);
+      }
+    }
   }
 
   function rerenderRow(ingredientId: string, entry: MappingEntry | null) {
