@@ -1,6 +1,5 @@
 {
   "framework": "astro",
   "installCommand": "cd web && npm install",
-  "buildCommand": "cd web && npm run build",
-  "outputDirectory": "web/dist"
+  "buildCommand": "cd web && npm run build"
 }
