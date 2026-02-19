@@ -1,18 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { loadIngredientDb, loadWeeklyMealPlan } from "../../lib/loaders";
+import { loadIngredientDb } from "../../lib/loaders";
 
 const db = await loadIngredientDb();
 const ingredients = db.ingredients;
-
-/* ── Recipe ingredient usage (local JSON — always available) ── */
-const mealPlan = await loadWeeklyMealPlan();
-const recipeUsage = new Map<string, number>();
-for (const recipe of mealPlan.recipes) {
-  for (const ing of recipe.ingredients) {
-    recipeUsage.set(ing.ingredient_id, (recipeUsage.get(ing.ingredient_id) ?? 0) + 1);
-  }
-}
 
 /* ── Build rows (FDC columns filled client-side) ─────── */
 const rows = ingredients.map((ing) => ({
@@ -20,10 +11,8 @@ const rows = ingredients.map((ing) => ({
   name: ing.name,
   category: ing.category,
   tier: ing.tier,
-  inRecipes: recipeUsage.get(ing.id) ?? 0,
+  inRecipes: 0,
 }));
-
-const inRecipeCount = rows.filter((r) => r.inRecipes > 0).length;
 
 // Group by category for section headers
 const categories = [...new Set(rows.map((r) => r.category))];
@@ -52,8 +41,6 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? "";
 
     <p class="fdc-stats">
       <strong id="fdc-mapped-count">…</strong> / {rows.length} mapped to FDC
-      &nbsp;&middot;&nbsp;
-      <strong>{inRecipeCount}</strong> used in recipes
     </p>
 
     {categories.map((cat) => {

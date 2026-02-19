@@ -1,11 +1,11 @@
 /**
  * Assemble a complete prompt from the CFPO v2 template + user inputs.
- * Uses bundled assets (no runtime fs reads) so this works in serverless builds.
+ * Imports from @data alias (resolved by Vite at build time).
  */
 
 import type { GenerateRecipeRequest } from "./types/recipe";
-import promptTemplateJson from "./assets/prompts/canine_recipe_generation_v2.json";
-import ingredientDbJson from "./assets/ingredients/ingredients.json";
+import promptTemplateJson from "@data/prompts/canine_recipe_generation_v2.json";
+import ingredientDbJson from "@data/ingredients/ingredients.json";
 
 interface PromptTemplate {
   system_prompt: string;

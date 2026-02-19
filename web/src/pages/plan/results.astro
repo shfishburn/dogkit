@@ -1,11 +1,5 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { loadWeeklyMealPlan } from "../../lib/loaders";
-
-const mealPlan = await loadWeeklyMealPlan();
-const recipes = mealPlan.recipes;
-const weeklyPlan = mealPlan.weekly_plan;
-const sizing = mealPlan.metadata.size_scaling;
 ---
 
 <BaseLayout title="Your Nutrition Plan" description="Personalized daily energy and feeding recommendations for your dog." container="md">
@@ -43,12 +37,24 @@ const sizing = mealPlan.metadata.size_scaling;
 
     <!-- Recommended meal plan -->
     <section class="pr__section reveal">
-      <h2 class="pr__section-title">Recommended weekly meal plan</h2>
-      <p class="page-sub" style="margin-bottom:var(--space-4);">A 7-day sample from the 21-day rotation, with recipes scaled for your dog's size category.</p>
-      <div id="dogs-mealplans"></div>
-      <p style="margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-muted);">
-        This is week 1 of a 21-day rotation. <a href="/recipes">View all recipes and the full rotation &rarr;</a>
+      <h2 class="pr__section-title">Recipes</h2>
+      <p class="page-sub" style="margin-bottom:var(--space-4);">
+        Browse the recipe library and generate new recipes.
       </p>
+      <div class="card" style="padding:var(--space-6);">
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center;justify-content:space-between;">
+          <div style="max-width:60ch;">
+            <strong>Recipe library</strong>
+            <div class="small" style="color:var(--color-muted);margin-top:var(--space-1);">
+              Legacy static recipes have been removed. Recipes now come from the generated recipe database.
+            </div>
+          </div>
+          <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;">
+            <a class="button" href="/recipes">View recipes</a>
+            <a class="button button--primary" href="/admin/recipes/new">Generate recipe</a>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Disclaimer -->
@@ -67,7 +73,7 @@ const sizing = mealPlan.metadata.size_scaling;
 
 </BaseLayout>
 
-<script define:vars={{ recipes, weeklyPlan, sizing }}>
+<script>
   const LB_PER_KG = 2.2046226218;
 
   function kgToLb(kg) {
@@ -237,14 +243,10 @@ const sizing = mealPlan.metadata.size_scaling;
     const profileHost = document.getElementById("dogs-profile");
     const energyHost = document.getElementById("dogs-energy");
     const guideHost = document.getElementById("dogs-guide");
-    const mealHost = document.getElementById("dogs-mealplans");
 
     profileHost.innerHTML = "";
     energyHost.innerHTML = "";
     guideHost.innerHTML = "";
-    mealHost.innerHTML = "";
-
-    const week1 = (weeklyPlan.days || []).slice(0, 7);
 
     for (const dog of dogs) {
       const rer = computeRER(dog.weightKg);
@@ -259,7 +261,6 @@ const sizing = mealPlan.metadata.size_scaling;
       const meals = mealsPerDay(dog.ageMonths);
       const perMeal = dailyKcal / meals;
       const size = sizeCategory(dailyKcal);
-      const sizeInfo = sizing[size] || {};
 
       const dogLabel = dog.name ? dog.name : `Dog ${dog.idx + 1}`;
 
@@ -281,7 +282,7 @@ const sizing = mealPlan.metadata.size_scaling;
           <div class="pr__profile">
             ${tags.map((t) => `<span class="pr__profile-tag"><strong>${t.label}:</strong>&nbsp;${t.value}</span>`).join("")}
           </div>
-        </div>`
+        </div>`,
       );
 
       energyHost.insertAdjacentHTML(
@@ -310,7 +311,7 @@ const sizing = mealPlan.metadata.size_scaling;
               <span class="pr__energy-val">~${Math.round(perMeal)} kcal</span>
             </div>
           </div>
-        </div>`
+        </div>`,
       );
 
       guideHost.insertAdjacentHTML(
@@ -319,43 +320,10 @@ const sizing = mealPlan.metadata.size_scaling;
           <h3 class="pr__dog-title">${dogLabel}</h3>
           <div class="pr__size-banner">
             Based on <strong>${Math.round(dailyKcal)} kcal/day</strong>, your dog falls in the
-            <strong>${size.charAt(0).toUpperCase() + size.slice(1)}</strong> category
-            (${typeof sizeInfo.weight_kg === 'number' ? formatWeight(sizeInfo.weight_kg, units) : "—"} reference, factor ${sizeInfo.factor ?? "—"}).
-            Ingredient amounts in recipes are scaled for this size.
+            <strong>${size.charAt(0).toUpperCase() + size.slice(1)}</strong> category.
           </div>
-        </div>`
+        </div>`,
       );
-
-      if (week1.length > 0) {
-        let html = `<div class="pr__dog-block">`;
-        html += `<h3 class="pr__dog-title">${dogLabel}</h3>`;
-        html += '<div class="week-grid">';
-        for (const day of week1) {
-          const am = recipes.find((r) => r.id === day.am?.recipe_id);
-          const pm = recipes.find((r) => r.id === day.pm?.recipe_id);
-          html += `<div class="week-cell">`;
-          html += `<div class="week-cell__day">${day.label}</div>`;
-          if (am) {
-            const amImg = am.image_url ? `<img class="week-cell__thumb" src="${thumbUrl(am.image_url)}" alt="" loading="lazy" decoding="async" />` : "";
-            html += `<a class="week-cell__meal week-cell__meal--am" href="/recipes/${am.id}">
-              ${amImg}<span class="week-meal-time">AM</span>${am.name}
-            </a>`;
-          }
-          if (pm) {
-            const pmImg = pm.image_url ? `<img class="week-cell__thumb" src="${thumbUrl(pm.image_url)}" alt="" loading="lazy" decoding="async" />` : "";
-            html += `<a class="week-cell__meal week-cell__meal--pm" href="/recipes/${pm.id}">
-              ${pmImg}<span class="week-meal-time">PM</span>${pm.name}
-            </a>`;
-          }
-          html += `</div>`;
-        }
-        html += "</div></div>";
-        mealHost.insertAdjacentHTML("beforeend", html);
-      }
-    }
-
-    if (week1.length === 0) {
-      mealHost.innerHTML = '<p style="color:var(--color-muted);font-size:var(--text-sm);">No meal plan data available.</p>';
     }
   }
 </script>
