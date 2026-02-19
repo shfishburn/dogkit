@@ -349,7 +349,7 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
       <header className="rd__header">
         <div className="rd__meta">
           <span className={`badge ${recipe.tier === "T2" ? "badge--t2" : "badge--t1"}`}>
-            {recipe.tier}
+            {recipe.tier === "T2" ? "Specialty" : "Easy to find"}
           </span>
           <span className="badge badge--time">{recipe.prep_time_min} min</span>
           <span className="tag tag--protein">{labelify(recipe.protein_type)}</span>

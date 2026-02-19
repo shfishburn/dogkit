@@ -78,7 +78,7 @@ function RecipeListInner({ detailHrefBase }: { detailHrefBase: string }) {
             )}
             <div className="recipe-list-card__badges">
               <span className={`badge ${r.tier === "T2" ? "badge--t2" : "badge--t1"}`}>
-                {r.tier}
+                {r.tier === "T2" ? "Specialty" : "Easy to find"}
               </span>
               <span className="badge badge--time">⏱ {r.prep_time_min} min</span>
             </div>
