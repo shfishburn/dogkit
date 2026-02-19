@@ -5,6 +5,7 @@ export const RecipeIngredientSchema = z.object({
   name: z.string(),
   base_g: z.number().nullable(),
   unit: z.string(),
+  display_quantity: z.string().optional(),
   prep: z.string().optional(),
 });
 

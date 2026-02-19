@@ -28,6 +28,8 @@ export interface RecipeIngredient {
   name: string;
   base_g: number | null;
   unit: "g" | "ml" | "IU";
+  /** Display-only, USA-first dual units, e.g. "8 oz (230 g)". */
+  display_quantity?: string;
   prep: string;
 }
 
@@ -73,6 +75,8 @@ export interface GenerateRecipeRequest {
   activity_level?: string;
   known_allergies?: string;
   health_conditions?: string;
+  /** User-selected cooking device/method (USA app): stovetop (pan), slow_cooker, instant_pot (pressure cooker). */
+  cook_method?: "stovetop" | "slow_cooker" | "instant_pot";
 }
 
 // ── Image generation request ──

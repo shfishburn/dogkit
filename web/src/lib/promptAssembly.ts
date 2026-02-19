@@ -75,6 +75,43 @@ export async function assemblePrompt(req: GenerateRecipeRequest): Promise<{
   const template = promptTemplateJson as unknown as PromptTemplate;
   const ingredients = loadIngredients();
 
+  const usaDisplayUnitsAddendum = `
+
+## USA Display Units (REQUIRED)
+
+This is a USA app. You MUST include a human-friendly \`display_quantity\` field for EVERY ingredient.
+
+- \`base_g\` + \`unit\` remain the ONLY nutrition-canonical values for the deterministic pipeline.
+- \`display_quantity\` is display-only and must be derived from \`base_g\` + \`unit\`.
+- Format: US customary first, metric in parentheses.
+  - Solids: \`X oz (Y g)\`
+  - Liquids: \`X fl oz (Y ml)\`
+  - IU: \`X IU\`
+- Rounding (round UP):
+  - grams: round up to nearest 5 g
+  - milliliters: round up to nearest 1 ml
+  - oz/fl oz: round up to nearest 0.25
+
+Example ingredient object:
+{ "ingredient_id": "muscle_meat_chicken_thigh_boneless", "name": "Chicken thigh, boneless", "base_g": 227, "unit": "g", "display_quantity": "8 oz (230 g)", "prep": "Raw weight, ..." }
+`;
+
+  const cookMethod = req.cook_method ?? "stovetop";
+  const cookMethodAddendum = `
+
+## Cooking Device (REQUIRED)
+
+The user has selected a cooking device. You MUST:
+
+1) Set \`tags.cook_method\` to EXACTLY: \`${cookMethod}\`
+2) Write instructions that actually use that device and adjust \`time_minutes\` appropriately.
+
+Device mapping:
+- \`stovetop\` = pan/skillet + pot on stove
+- \`slow_cooker\` = crockpot-style low/slow cooking (longer times)
+- \`instant_pot\` = pressure cooker (shorter pressure times + include release guidance)
+`;
+
   // Fill user prompt template variables
   let userPrompt = template.user_prompt_template;
 
@@ -96,8 +133,10 @@ export async function assemblePrompt(req: GenerateRecipeRequest): Promise<{
     userPrompt = userPrompt.replaceAll(key, value);
   }
 
+  userPrompt += `\n\n## Cooking Device\n- cook_method: ${cookMethod}\n- device: ${cookMethod === "stovetop" ? "pan" : cookMethod === "slow_cooker" ? "slow cooker" : "pressure cooker"}\n`;
+
   return {
-    system: template.system_prompt,
+    system: template.system_prompt + usaDisplayUnitsAddendum + cookMethodAddendum,
     user: userPrompt,
   };
 }

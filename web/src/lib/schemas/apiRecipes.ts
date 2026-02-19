@@ -10,6 +10,7 @@ export const GenerateRecipeRequestSchema = z.object({
   activity_level: z.string().optional(),
   known_allergies: z.string().optional(),
   health_conditions: z.string().optional(),
+  cook_method: z.enum(["stovetop", "slow_cooker", "instant_pot"]).optional(),
 });
 
 const RecipeInstructionSchema = z.object({
@@ -25,6 +26,7 @@ const RecipeIngredientSchema = z.object({
   name: z.string(),
   base_g: z.number().nullable(),
   unit: z.enum(["g", "ml", "IU"]),
+  display_quantity: z.string().optional(),
   prep: z.string(),
 });
 

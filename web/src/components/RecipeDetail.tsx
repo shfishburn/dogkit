@@ -240,11 +240,11 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
                   )}
                 </div>
               </div>
-              {ing.base_g != null && (
-                <span className="rd__ing-amount">
-                  {ing.base_g} {ing.unit}
-                </span>
-              )}
+              <span className="rd__ing-amount">
+                {ing.display_quantity
+                  ? ing.display_quantity
+                  : (ing.base_g != null ? `${ing.base_g} ${ing.unit}` : "")}
+              </span>
             </div>
           ))}
         </div>

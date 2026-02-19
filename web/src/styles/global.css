@@ -1534,6 +1534,9 @@ main.full-bleed {
   .spec-tags,
   .ing-jumps,
   .lib-card__arrow,
+  .rd__json-toggle,
+  .rd__hero--skeleton,
+  .rd__ing-check,
   .button {
     display: none !important;
   }
@@ -1559,13 +1562,130 @@ main.full-bleed {
   .lib-card {
     break-inside: avoid;
   }
-  .rd__stat-grid,
-  .rd__ing-card {
-    break-inside: avoid;
-  }
   img {
     max-width: 100% !important;
     break-inside: avoid;
+  }
+
+  /* ── Recipe detail print layout ── */
+
+  /* Constrain hero so it doesn't eat an entire page */
+  .rd__hero {
+    max-height: 45vh;
+    overflow: hidden;
+    margin-bottom: 0.5cm;
+    border: none;
+    border-radius: 0;
+  }
+  .rd__hero-img {
+    max-height: 45vh;
+    object-fit: cover;
+  }
+
+  /* Tighten spacing across sections */
+  .rd__header {
+    padding-bottom: 0.3cm;
+  }
+  .rd__section {
+    padding-block: 0.3cm;
+  }
+  .rd__title {
+    font-size: 18pt;
+    margin-bottom: 0.15cm;
+  }
+  .rd__overview,
+  .rd__description {
+    font-size: 10pt;
+    margin-bottom: 0.2cm;
+  }
+
+  /* Section headings must not orphan at page bottom */
+  .rd__section-title {
+    break-after: avoid;
+    font-size: 9pt;
+    margin-bottom: 0.2cm;
+  }
+
+  /* Ingredient card: keep together when possible, allow break between rows */
+  .rd__ing-card {
+    break-inside: auto;
+  }
+  .rd__ing {
+    break-inside: avoid;
+    padding: 0.1cm 0.25cm;
+  }
+  .rd__ing-name { font-size: 10pt; }
+  .rd__ing-prep { font-size: 9pt; }
+  .rd__ing-amount { font-size: 9pt; }
+  .rd__note { font-size: 9pt; margin-top: 0.15cm; }
+
+  /* Steps: keep each step together, allow breaks between */
+  .rd__steps {
+    gap: 0.2cm;
+  }
+  .rd__step {
+    break-inside: avoid;
+    gap: 0.25cm;
+  }
+  .rd__step-num {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 8pt;
+    background: none;
+    border: 1px solid #999;
+  }
+  .rd__step-body { font-size: 10pt; }
+  .rd__step-text { font-size: 10pt; padding-top: 0; }
+  .rd__step-cat { font-size: 8pt; }
+  .rd__step-time,
+  .rd__step-equip { font-size: 8pt; }
+
+  /* Stat grid: keep together */
+  .rd__stat-grid {
+    break-inside: avoid;
+  }
+
+  /* Notes & disclaimers */
+  .rd__disclaimers {
+    font-size: 9pt;
+  }
+  .rd__disclaimers li {
+    break-inside: avoid;
+  }
+
+  /* Meta list (generation info) */
+  .rd__meta-list {
+    font-size: 9pt;
+    break-inside: avoid;
+  }
+
+  /* Badges & tags: print-safe */
+  .badge, .tag {
+    font-size: 8pt;
+    border: 1px solid #999;
+    background: none !important;
+    color: #000;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Reset done-state styling so all ingredients print clearly */
+  .rd__ing--done {
+    opacity: 1;
+  }
+  .rd__ing--done .rd__ing-name,
+  .rd__ing--done .rd__ing-prep {
+    text-decoration: none;
+  }
+
+  /* Prevent large blank gaps from flex/grid containers */
+  .rd {
+    display: block;
+  }
+
+  /* Minimal page margins */
+  @page {
+    margin: 1.5cm 1.5cm;
   }
 }
 

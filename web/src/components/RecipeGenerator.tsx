@@ -21,6 +21,12 @@ const BREED_SIZES = [
   { value: "giant", label: "Giant (> 45 kg)" },
 ];
 
+const COOKING_DEVICES = [
+  { value: "stovetop", label: "Pan" },
+  { value: "slow_cooker", label: "Slow cooker" },
+  { value: "instant_pot", label: "Pressure cooker" },
+] as const;
+
 type GeneratorState = "idle" | "streaming" | "saving" | "done" | "error";
 
 export default function RecipeGenerator() {
@@ -29,6 +35,7 @@ export default function RecipeGenerator() {
   const [breedSize, setBreedSize] = useState("medium");
   const [weightKg, setWeightKg] = useState(20);
   const [allergies, setAllergies] = useState("");
+  const [cookMethod, setCookMethod] = useState<GenerateRecipeRequest["cook_method"]>("stovetop");
 
   const [state, setState] = useState<GeneratorState>("idle");
   const [streamedText, setStreamedText] = useState("");
@@ -52,6 +59,7 @@ export default function RecipeGenerator() {
       breed_size_class: breedSize,
       weight_kg: weightKg,
       known_allergies: allergies || "none",
+      cook_method: cookMethod,
     };
 
     try {
@@ -226,6 +234,22 @@ export default function RecipeGenerator() {
             disabled={state === "streaming" || state === "saving"}
           />
         </div>
+
+          <div className="recipe-gen__field">
+            <label htmlFor="cook-method">Cooking device</label>
+            <select
+              id="cook-method"
+              value={cookMethod ?? "stovetop"}
+              onChange={(e) => setCookMethod(e.target.value as GenerateRecipeRequest["cook_method"])}
+              disabled={state === "streaming" || state === "saving"}
+            >
+              {COOKING_DEVICES.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
         <div className="recipe-gen__actions">
           {state === "streaming" ? (
