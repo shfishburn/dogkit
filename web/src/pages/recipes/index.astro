@@ -31,223 +31,36 @@ const tiers = [...new Set(recipes.map((r) => r.tags?.tier).filter(Boolean))].sor
     <!-- Protein type -->
     <fieldset class="filter-group">
       <legend class="filter-label">Protein</legend>
-      <div class="pill-row" id="protein-picker">
-        <button type="button" class="pill pill--active" data-protein="all">All</button>
-        {proteins.map((p) => (
-          <button type="button" class="pill" data-protein={p}>
-            {labelify(p)}
-          </button>
-        ))}
-      </div>
-    </fieldset>
-
-    <!-- Tier -->
     <fieldset class="filter-group">
       <legend class="filter-label">Tier</legend>
       <div class="pill-row" id="tier-picker">
         <button type="button" class="pill pill--active" data-tier="all">All</button>
-        {tiers.map((t) => (
+      description="AI-generated canine recipes."
           <button type="button" class="pill" data-tier={t}>
             {t === "T2" ? "T2 · Specialty" : "T1 · Standard"}
           </button>
         ))}
-      </div>
+          <a class="button" href="/admin/recipes/new">+ Generate Recipe</a>
     </fieldset>
 
-    <!-- Max prep time -->
+        <p class="page-sub">Generated recipes pulled from the live database.</p>
     <fieldset class="filter-group">
-      <legend class="filter-label">Max prep time</legend>
-      <div class="pill-row" id="prep-picker">
-        <button type="button" class="pill pill--active" data-prep="0">Any</button>
-        <button type="button" class="pill" data-prep="20">≤ 20 min</button>
-        <button type="button" class="pill" data-prep="30">≤ 30 min</button>
-        <button type="button" class="pill" data-prep="40">≤ 40 min</button>
+
+      <div id="recipe-list">
+        <!-- React island hydrates here -->
       </div>
-    </fieldset>
-  </div>
-
-  <!-- ── Results count ── -->
-  <p class="results-count" id="results-count" aria-live="polite"></p>
-
-  <!-- ── Recipe grid ── -->
-  <div class="recipe-grid" id="recipe-grid">
-    {recipes.map((r) => {
-      const prep = r.tags?.prep_time_min ?? 0;
-      const protein = r.tags?.protein_type ?? "";
-      const tier = r.tags?.tier ?? "";
-      const carb = r.tags?.primary_carb ?? "";
-      const veggie = r.tags?.primary_veggie ?? "";
-
-      const imageUrl = r.image_url as string | undefined;
-      const cardImgSrc = imageUrl
-        ? supabaseRenderImageUrl(imageUrl, {
-            width: 480,
-            height: 480,
-            resize: "cover",
-            quality: 70,
-          })
-        : null;
-      const cardImgSrcSet = imageUrl
-        ? supabaseSrcSetWH(
-            imageUrl,
-            [
-              { width: 240, height: 240 },
-              { width: 360, height: 360 },
-              { width: 480, height: 480 },
-              { width: 720, height: 720 },
-            ],
-            {
-            resize: "cover",
-            quality: 70,
-          }
-          )
-        : null;
-      return (
-        <a
-          href={`/recipes/${r.id}`}
-          class="recipe-list-card"
-          data-protein={protein}
-          data-tier={tier}
-          data-prep={prep}
-        >
-          {imageUrl && cardImgSrc && cardImgSrcSet && (
-            <div class="recipe-list-card__media">
-              <img
-                class="recipe-list-card__img"
-                src={cardImgSrc}
-                srcset={cardImgSrcSet}
-                sizes="(max-width: 40rem) 100vw, 360px"
-                alt={r.name}
-                width="360"
-                height="360"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-          )}
-          <div class="recipe-list-card__badges">
-            <span class:list={["badge", tier === "T2" ? "badge--t2" : "badge--t1"]}>{tier}</span>
-            <span class="badge badge--time">⏱ {prep} min</span>
-          </div>
-          <h2 class="recipe-list-card__name">{r.name}</h2>
-          <p class="recipe-list-card__tags">
-            <span class="tag tag--protein">{labelify(protein)}</span>
-            <span class="tag tag--carb">{labelify(carb)}</span>
-            <span class="tag tag--veggie">{labelify(veggie)}</span>
-          </p>
-          <p class="recipe-list-card__overview">{r.overview}</p>
-          <div class="recipe-list-card__nutrients">
-            <span class="recipe-list-card__nutrient"><strong>{r.per_1000kcal_estimate?.protein_g}g</strong> protein</span>
-            <span class="recipe-list-card__nutrient"><strong>{r.per_1000kcal_estimate?.fat_g}g</strong> fat</span>
-            <span class="recipe-list-card__nutrient"><strong>{r.per_1000kcal_estimate?.ca_p_ratio}</strong> Ca:P</span>
-          </div>
-          <span class="recipe-list-card__cta" aria-hidden="true">View recipe →</span>
-        </a>
-      );
-    })}
-  </div>
-
-  <!-- ── Weekly plan ── -->
-  <section class="weekly-plan-section reveal">
-    <h2 class="section-headline" style="font-size:var(--text-2xl);margin-bottom:var(--space-4);">21-Day Rotation Plan</h2>
-    <p class="page-sub" style="margin-bottom:var(--space-6);">{weeklyPlan.description}</p>
-
-    {[
-      { label: "Week 1", days: weeklyPlan.days?.slice(0, 7) },
-      { label: "Week 2", days: weeklyPlan.days?.slice(7, 14) },
-      { label: "Week 3", days: weeklyPlan.days?.slice(14, 21) },
-    ].map((week) => week.days?.length > 0 && (
-      <div class="week-block">
-        <h3 class="week-block__label">{week.label}</h3>
-        <div class="week-grid">
-          {week.days.map((day) => {
-            const am = recipes.find((r) => r.id === day.am?.recipe_id);
-            const pm = recipes.find((r) => r.id === day.pm?.recipe_id);
-            return (
-              <div class="week-cell">
-                <div class="week-cell__day">{day.label}</div>
-                {am && (
-                  <a class="week-cell__meal week-cell__meal--am" href={`/recipes/${am.id}`}>
-                    <span class="week-meal-time">AM</span>
-                    {am.name}
-                  </a>
-                )}
-                {pm && (
-                  <a class="week-cell__meal week-cell__meal--pm" href={`/recipes/${pm.id}`}>
-                    <span class="week-meal-time">PM</span>
-                    {pm.name}
-                  </a>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    ))}
-  </section>
-</BaseLayout>
-
-<script>
-  // ── State ──
-  let activeProtein = "all";
-  let activeTier = "all";
-  let activeMaxPrep = 0;
-
-  const grid = document.getElementById("recipe-grid")!;
-  const cards = Array.from(grid.querySelectorAll(".recipe-list-card")) as HTMLElement[];
-  const countEl = document.getElementById("results-count")!;
-
-  function applyFilters() {
-    let visible = 0;
-    for (const card of cards) {
-      const protein = card.dataset.protein ?? "";
-      const tier = card.dataset.tier ?? "";
-      const prep = parseInt(card.dataset.prep ?? "0", 10);
-
-      const proteinOk = activeProtein === "all" || protein === activeProtein;
-      const tierOk = activeTier === "all" || tier === activeTier;
-      const prepOk = activeMaxPrep === 0 || prep <= activeMaxPrep;
-
-      const show = proteinOk && tierOk && prepOk;
-      card.hidden = !show;
-      if (show) visible++;
-    }
-    countEl.textContent = `Showing ${visible} of ${cards.length} recipes`;
-  }
-
-  // Protein pills
   const proteinPicker = document.getElementById("protein-picker")!;
-  proteinPicker.addEventListener("click", (e) => {
-    const btn = (e.target as HTMLElement).closest("button[data-protein]") as HTMLButtonElement | null;
-    if (!btn) return;
-    for (const p of proteinPicker.querySelectorAll(".pill")) p.classList.remove("pill--active");
-    btn.classList.add("pill--active");
-    activeProtein = btn.dataset.protein!;
-    applyFilters();
-  });
 
-  // Tier pills
-  const tierPicker = document.getElementById("tier-picker")!;
-  tierPicker.addEventListener("click", (e) => {
-    const btn = (e.target as HTMLElement).closest("button[data-tier]") as HTMLButtonElement | null;
-    if (!btn) return;
-    for (const p of tierPicker.querySelectorAll(".pill")) p.classList.remove("pill--active");
-    btn.classList.add("pill--active");
-    activeTier = btn.dataset.tier!;
-    applyFilters();
-  });
+    <script>
+      import { createElement } from "react";
+      import { createRoot } from "react-dom/client";
+      import { RecipeListWithBase } from "../../components/RecipeList";
 
-  // Prep time pills
-  const prepPicker = document.getElementById("prep-picker")!;
-  prepPicker.addEventListener("click", (e) => {
-    const btn = (e.target as HTMLElement).closest("button[data-prep]") as HTMLButtonElement | null;
-    if (!btn) return;
-    for (const p of prepPicker.querySelectorAll(".pill")) p.classList.remove("pill--active");
-    btn.classList.add("pill--active");
-    activeMaxPrep = parseInt(btn.dataset.prep!, 10);
-    applyFilters();
-  });
-
-  // Boot
-  applyFilters();
-</script>
+      const container = document.getElementById("recipe-list");
+      if (container) {
+        const root = createRoot(container);
+        root.render(createElement(RecipeListWithBase, { detailHrefBase: "/recipes" }));
+        window.addEventListener("astro:before-swap", () => root.unmount(), { once: true });
+      }
+    </script>
+    </fieldset>

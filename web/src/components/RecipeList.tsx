@@ -8,7 +8,7 @@ import QueryProvider from "./QueryProvider";
 import type { RecipeRow } from "../lib/types/recipe";
 import { labelify } from "../lib/utils";
 
-function RecipeListInner() {
+function RecipeListInner({ detailHrefBase }: { detailHrefBase: string }) {
   const { data: recipes, isLoading, error } = useQuery<RecipeRow[]>({
     queryKey: ["recipes"],
     queryFn: async () => {
@@ -55,7 +55,7 @@ function RecipeListInner() {
         return (
           <a
             key={r.id}
-            href={`/admin/recipes/${r.id}`}
+            href={`${detailHrefBase}/${r.id}`}
             className="recipe-list-card"
           >
             {thumbSrc ? (
@@ -104,7 +104,15 @@ function RecipeListInner() {
 export default function RecipeList() {
   return (
     <QueryProvider>
-      <RecipeListInner />
+      <RecipeListInner detailHrefBase="/admin/recipes" />
+    </QueryProvider>
+  );
+}
+
+export function RecipeListWithBase({ detailHrefBase }: { detailHrefBase: string }) {
+  return (
+    <QueryProvider>
+      <RecipeListInner detailHrefBase={detailHrefBase} />
     </QueryProvider>
   );
 }

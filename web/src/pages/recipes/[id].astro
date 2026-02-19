@@ -1,375 +1,49 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { loadWeeklyMealPlan, loadNistConversions } from "../../lib/loaders";
-import { loadFdcNutrientMap } from "../../lib/supabaseFdc";
-import { supabaseRenderImageUrl, supabaseSrcSetWH } from "../../lib/supabaseImages";
-import {
-  computeRecipeNutrients,
-  NUTRIENT_DISPLAY_SECTIONS,
-  fmtNutrient,
-  caPRatio,
-} from "../../lib/nutrition";
 
-export async function getStaticPaths() {
-  const plan = await loadWeeklyMealPlan();
-  const [fdcMap, conversions] = await Promise.all([
-    loadFdcNutrientMap(),
-    loadNistConversions(),
-  ]);
+export const prerender = false;
 
-  return plan.recipes.map((r) => ({
-    params: { id: r.id },
-    props: {
-      recipe: r,
-      sizing: plan.metadata.size_scaling,
-      weeklyPlan: plan.weekly_plan,
-      nutrientTotals: computeRecipeNutrients(r.ingredients, fdcMap, conversions),
-      hasFdcData: fdcMap.size > 0,
-    },
-  }));
-}
-
-const { recipe, sizing, weeklyPlan, nutrientTotals, hasFdcData } = Astro.props;
-
-import { labelify } from "../../lib/utils";
-
-const protein = recipe.tags?.protein_type ?? "";
-const carb = recipe.tags?.primary_carb ?? "";
-const veggie = recipe.tags?.primary_veggie ?? "";
-const tier = recipe.tags?.tier ?? "";
-const prep = recipe.tags?.prep_time_min ?? 0;
-const staticNutrients = recipe.per_1000kcal_estimate ?? {};
-const computedCaPRatio = caPRatio(nutrientTotals);
-
-const heroImageUrl = recipe.image_url;
-const heroSrc = heroImageUrl
-  ? supabaseRenderImageUrl(heroImageUrl, {
-      width: 960,
-      height: 600,
-      resize: "cover",
-      quality: 75,
-    })
-  : null;
-const heroSrcSet = heroImageUrl
-  ? supabaseSrcSetWH(
-      heroImageUrl,
-      [
-        { width: 480, height: 300 },
-        { width: 640, height: 400 },
-        { width: 960, height: 600 },
-        { width: 1280, height: 800 },
-      ],
-      {
-        resize: "cover",
-        quality: 75,
-      }
-    )
-  : null;
-
-const appearances: { day: number; label: string; meal: string }[] = [];
-for (const day of weeklyPlan.days ?? []) {
-  if (day.am?.recipe_id === recipe.id) appearances.push({ day: day.day, label: day.label, meal: "AM" });
-  if (day.pm?.recipe_id === recipe.id) appearances.push({ day: day.day, label: day.label, meal: "PM" });
-}
+// Extract recipe ID from URL
+const { id } = Astro.params;
 ---
 
-<BaseLayout title={recipe.name} description={recipe.overview} container="lg">
-  <article class="rd">
+<BaseLayout title="Recipe Detail" description="View a generated canine recipe." container="lg">
+  <div class="rd__back">
+    <a href="/recipes" class="button">← Back to recipes</a>
+  </div>
 
-    {/* Hero image */}
-    {heroImageUrl && heroSrc && heroSrcSet && (
-      <figure class="rd__hero">
-        <img
-          class="rd__hero-img"
-          src={heroSrc}
-          srcset={heroSrcSet}
-          sizes="(max-width: 72rem) 100vw, 72rem"
-          alt={recipe.name}
-          width="960"
-          height="600"
-          loading="eager"
-          decoding="async"
-        />
-      </figure>
-    )}
-
-    {/* Header */}
-    <header class="rd__header reveal">
-      <div class="rd__meta">
-        <span class:list={["badge", tier === "T2" ? "badge--t2" : "badge--t1"]}>{tier}</span>
-        <span class="badge badge--time">{prep} min</span>
-        <span class="tag tag--protein">{labelify(protein)}</span>
-        <span class="tag tag--carb">{labelify(carb)}</span>
-        <span class="tag tag--veggie">{labelify(veggie)}</span>
-      </div>
-      <h1 class="rd__title">{recipe.name}</h1>
-      <p class="rd__overview">{recipe.overview}</p>
-      <div class="rd__actions no-print">
-        <button type="button" class="action-btn" id="share-btn" title="Share recipe">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          <span>Share</span>
-        </button>
-        <button type="button" class="action-btn" id="print-btn" title="Print recipe">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          <span>Print</span>
-        </button>
-      </div>
-    </header>
-
-    {/* Size selector */}
-    <section class="rd__section no-print reveal">
-      <h2 class="rd__section-title">Dog size</h2>
-      <div class="pill-row" id="size-picker">
-        {(["small", "medium", "large"] as const).map((key) => {
-          const val = sizing[key];
-          return (
-          <button
-            type="button"
-            class:list={["pill", { "pill--active": key === "medium" }]}
-            data-size={key}
-          >
-            {key.charAt(0).toUpperCase() + key.slice(1)}
-            <span class="pill-sub">{val.weight_kg} kg · {val.approx_mer_kcal} kcal</span>
-          </button>
-        );
-        })}
-      </div>
-    </section>
-
-    {/* Ingredients */}
-    <section class="rd__section reveal">
-      <h2 class="rd__section-title">Ingredients</h2>
-      <div class="rd__ing-card">
-        {recipe.ingredients.map((ing) => (
-          <div class="rd__ing">
-            <div class="rd__ing-left">
-              <span class="rd__ing-name">{ing.name}</span>
-              {ing.prep && <span class="rd__ing-prep">{ing.prep}</span>}
-            </div>
-            {ing.base_g != null && (
-              <span
-                class="rd__ing-amount"
-                data-base-g={ing.base_g}
-                data-unit={ing.unit}
-              >
-                {Math.round(ing.base_g * sizing.medium.factor)} {ing.unit}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-    </section>
-
-    {/* Instructions */}
-    <section class="rd__section reveal">
-      <h2 class="rd__section-title">Instructions</h2>
-      <ol class="rd__steps">
-        {recipe.instructions.map((step: string, i: number) => (
-          <li class="rd__step">
-            <span class="rd__step-num">{i + 1}</span>
-            <span class="rd__step-text">{step}</span>
-          </li>
-        ))}
-      </ol>
-    </section>
-
-    {/* Nutrition */}
-    <section class="rd__section reveal">
-      <h2 class="rd__section-title">
-        Nutrition
-        <span class="rd__section-note">{hasFdcData ? "FDC-computed · 1× base recipe" : "per 1,000 kcal estimate"}</span>
-      </h2>
-
-      {/* Top-level glanceable stats */}
-      <div class="rd__stat-grid">
-        <div class="rd__stat">
-          <span class="rd__stat-val">
-            <span data-base-val={hasFdcData ? nutrientTotals.protein_g : ""} data-decimals="0">
-              {hasFdcData ? fmtNutrient(nutrientTotals.protein_g, 0) : staticNutrients.protein_g}
-            </span><small>g</small>
-          </span>
-          <span class="rd__stat-lbl">Protein</span>
-        </div>
-        <div class="rd__stat">
-          <span class="rd__stat-val">
-            <span data-base-val={hasFdcData ? nutrientTotals.fat_g : ""} data-decimals="0">
-              {hasFdcData ? fmtNutrient(nutrientTotals.fat_g, 0) : staticNutrients.fat_g}
-            </span><small>g</small>
-          </span>
-          <span class="rd__stat-lbl">Fat</span>
-        </div>
-        <div class="rd__stat">
-          <span class="rd__stat-val">
-            <span data-base-val={hasFdcData ? nutrientTotals.fiber_g : ""} data-decimals="0">
-              {hasFdcData ? fmtNutrient(nutrientTotals.fiber_g, 0) : staticNutrients.fiber_g}
-            </span><small>g</small>
-          </span>
-          <span class="rd__stat-lbl">Fiber</span>
-        </div>
-        <div class="rd__stat">
-          <span class="rd__stat-val" data-nutrient="ca_p_ratio">
-            {hasFdcData ? (computedCaPRatio ?? "—") : staticNutrients.ca_p_ratio}
-          </span>
-          <span class="rd__stat-lbl">Ca:P</span>
-        </div>
-        <div class="rd__stat">
-          <span class="rd__stat-val">
-            <span data-base-val={hasFdcData ? nutrientTotals.calcium_mg : ""} data-decimals="0">
-              {hasFdcData ? fmtNutrient(nutrientTotals.calcium_mg, 0) : staticNutrients.calcium_mg}
-            </span><small>mg</small>
-          </span>
-          <span class="rd__stat-lbl">Calcium</span>
-        </div>
-      </div>
-
-      {/* Full nutrient breakdown (FDC computed) */}
-      {hasFdcData && (
-        <details class="rd__nutrient-details">
-          <summary>Full nutrient breakdown</summary>
-          <div class="nutrient-grid">
-            {NUTRIENT_DISPLAY_SECTIONS.map((section) => (
-              <div class="nutrient-card">
-                <h3 class="nutrient-card__title">{section.title}</h3>
-                <table class="nutrient-table">
-                  <tbody>
-                    {section.rows.map((row) => {
-                      const val = nutrientTotals[row.key];
-                      return (
-                        <tr class={val === 0 ? "null-row" : ""}>
-                          <td class="nl">{row.label}</td>
-                          <td class="nv" data-base-val={val} data-decimals={row.decimals}>
-                            {fmtNutrient(val, row.decimals)}
-                          </td>
-                          <td class="nu">{row.unit}</td>
-                        </tr>
-                      );
-                    })}
-                    {section.title === "Minerals" && computedCaPRatio && (
-                      <tr>
-                        <td class="nl">Ca:P Ratio</td>
-                        <td class="nv" data-nutrient="ca_p_ratio">{computedCaPRatio}</td>
-                        <td class="nu"></td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            ))}
-          </div>
-        </details>
-      )}
-
-      {recipe.tags?.dimensions_covered?.length > 0 && (
-        <div class="rd__dimensions">
-          <h3 class="rd__section-title">Dimensions covered</h3>
-          <div class="dim-chips">
-            {recipe.tags.dimensions_covered.map((d: string) => (
-              <span class="dim-chip">{d}</span>
-            ))}
-          </div>
-        </div>
-      )}
-    </section>
-
-    {/* Meal plan appearances */}
-    {appearances.length > 0 && (
-      <section class="rd__section reveal">
-        <h2 class="rd__section-title">In the meal plan</h2>
-        <div class="rd__plan-chips">
-          {appearances.map((a) => (
-            <span class:list={["plan-chip", a.meal === "AM" ? "plan-chip--am" : "plan-chip--pm"]}>
-              {a.label} · {a.meal}
-            </span>
-          ))}
-        </div>
-      </section>
-    )}
-
-    {/* Copy JSON */}
-    <section class="rd__section no-print reveal">
-      <h2 class="rd__section-title">Recipe data</h2>
-      <div class="rd__actions">
-        <button type="button" class="action-btn" id="copy-json-btn" title="Copy recipe JSON">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <span>Copy recipe JSON</span>
-        </button>
-      </div>
-    </section>
-  </article>
+  <div id="recipe-detail" data-recipe-id={id}>
+    <!-- React island hydrates here -->
+  </div>
 </BaseLayout>
 
-<script define:vars={{ sizing, RECIPE: recipe, nutrientTotals }}>
-  let activeSize = "medium";
-  const sizePicker = document.getElementById("size-picker");
+<script>
+  import { createElement } from "react";
+  import { createRoot } from "react-dom/client";
+  import RecipeDetail from "../../components/RecipeDetail";
 
-  function applySize(sizeKey) {
-    const factor = sizing[sizeKey]?.factor ?? 0.95;
+  const container = document.getElementById("recipe-detail");
+  if (container) {
+    const recipeId = container.dataset.recipeId ?? "";
+    const root = createRoot(container);
+    root.render(createElement(RecipeDetail, { recipeId }));
 
-    // Scale ingredient amounts
-    for (const el of document.querySelectorAll("[data-base-g]")) {
-      const base = parseFloat(el.dataset.baseG);
-      if (!isNaN(base)) {
-        const unit = el.dataset.unit ?? "g";
-        el.textContent = `${Math.round(base * factor)} ${unit}`;
-      }
-    }
-
-    // Scale nutrient values
-    for (const el of document.querySelectorAll("[data-base-val]")) {
-      const base = parseFloat(el.dataset.baseVal);
-      if (isNaN(base)) continue;
-      const decimals = parseInt(el.dataset.decimals ?? "1", 10);
-      const scaled = base * factor;
-      el.textContent = scaled.toFixed(decimals);
-    }
-
-    // Ca:P ratio is size-invariant (factor cancels), but update from computed totals
-    const caP = nutrientTotals.phosphorus_mg > 0
-      ? (nutrientTotals.calcium_mg / nutrientTotals.phosphorus_mg).toFixed(2) + ":1"
-      : "—";
-    for (const el of document.querySelectorAll('[data-nutrient="ca_p_ratio"]')) {
-      el.textContent = caP;
-    }
+    window.addEventListener("astro:before-swap", () => root.unmount(), { once: true });
   }
-
-  sizePicker?.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-size]");
-    if (!btn) return;
-    for (const p of sizePicker.querySelectorAll(".pill")) p.classList.remove("pill--active");
-    btn.classList.add("pill--active");
-    activeSize = btn.dataset.size;
-    applySize(activeSize);
-  });
-
-  applySize("medium");
-
-  const shareBtn = document.getElementById("share-btn");
-  shareBtn?.addEventListener("click", async () => {
-    const title = document.querySelector(".rd__title")?.textContent ?? "Recipe";
-    const url = window.location.href;
-    if (navigator.share) {
-      try { await navigator.share({ title, url }); } catch {}
-    } else {
-      await navigator.clipboard.writeText(url);
-      const label = shareBtn.querySelector("span");
-      if (!label) return;
-      const prev = label.textContent;
-      label.textContent = "Copied!";
-      setTimeout(() => { label.textContent = prev; }, 2000);
-    }
-  });
-
-  document.getElementById("print-btn")?.addEventListener("click", () => window.print());
-
-  const copyJsonBtn = document.getElementById('copy-json-btn');
-  copyJsonBtn?.addEventListener('click', async () => {
-    if (!navigator.clipboard) return;
-    try {
-      await navigator.clipboard.writeText(JSON.stringify(RECIPE, null, 2));
-      const label = copyJsonBtn.querySelector('span');
-      const prev = label.textContent;
-      label.textContent = 'Copied!';
-      setTimeout(() => { label.textContent = prev; }, 2000);
-    } catch {}
-  });
 </script>
+
+<style>
+  .rd__back {
+    margin-bottom: var(--space-4);
+  }
+  :global(.rd__loading),
+  :global(.rd__error) {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--color-muted);
+  }
+  :global(.rd__hero--skeleton) {
+    min-height: 300px;
+    margin-bottom: var(--space-6);
+  }
+</style>
