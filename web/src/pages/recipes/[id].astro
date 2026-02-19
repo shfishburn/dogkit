@@ -31,9 +31,7 @@ export async function getStaticPaths() {
 
 const { recipe, sizing, weeklyPlan, nutrientTotals, hasFdcData } = Astro.props;
 
-function labelify(s: string): string {
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
+import { labelify } from "../../lib/utils";
 
 const protein = recipe.tags?.protein_type ?? "";
 const carb = recipe.tags?.primary_carb ?? "";
@@ -334,7 +332,7 @@ for (const day of weeklyPlan.days ?? []) {
     }
   }
 
-  sizePicker.addEventListener("click", (e) => {
+  sizePicker?.addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-size]");
     if (!btn) return;
     for (const p of sizePicker.querySelectorAll(".pill")) p.classList.remove("pill--active");
@@ -346,7 +344,7 @@ for (const day of weeklyPlan.days ?? []) {
   applySize("medium");
 
   const shareBtn = document.getElementById("share-btn");
-  shareBtn.addEventListener("click", async () => {
+  shareBtn?.addEventListener("click", async () => {
     const title = document.querySelector(".rd__title")?.textContent ?? "Recipe";
     const url = window.location.href;
     if (navigator.share) {
@@ -354,13 +352,14 @@ for (const day of weeklyPlan.days ?? []) {
     } else {
       await navigator.clipboard.writeText(url);
       const label = shareBtn.querySelector("span");
+      if (!label) return;
       const prev = label.textContent;
       label.textContent = "Copied!";
       setTimeout(() => { label.textContent = prev; }, 2000);
     }
   });
 
-  document.getElementById("print-btn").addEventListener("click", () => window.print());
+  document.getElementById("print-btn")?.addEventListener("click", () => window.print());
 
   const copyJsonBtn = document.getElementById('copy-json-btn');
   copyJsonBtn?.addEventListener('click', async () => {

@@ -16,7 +16,7 @@
   --color-accent-hover: #c9710e;
   --color-accent-surface: color-mix(in oklab, #E0831A 12%, Canvas);
 
-  /* Tag palette */
+  /* Tag palette (light-mode defaults, overridden in dark via @media below) */
   --color-tag-protein-bg: #fef3c7;
   --color-tag-protein: #92400e;
   --color-tag-carb-bg: #dbeafe;

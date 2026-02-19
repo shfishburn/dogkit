@@ -5,8 +5,6 @@ import { WeeklyMealPlanSchema } from "./schemas/mealPlan";
 import { IngredientDbSchema } from "./schemas/ingredient";
 import { ManufacturerDbSchema } from "./schemas/manufacturer";
 import { PlanItemArraySchema } from "./schemas/planItem";
-import { FdcMappingDbSchema } from "./schemas/fdc";
-import { NutrientDbSchema } from "./schemas/fdc";
 import { NistConversionsSchema } from "./schemas/conversions";
 
 const DATA_ROOT = path.resolve(process.cwd(), "..", "data");
@@ -42,20 +40,6 @@ export function loadPlanItems() {
   return loadAndParse(
     path.join(PLAN_ROOT, "plan.json"),
     PlanItemArraySchema,
-  );
-}
-
-export function loadFdcMapping() {
-  return loadAndParse(
-    path.join(DATA_ROOT, "ingredients", "fdc_mapping.json"),
-    FdcMappingDbSchema,
-  );
-}
-
-export function loadNutrientDb() {
-  return loadAndParse(
-    path.join(DATA_ROOT, "ingredients", "nutrients.json"),
-    NutrientDbSchema,
   );
 }
 

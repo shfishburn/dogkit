@@ -7,6 +7,8 @@ export const FdcMappingEntrySchema = z.object({
   fdc_id: z.number(),
   fdc_description: z.string(),
   data_type: z.string(),
+  mapped_at: z.string().optional(),
+  updated_at: z.string().optional(),
 });
 
 export const FdcMappingDbSchema = z.object({

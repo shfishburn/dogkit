@@ -504,7 +504,7 @@
           "prep": "1 IU per lb body weight"
         },
         {
-          "ingredient_id": "whole_egg",
+          "ingredient_id": "eggs_dairy_whole_egg",
           "name": "Whole egg",
           "base_g": 50,
           "unit": "g",

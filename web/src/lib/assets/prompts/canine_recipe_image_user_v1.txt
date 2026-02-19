@@ -1,0 +1,12 @@
+Generate a hero photograph of this home-cooked dog food recipe:
+
+Recipe: {{name}}
+Protein: {{protein}}
+Carbohydrate: {{carb}}
+Vegetable: {{veggie}}
+Cook method: {{cook_method}}
+
+The bowl should prominently feature:
+{{ingredient_list}}
+
+Style the shot so the {{protein}} is the visual hero, with {{carb}} and {{veggie}} clearly visible as supporting ingredients.

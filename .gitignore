@@ -8,6 +8,9 @@ node_modules/
 scripts/*.tgz
 scripts/node_modules/
 
+# Astro generated
+.astro/
+
 # macOS
 .DS_Store
 

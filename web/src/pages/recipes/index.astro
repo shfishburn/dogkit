@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { loadWeeklyMealPlan } from "../../lib/loaders";
 import { supabaseRenderImageUrl, supabaseSrcSetWH } from "../../lib/supabaseImages";
+import { labelify } from "../../lib/utils";
 
 const mealPlan = await loadWeeklyMealPlan();
 const recipes = mealPlan.recipes;
@@ -10,10 +11,6 @@ const weeklyPlan = mealPlan.weekly_plan;
 // Collect unique filter values
 const proteins = [...new Set(recipes.map((r) => r.tags?.protein_type).filter(Boolean))].sort();
 const tiers = [...new Set(recipes.map((r) => r.tags?.tier).filter(Boolean))].sort();
-
-function labelify(s: string): string {
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
 ---
 
 <BaseLayout
@@ -70,7 +67,7 @@ function labelify(s: string): string {
   </div>
 
   <!-- ── Results count ── -->
-  <p class="results-count" id="results-count"></p>
+  <p class="results-count" id="results-count" aria-live="polite"></p>
 
   <!-- ── Recipe grid ── -->
   <div class="recipe-grid" id="recipe-grid">

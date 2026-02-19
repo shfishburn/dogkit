@@ -1,0 +1,275 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Generate Recipe" description="Generate a new canine recipe using AI.">
+  <div class="page-header reveal">
+    <div class="page-header__top">
+      <p class="section-label">Admin · Recipes</p>
+      <a href="/admin/recipes" class="button">← Back to list</a>
+    </div>
+    <h1 class="section-headline">Generate Recipe</h1>
+    <p class="page-sub">
+      Enter a recipe request and the AI will generate a complete NRC-compliant canine recipe
+      using the CFPO v2 prompt pipeline. Powered by Claude Sonnet via OpenRouter.
+    </p>
+  </div>
+
+  <div id="recipe-generator">
+    <!-- React island hydrates here -->
+  </div>
+</BaseLayout>
+
+<script>
+  import { createElement } from "react";
+  import { createRoot } from "react-dom/client";
+  import RecipeGenerator from "../../../components/RecipeGenerator";
+
+  const container = document.getElementById("recipe-generator");
+  if (container) {
+    const root = createRoot(container);
+    root.render(createElement(RecipeGenerator));
+
+    // Stop polling / timers on navigation (Astro view transitions)
+    window.addEventListener("astro:before-swap", () => root.unmount(), { once: true });
+  }
+</script>
+
+<style>
+  /* ── Generator form styles ── */
+  :global(.recipe-gen__form) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  :global(.recipe-gen__field--full) {
+    grid-column: 1 / -1;
+  }
+  :global(.recipe-gen__field) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  :global(.recipe-gen__field label) {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+  :global(.recipe-gen__field textarea),
+  :global(.recipe-gen__field select),
+  :global(.recipe-gen__field input) {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    font-size: var(--text-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+  :global(.recipe-gen__field textarea) {
+    resize: vertical;
+    min-height: 4rem;
+  }
+  :global(.recipe-gen__actions) {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+  }
+
+  /* ── Streaming output ── */
+  :global(.recipe-gen__stream) {
+    margin-bottom: var(--space-6);
+  }
+  :global(.recipe-gen__stream-header) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  :global(.recipe-gen__spinner) {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  :global(.recipe-gen__raw) {
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    padding: var(--space-4);
+    font-size: var(--text-xs);
+    line-height: 1.6;
+    overflow-x: auto;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ── Error ── */
+  :global(.recipe-gen__error) {
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: var(--radius-1);
+    padding: var(--space-3) var(--space-4);
+    color: #c00;
+    margin-bottom: var(--space-4);
+  }
+
+  /* ── Preview ── */
+  :global(.recipe-gen__preview) {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    padding: var(--space-6);
+    background: var(--color-surface);
+  }
+  :global(.recipe-gen__preview-header) {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  :global(.recipe-gen__preview-header h2) {
+    margin: 0;
+    font-size: var(--text-2xl);
+  }
+  :global(.recipe-gen__saved) {
+    color: #080;
+    font-weight: 600;
+  }
+  :global(.recipe-gen__saved a) {
+    color: var(--color-accent);
+    margin-left: var(--space-2);
+  }
+  :global(.recipe-gen__description) {
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+  }
+  :global(.recipe-gen__overview) {
+    margin-bottom: var(--space-4);
+    line-height: 1.7;
+  }
+  :global(.recipe-gen__tags) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+
+  /* ── Ingredients ── */
+  :global(.recipe-gen__ingredients) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+  :global(.recipe-gen__ing) {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  :global(.recipe-gen__ing-name) {
+    font-weight: 600;
+  }
+  :global(.recipe-gen__ing-amount) {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+  :global(.recipe-gen__ing-prep) {
+    grid-column: 1 / -1;
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  /* ── Instructions ── */
+  :global(.recipe-gen__instructions) {
+    padding-left: 0;
+    list-style: none;
+    counter-reset: step;
+    margin-bottom: var(--space-6);
+  }
+  :global(.recipe-gen__step) {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  :global(.recipe-gen__step-cat) {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent);
+    background: var(--color-surface-alt);
+    padding: 2px 8px;
+    border-radius: var(--radius-1);
+    white-space: nowrap;
+    align-self: start;
+    min-width: 5em;
+    text-align: center;
+  }
+  :global(.recipe-gen__step-text) {
+    flex: 1;
+    line-height: 1.6;
+  }
+  :global(.recipe-gen__step-time) {
+    white-space: nowrap;
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+
+  /* ── Disclaimers ── */
+  :global(.recipe-gen__disclaimers) {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    line-height: 1.6;
+  }
+
+  /* ── JSON toggle ── */
+  :global(.recipe-gen__json-toggle) {
+    margin-top: var(--space-6);
+  }
+
+  /* ── Buttons ── */
+  :global(.button--primary) {
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-1);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  :global(.button--primary:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  :global(.button--danger) {
+    background: #c00;
+    color: white;
+    border: none;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-1);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  @media (max-width: 40rem) {
+    :global(.recipe-gen__form) {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

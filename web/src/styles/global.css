@@ -1534,7 +1534,6 @@ main.full-bleed {
   .filter-bar,
   .results-count,
   .weekly-plan-section,
-  .rd__size-bar,
   .rd__actions,
   .spec-xref,
   .spec-tags,
@@ -2211,6 +2210,10 @@ main.full-bleed {
   white-space: nowrap;
   background: color-mix(in srgb, var(--color-accent) 12%, transparent);
   color: var(--color-accent);
+}
+.tier-badge--t2 {
+  background: color-mix(in srgb, var(--color-badge-t2) 12%, transparent);
+  color: var(--color-badge-t2);
 }
 
 /* ─── Steps grid (homepage how-it-works) ───────────────────── */

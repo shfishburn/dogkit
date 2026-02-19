@@ -1,7 +1,5 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { loadIngredientDb } from "../../lib/loaders";
-import { loadFdcNutrientById } from "../../lib/supabaseFdc";
 
 /* ── Static paths for all ingredients with FDC data ────── */
 
@@ -103,14 +101,6 @@ const sections = [
 
 <BaseLayout title={`${ing.name} — Nutrient Profile`} container="md">
 
-  <nav class="breadcrumb">
-    <a href="/ingredients">Ingredients</a>
-    <span class="sep">/</span>
-    <span>{titleCase(ing.category)}</span>
-    <span class="sep">/</span>
-    <span>{ing.name}</span>
-  </nav>
-
   <header class="detail-header">
     <h1>{ing.name}</h1>
     <div class="detail-meta">
@@ -171,15 +161,6 @@ const sections = [
 </BaseLayout>
 
 <style>
-  .breadcrumb {
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-    margin-bottom: var(--space-4);
-  }
-  .breadcrumb a { color: var(--color-link); text-decoration: none; }
-  .breadcrumb a:hover { text-decoration: underline; }
-  .breadcrumb .sep { margin-inline: 0.4em; }
-
   .detail-header {
     margin-bottom: var(--space-6);
   }

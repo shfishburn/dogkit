@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Recipes" description="All generated canine recipes.">
+  <div class="page-header reveal">
+    <div class="page-header__top">
+      <p class="section-label">Admin · Recipes</p>
+      <a href="/admin/recipes/new" class="button button--primary">+ Generate Recipe</a>
+    </div>
+    <h1 class="section-headline">Generated Recipes</h1>
+    <p class="page-sub">
+      All AI-generated canine recipes. Images generate asynchronously and will appear when ready.
+    </p>
+  </div>
+
+  <div id="recipe-list">
+    <!-- React island hydrates here -->
+  </div>
+</BaseLayout>
+
+<script>
+  import { createElement } from "react";
+  import { createRoot } from "react-dom/client";
+  import RecipeList from "../../../components/RecipeList";
+
+  const container = document.getElementById("recipe-list");
+  if (container) {
+    const root = createRoot(container);
+    root.render(createElement(RecipeList));
+
+    window.addEventListener("astro:before-swap", () => root.unmount(), { once: true });
+  }
+</script>
+
+<style>
+  :global(.recipe-list__loading),
+  :global(.recipe-list__error),
+  :global(.recipe-list__empty) {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--color-muted);
+  }
+  :global(.recipe-list__empty .button) {
+    margin-top: var(--space-4);
+    display: inline-block;
+  }
+  :global(.recipe-list-card__media--skeleton) {
+    /* base card styles already provide surface-alt + border + aspect-ratio */
+    min-height: 0;
+  }
+</style>
