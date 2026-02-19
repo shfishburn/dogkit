@@ -4,6 +4,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import QueryProvider from "./QueryProvider";
 import type { RecipeRow, RecipeInstruction, RecipeIngredient } from "../lib/types/recipe";
 import { labelify } from "../lib/utils";
@@ -22,7 +23,86 @@ function renderMarkdown(text: string): string {
     .replace(/\*(.*?)\*/g, "<em>$1</em>");
 }
 
+function currentUrl(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.href;
+}
+
+function RecipePrintShare({ title }: { title: string }) {
+  async function onShare() {
+    const url = currentUrl();
+    if (!url) return;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+        return;
+      }
+    } catch {
+      // Fall through to copy link.
+    }
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        alert("Link copied");
+        return;
+      }
+    } catch {
+      // Fall through.
+    }
+
+    // Last-resort fallback.
+    prompt("Copy link:", url);
+  }
+
+  return (
+    <div className="rd__actions no-print">
+      <button type="button" className="button" onClick={() => window.print()}>
+        Print
+      </button>
+      <button type="button" className="button" onClick={onShare}>
+        Share
+      </button>
+    </div>
+  );
+}
+
 function RecipeDetailInner({ recipeId }: { recipeId: string }) {
+  const doneKey = useMemo(() => `dogology:recipe:${recipeId}:doneIngredients`, [recipeId]);
+  const [doneIngredientIds, setDoneIngredientIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(doneKey);
+      if (!raw) {
+        setDoneIngredientIds([]);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      setDoneIngredientIds(Array.isArray(parsed) ? parsed.filter((x) => typeof x === "string") : []);
+    } catch {
+      setDoneIngredientIds([]);
+    }
+  }, [doneKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(doneKey, JSON.stringify(doneIngredientIds));
+    } catch {
+      // ignore
+    }
+  }, [doneKey, doneIngredientIds]);
+
+  const doneSet = useMemo(() => new Set(doneIngredientIds), [doneIngredientIds]);
+
+  function toggleIngredientDone(ingredientId: string) {
+    setDoneIngredientIds((prev) => {
+      if (prev.includes(ingredientId)) return prev.filter((id) => id !== ingredientId);
+      return [...prev, ingredientId];
+    });
+  }
+
   const { data: recipe, isLoading, error } = useQuery<RecipeRow>({
     queryKey: ["recipe", recipeId],
     queryFn: async () => {
@@ -125,7 +205,10 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
             <span className="badge">{labelify(recipe.target_life_stage)}</span>
           )}
         </div>
-        <h1 className="rd__title">{recipe.name}</h1>
+        <div className="rd__title-row">
+          <h1 className="rd__title">{recipe.name}</h1>
+          <RecipePrintShare title={recipe.name} />
+        </div>
         {recipe.description && <p className="rd__description">{recipe.description}</p>}
         <p className="rd__overview">{recipe.overview}</p>
       </header>
@@ -135,15 +218,27 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
         <h2 className="rd__section-title">Ingredients</h2>
         <div className="rd__ing-card">
           {ingredients.map((ing, i) => (
-            <div key={i} className="rd__ing">
-              <div className="rd__ing-left">
-                <span className="rd__ing-name">{ing.name}</span>
-                {ing.prep && (
-                  <span
-                    className="rd__ing-prep"
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(ing.prep) }}
-                  />
-                )}
+            <div
+              key={ing.ingredient_id || i}
+              className={`rd__ing ${doneSet.has(ing.ingredient_id) ? "rd__ing--done" : ""}`}
+            >
+              <div className="rd__ing-main">
+                <input
+                  className="rd__ing-check"
+                  type="checkbox"
+                  checked={doneSet.has(ing.ingredient_id)}
+                  onChange={() => toggleIngredientDone(ing.ingredient_id)}
+                  aria-label={`Mark ${ing.name} as done`}
+                />
+                <div className="rd__ing-left">
+                  <span className="rd__ing-name">{ing.name}</span>
+                  {ing.prep && (
+                    <span
+                      className="rd__ing-prep"
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(ing.prep) }}
+                    />
+                  )}
+                </div>
               </div>
               {ing.base_g != null && (
                 <span className="rd__ing-amount">

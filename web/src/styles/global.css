@@ -1290,11 +1290,6 @@ main.full-bleed {
   color: var(--color-muted);
   line-height: 1.55;
   margin: 0 0 var(--space-3);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  overflow: hidden;
 }
 .recipe-list-card__nutrients {
   display: flex;
@@ -1611,6 +1606,17 @@ main.full-bleed {
   line-height: 1.15;
   margin: 0 0 var(--space-3);
 }
+.rd__title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+@media (max-width: 40rem) {
+  .rd__title-row {
+    flex-direction: column;
+  }
+}
 .rd__overview {
   font-size: var(--text-base);
   color: var(--color-muted);
@@ -1653,6 +1659,26 @@ main.full-bleed {
   gap: var(--space-4);
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+}
+.rd__ing-main {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.rd__ing-check {
+  margin-top: 0.15rem;
+  accent-color: var(--color-accent);
+}
+.rd__ing--done {
+  opacity: 0.65;
+}
+.rd__ing--done .rd__ing-name,
+.rd__ing--done .rd__ing-prep {
+  text-decoration: line-through;
+}
+.rd__ing--done .rd__ing-amount {
+  color: var(--color-muted);
 }
 .rd__ing:last-child {
   border-bottom: none;

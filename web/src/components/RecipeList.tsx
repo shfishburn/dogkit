@@ -89,7 +89,7 @@ function RecipeListInner({ detailHrefBase }: { detailHrefBase: string }) {
               <span className="tag tag--veggie">{labelify(r.primary_veggie)}</span>
             </p>
             <p className="recipe-list-card__overview">
-              {r.description || r.overview?.slice(0, 150)}
+              {r.description || r.overview}
             </p>
             <span className="recipe-list-card__cta" aria-hidden="true">
               View recipe →
