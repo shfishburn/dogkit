@@ -11,6 +11,9 @@ scripts/node_modules/
 # Astro generated
 .astro/
 
+# Vercel build output
+.vercel/
+
 # macOS
 .DS_Store
 
