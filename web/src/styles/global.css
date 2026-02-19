@@ -1703,13 +1703,15 @@ main.full-bleed {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: var(--radius-full);
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-accent);
   font-size: var(--text-sm);
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   flex-shrink: 0;
   line-height: 1;
 }

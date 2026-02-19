@@ -162,7 +162,9 @@ function RecipeDetailInner({ recipeId }: { recipeId: string }) {
         <ol className="rd__steps">
           {normalizedInstructions.map((inst, i) => (
             <li key={i} className="rd__step">
-              <span className="rd__step-num">{inst.step}</span>
+              <span className="rd__step-num">
+                {String(typeof inst.step === "number" ? inst.step : i + 1).padStart(2, "0")}
+              </span>
               <div className="rd__step-body">
                 <span className="rd__step-cat">{inst.category}</span>
                 <span
